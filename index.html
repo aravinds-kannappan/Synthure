@@ -14,15 +14,12 @@
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: 'Sora', sans-serif;
             background: #ffffff;
             color: #1a1a1a;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Navigation */
@@ -30,7 +27,7 @@
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 1.5rem 4rem;
+            padding: 1rem 4rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -41,19 +38,17 @@
         }
 
         .logo {
-            font-size: 1.3rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: #1a1a1a;
+            font-size: 1.5rem;
+            font-weight: 900;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            color: #1a1a1a;
         }
 
         .nav-center {
             display: flex;
             gap: 3rem;
-            align-items: center;
         }
 
         .nav-link {
@@ -68,78 +63,47 @@
             color: #0066ff;
         }
 
-        .nav-right {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .nav-signin {
-            color: #1a1a1a;
-            font-weight: 600;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .nav-signin:hover {
-            color: #0066ff;
-        }
-
         .nav-cta {
-            padding: 0.75rem 2rem;
+            padding: 0.6rem 1.8rem;
             background: #0066ff;
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
         }
 
-        .nav-cta:hover {
-            background: #0052cc;
-            transform: translateY(-2px);
-        }
-
-        /* Hero Section */
+        /* Hero */
         .hero {
-            padding-top: 8rem;
-            padding-bottom: 4rem;
+            padding-top: 6rem;
+            padding-bottom: 3rem;
             min-height: 100vh;
             display: flex;
             align-items: center;
-            overflow: hidden;
+            justify-content: center;
+            text-align: center;
         }
 
-        .hero-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 4rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .hero-content h1 {
-            font-size: 3.5rem;
+        .hero h1 {
+            font-size: 5rem;
             font-weight: 900;
-            line-height: 1.15;
+            line-height: 1.1;
             margin-bottom: 1.5rem;
-            letter-spacing: -1px;
         }
 
-        .hero-content p {
-            font-size: 1.2rem;
+        .hero p {
+            font-size: 1.3rem;
             color: #666;
-            margin-bottom: 2.5rem;
-            line-height: 1.7;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-cta-group {
             display: flex;
             gap: 1rem;
-            margin-bottom: 3rem;
+            justify-content: center;
         }
 
         .btn {
@@ -150,8 +114,6 @@
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
         }
 
         .btn-primary {
@@ -162,240 +124,121 @@
         .btn-primary:hover {
             background: #0052cc;
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.2);
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: #1a1a1a;
-            border: 2px solid #1a1a1a;
-        }
-
-        .btn-secondary:hover {
-            border-color: #0066ff;
-            color: #0066ff;
-            background: rgba(0, 102, 255, 0.05);
-        }
-
-        .hero-visual {
+        /* Scroll Trigger Section */
+        .scroll-trigger {
             position: relative;
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
-            border-radius: 16px;
+            height: 500vh;
+            padding: 0 4rem;
+        }
+
+        .scroll-trigger-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            background: linear-gradient(135deg, #f5f7ff 0%, #fff 50%, #f0f4ff 100%);
         }
 
-        .hero-visual-content {
-            width: 90%;
-            height: 90%;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-        }
-
-        .patient-card {
-            padding: 1.5rem;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 10px;
-            background: #f9fafc;
-            margin-bottom: 1rem;
-            animation: slideIn 0.6s ease-out forwards;
-        }
-
-        .patient-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .patient-card:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .patient-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-
-        .patient-name {
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        .patient-match {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .patient-profile {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 0.5rem;
-        }
-
-        .patient-plan {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #0066ff;
-        }
-
-        /* Section with alternating layout */
-        .section {
-            padding: 6rem 4rem;
+        /* Main visualization container */
+        .viz-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        .section-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .section-grid.reverse {
-            direction: rtl;
-        }
-
-        .section-grid.reverse > * {
-            direction: ltr;
-        }
-
-        .section-content h2 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        .section-content p {
-            font-size: 1.05rem;
-            color: #666;
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-        }
-
-        .feature-list {
-            list-style: none;
-            margin-bottom: 2rem;
-        }
-
-        .feature-list li {
-            padding-left: 2rem;
-            margin-bottom: 1rem;
-            position: relative;
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .feature-list li::before {
-            content: '✓';
+        /* SVG Canvas */
+        .viz-canvas {
             position: absolute;
+            top: 0;
             left: 0;
-            font-weight: 700;
-            color: #0066ff;
-            font-size: 1.2rem;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
-        .section-image {
-            position: relative;
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .section-image-content {
-            width: 85%;
-            height: 85%;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 2rem;
+        /* Data nodes */
+        .data-node {
+            position: absolute;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-        }
-
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1.2rem 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            gap: 0.5rem;
+            z-index: 2;
         }
 
-        .metric-row:last-child {
-            border-bottom: none;
-        }
-
-        .metric-label {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .metric-value {
+        .node-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-weight: 700;
-            color: #1a1a1a;
-            font-size: 1.1rem;
+            font-size: 0.75rem;
+            text-align: center;
+            transition: all 0.3s;
         }
 
-        .metric-positive {
-            color: #2e7d32;
+        .node-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Patient nodes */
+        .patient-node .node-circle {
+            background: linear-gradient(135deg, #0066ff, #0052cc);
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
+        }
+
+        /* Process nodes */
+        .process-node .node-circle {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+            font-size: 0.65rem;
+        }
+
+        /* Plan nodes */
+        .plan-node .node-circle {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            box-shadow: 0 0 20px rgba(46, 125, 50, 0.4);
+        }
+
+        /* Result nodes */
+        .result-node .node-circle {
+            background: linear-gradient(135deg, #ff8c00, #f57c00);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
         }
 
         /* Stats Section */
         .stats {
-            padding: 6rem 4rem;
+            padding: 8rem 4rem;
             background: #f9fafc;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .stats-container {
-            max-width: 1400px;
-            margin: 0 auto;
         }
 
         .stats-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 900;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
             text-align: center;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .stat {
@@ -403,148 +246,23 @@
         }
 
         .stat-number {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 900;
             color: #0066ff;
             margin-bottom: 0.5rem;
-            letter-spacing: -1px;
         }
 
         .stat-label {
             color: #666;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        /* Features Grid */
-        .features-section {
-            padding: 6rem 4rem;
-        }
-
-        .features-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .feature-box {
-            padding: 2.5rem;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 12px;
-            background: #f9fafc;
-            transition: all 0.3s;
-        }
-
-        .feature-box:hover {
-            border-color: #0066ff;
-            background: white;
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 102, 255, 0.1);
-        }
-
-        .feature-box h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: #1a1a1a;
-        }
-
-        .feature-box p {
-            color: #666;
-            line-height: 1.7;
-        }
-
-        /* Testimonials */
-        .testimonials {
-            padding: 6rem 4rem;
-            background: #f9fafc;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .testimonials-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .testimonials-title {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .testimonials-subtitle {
-            text-align: center;
-            color: #666;
             font-size: 1.05rem;
-            margin-bottom: 4rem;
         }
 
-        .testimonial {
-            padding: 2.5rem;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-        }
-
-        .testimonial-quote {
-            font-size: 1.1rem;
-            color: #1a1a1a;
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-            font-weight: 500;
-        }
-
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .author-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0066ff, #00d9ff);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-        }
-
-        .author-info h4 {
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 0.25rem;
-        }
-
-        .author-info p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* CTA Section */
+        /* CTA */
         .cta {
-            padding: 6rem 4rem;
+            padding: 8rem 4rem;
             background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
             color: white;
             text-align: center;
-        }
-
-        .cta-container {
-            max-width: 800px;
-            margin: 0 auto;
         }
 
         .cta h2 {
@@ -555,8 +273,7 @@
 
         .cta p {
             font-size: 1.2rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.95;
+            margin-bottom: 3rem;
         }
 
         .cta .btn {
@@ -564,21 +281,15 @@
             color: #0066ff;
         }
 
-        .cta .btn:hover {
-            background: #f5f7ff;
-            transform: translateY(-3px);
-        }
-
         /* Footer */
         footer {
             padding: 4rem;
             background: #1a1a1a;
             color: white;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-content {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -589,15 +300,10 @@
         .footer-col h4 {
             font-weight: 700;
             margin-bottom: 1.5rem;
-            color: white;
         }
 
         .footer-col ul {
             list-style: none;
-        }
-
-        .footer-col ul li {
-            margin-bottom: 0.75rem;
         }
 
         .footer-col a {
@@ -610,68 +316,22 @@
             color: white;
         }
 
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 2rem;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        /* Responsive */
         @media (max-width: 1024px) {
-            .section-grid,
-            .hero-container,
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 3rem;
-            }
-
-            .section-grid.reverse {
-                direction: ltr;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 768px) {
-            nav {
-                padding: 1rem 2rem;
-                flex-direction: column;
-                gap: 1rem;
+            .hero h1 {
+                font-size: 2.5rem;
             }
-
-            .nav-center {
-                gap: 1.5rem;
-            }
-
-            .hero-container,
-            .section-grid {
-                padding: 0 2rem;
-            }
-
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-
-            .section-content h2 {
-                font-size: 1.75rem;
-            }
-
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
             }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 2rem;
+            .node-circle {
+                width: 45px;
+                height: 45px;
             }
         }
     </style>
@@ -679,192 +339,80 @@
 <body>
     <!-- Navigation -->
     <nav>
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="margin-right: 0.5rem;">
-            <circle cx="16" cy="16" r="15" fill="url(#gradient1)" opacity="0.1"/>
-            <path d="M16 4 L24 28 L16 24 L8 28 Z" fill="url(#gradient1)"/>
-            <circle cx="16" cy="16" r="4" fill="url(#gradient1)"/>
-            <defs>
-                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#0066ff;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#00d9ff;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-        </svg>
-        <span>Synthure</span>
+        <div class="logo">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <path d="M18 2 L28 6 L28 16 C28 26 18 32 18 32 C18 32 8 26 8 16 L8 6 L18 2 Z" 
+                      fill="url(#shieldGradient)" stroke="#0066ff" stroke-width="1.5"/>
+                <circle cx="14" cy="14" r="2" fill="#00d9ff"/>
+                <circle cx="22" cy="14" r="2" fill="#00d9ff"/>
+                <circle cx="18" cy="22" r="2" fill="#00d9ff"/>
+                <line x1="14" y1="14" x2="22" y2="14" stroke="#00d9ff" stroke-width="1.5" opacity="0.6"/>
+                <line x1="14" y1="14" x2="18" y2="22" stroke="#00d9ff" stroke-width="1.5" opacity="0.6"/>
+                <line x1="22" y1="14" x2="18" y2="22" stroke="#00d9ff" stroke-width="1.5" opacity="0.6"/>
+                <circle cx="18" cy="16" r="3" fill="none" stroke="#0066ff" stroke-width="1.5" opacity="0.5"/>
+                <defs>
+                    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#0066ff;stop-opacity:0.15" />
+                        <stop offset="100%" style="stop-color:#00d9ff;stop-opacity:0.1" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span>Synthure</span>
+        </div>
         <div class="nav-center">
-            <a href="#platform" class="nav-link">SOLUTIONS</a>
-            <a href="#results" class="nav-link">RESULTS</a>
+            <a href="#" class="nav-link">SOLUTIONS</a>
+            <a href="#" class="nav-link">RESULTS</a>
         </div>
-        <div class="nav-right">
-            <a href="#" class="nav-signin">Log In</a>
-            <button class="nav-cta">Schedule demo</button>
-        </div>
+        <button class="nav-cta">Schedule demo</button>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1>Personalized Insurance at Enterprise Scale</h1>
-                <p>Intelligent patient-health matching. AI transforms 200K+ medical records daily into accurate plan recommendations. 25% better accuracy. 94% fewer disputes.</p>
-                <div class="hero-cta-group">
-                    <button class="btn btn-primary">Schedule demo</button>
-                    <button class="btn btn-secondary">See How it Works</button>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="hero-visual-content">
-                    <div class="patient-card">
-                        <div class="patient-header">
-                            <span class="patient-name">Sarah M.</span>
-                            <span class="patient-match">96% Match</span>
-                        </div>
-                        <div class="patient-profile">Diabetes, routine care</div>
-                        <div class="patient-plan">→ MetaHealth Plus</div>
-                    </div>
-                    <div class="patient-card">
-                        <div class="patient-header">
-                            <span class="patient-name">James K.</span>
-                            <span class="patient-match">98% Match</span>
-                        </div>
-                        <div class="patient-profile">Pregnancy, maternal care</div>
-                        <div class="patient-plan">→ FamilyFirst Premium</div>
-                    </div>
-                    <div class="patient-card">
-                        <div class="patient-header">
-                            <span class="patient-name">Elena V.</span>
-                            <span class="patient-match">97% Match</span>
-                        </div>
-                        <div class="patient-profile">Rare genetic condition</div>
-                        <div class="patient-plan">→ SpecialistCare Elite</div>
-                    </div>
-                </div>
+        <div style="text-align: center;">
+            <h1>AI That Matches Patients to Perfect Plans</h1>
+            <p>Watch how Synthure processes patient data through an advanced AI pipeline to instantly deliver personalized insurance recommendations.</p>
+            <div class="hero-cta-group">
+                <button class="btn btn-primary">Schedule demo</button>
             </div>
         </div>
     </section>
 
-    <!-- Platform Section -->
-    <section class="section" id="platform">
-        <div class="section-grid">
-            <div class="section-content">
-                <h2>Intelligent Patient-Plan Matching</h2>
-                <p>Synthure processes millions of data points across patient medical history, coverage needs, and plan details to deliver hyper-personalized recommendations.</p>
-                <ul class="feature-list">
-                    <li>Custom transformers trained on patient history</li>
-                    <li>Real-time eligibility verification</li>
-                    <li>Sub-100ms recommendation latency</li>
-                    <li>RAG-powered accuracy over 50K+ policy documents</li>
-                </ul>
-                <button class="btn btn-primary">Learn more</button>
+    <!-- Interactive Visualization -->
+    <section class="scroll-trigger">
+        <div class="scroll-trigger-sticky">
+            <svg class="viz-canvas" id="vizCanvas"></svg>
+            <div class="viz-container" id="vizContainer"></div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <h2 class="stats-title">Results that Speak for Themselves</h2>
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-number">25%</div>
+                <div class="stat-label">Better Accuracy</div>
             </div>
-            <div class="section-image">
-                <div class="section-image-content">
-                    <div class="metric-row">
-                        <span class="metric-label">Coverage Match</span>
-                        <span class="metric-value metric-positive">95.8%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Processing Time</span>
-                        <span class="metric-value">0.08s</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Model Accuracy</span>
-                        <span class="metric-value metric-positive">99.2%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Active Patients</span>
-                        <span class="metric-value">15,000+</span>
-                    </div>
-                </div>
+            <div class="stat">
+                <div class="stat-number">94%</div>
+                <div class="stat-label">Fewer Disputes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">31%</div>
+                <div class="stat-label">Mismatches Reduced</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">2-4 weeks</div>
+                <div class="stat-label">Contract to Live</div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats" id="results">
-        <div class="stats-container">
-            <h2 class="stats-title">Transform Claims Operations in Weeks, Not Years</h2>
-            <div class="stats-grid">
-                <div class="stat">
-                    <div class="stat-number">25%</div>
-                    <div class="stat-label">Better Accuracy</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">94%</div>
-                    <div class="stat-label">Fewer Disputes</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">31%</div>
-                    <div class="stat-label">Plan Mismatches Reduced</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">2-4 weeks</div>
-                    <div class="stat-label">Contract to Live</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features-section">
-        <h2 class="features-title">Everything You Need to Modernize Insurance Operations</h2>
-        <div class="features-grid">
-            <div class="feature-box">
-                <h3>Rare Case Detection</h3>
-                <p>Multi-objective training with focal loss catches edge cases. Bayesian inference identifies patients with unusual medical profiles others miss.</p>
-            </div>
-            <div class="feature-box">
-                <h3>RAG-Powered Accuracy</h3>
-                <p>50K+ policy documents indexed. Vector retrieval + transformer re-ranking. Zero hallucinations. 99.2% accuracy on policy rule encoding.</p>
-            </div>
-            <div class="feature-box">
-                <h3>Mixture of Experts Routing</h3>
-                <p>Intelligent routing of patient cohorts to specialized experts by medical profile. Parallel compute on Azure ML. 22% lower latency.</p>
-            </div>
-            <div class="feature-box">
-                <h3>Continuous Model Improvement</h3>
-                <p>99.2% training stability. 34% reduction in model drift. Automatic retraining cycles ensure recommendations improve with every patient.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section class="testimonials">
-        <div class="testimonials-container">
-            <h2 class="testimonials-title">Trusted by Healthcare Leaders</h2>
-            <p class="testimonials-subtitle">Healthcare providers using Synthure serve patients better and operate more efficiently</p>
-            
-            <div class="testimonial">
-                <div class="testimonial-quote">"Synthure transformed how we match patients to plans. Our recommendation accuracy improved 25% and disputes dropped 94%. The ROI was immediate."</div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">RH</div>
-                    <div class="author-info">
-                        <h4>Rachel Harrison</h4>
-                        <p>Chief Medical Officer, HealthFirst TPO</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial">
-                <div class="testimonial-quote">"We went from weeks of manual plan selection to real-time personalized recommendations. Our team loves it, and patients get better outcomes."</div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">MJ</div>
-                    <div class="author-info">
-                        <h4>Marcus Johnson</h4>
-                        <p>VP Operations, Midwest Insurance Cooperative</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
+    <!-- CTA -->
     <section class="cta">
-        <div class="cta-container">
-            <h2>Ready to Modernize Your Insurance Flow?</h2>
-            <p>See how leading healthcare providers use AI-powered personalization to cut costs, improve accuracy, and deliver better patient outcomes.</p>
-            <button class="btn">Schedule demo</button>
-        </div>
+        <h2>Ready to Transform Insurance Operations?</h2>
+        <p>See how leading healthcare providers use Synthure to improve accuracy and reduce disputes.</p>
+        <button class="btn">Schedule demo</button>
     </section>
 
     <!-- Footer -->
@@ -872,15 +420,13 @@
         <div class="footer-content">
             <div class="footer-col">
                 <h4>Synthure</h4>
-                <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.95rem;">AI-powered patient-personalized insurance platform for healthcare providers.</p>
+                <p style="color: rgba(255, 255, 255, 0.7);">AI-powered patient insurance matching.</p>
             </div>
             <div class="footer-col">
                 <h4>Solutions</h4>
                 <ul>
                     <li><a href="#">Patient Matching</a></li>
                     <li><a href="#">Plan Optimization</a></li>
-                    <li><a href="#">Dispute Reduction</a></li>
-                    <li><a href="#">Enterprise Integration</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -888,23 +434,181 @@
                 <ul>
                     <li><a href="#">About</a></li>
                     <li><a href="#">Blog</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Contact</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>Legal</h4>
                 <ul>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Security</a></li>
-                    <li><a href="#">HIPAA Compliance</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
                 </ul>
             </div>
         </div>
-        <div class="footer-bottom">
-            © 2026 Synthure. All rights reserved. | Privacy-first patient intelligence.
-        </div>
     </footer>
+
+    <script>
+        const pipeline = [
+            {
+                stage: "Data Retrieval",
+                items: [
+                    { label: "Patient\nRecords", type: "patient" },
+                    { label: "Medical\nHistory", type: "patient" },
+                    { label: "Coverage\nNeeds", type: "patient" }
+                ]
+            },
+            {
+                stage: "ETL Pipeline",
+                items: [
+                    { label: "Normalize\nData", type: "process" },
+                    { label: "Validate\nQuality", type: "process" }
+                ]
+            },
+            {
+                stage: "Feature Engineering",
+                items: [
+                    { label: "Medical\nEmbedding", type: "process" },
+                    { label: "Feature\nExtraction", type: "process" }
+                ]
+            },
+            {
+                stage: "Transformer Model",
+                items: [
+                    { label: "Self-\nAttention", type: "process" },
+                    { label: "Pre-\ntraining", type: "process" },
+                    { label: "Fine-\ntuning", type: "process" }
+                ]
+            },
+            {
+                stage: "RAG Search",
+                items: [
+                    { label: "Vector\nRetrieval", type: "process" },
+                    { label: "Policy\nDatabase", type: "plan" }
+                ]
+            },
+            {
+                stage: "Post-Training",
+                items: [
+                    { label: "Focal Loss\nOptimization", type: "process" },
+                    { label: "Confidence\nScoring", type: "process" }
+                ]
+            },
+            {
+                stage: "Recommendation",
+                items: [
+                    { label: "MetaHealth\nPlus", type: "plan" },
+                    { label: "FamilyFirst\nPremium", type: "plan" },
+                    { label: "Specialist\nCare", type: "plan" }
+                ]
+            },
+            {
+                stage: "Final Match",
+                items: [
+                    { label: "96%\nMatch", type: "result" },
+                    { label: "98%\nMatch", type: "result" },
+                    { label: "97%\nMatch", type: "result" }
+                ]
+            }
+        ];
+
+        const vizContainer = document.getElementById('vizContainer');
+        const svg = document.getElementById('vizCanvas');
+
+        function createVisualization(progress) {
+            // Clear container
+            vizContainer.innerHTML = '';
+            svg.innerHTML = '';
+
+            const containerWidth = vizContainer.offsetWidth;
+            const containerHeight = vizContainer.offsetHeight;
+            svg.setAttribute('viewBox', `0 0 ${containerWidth} ${containerHeight}`);
+
+            let xPos = 50;
+            const yCenter = containerHeight / 2;
+            const stageWidth = (containerWidth - 100) / pipeline.length;
+
+            // Draw connections and nodes
+            const nodes = [];
+
+            pipeline.forEach((stage, stageIndex) => {
+                const stageProgress = Math.max(0, Math.min(1, progress * pipeline.length - stageIndex));
+                const opacity = stageProgress;
+
+                stage.items.forEach((item, itemIndex) => {
+                    const yOffset = (itemIndex - (stage.items.length - 1) / 2) * 90;
+                    const yPos = yCenter + yOffset;
+                    
+                    nodes.push({
+                        x: xPos + stageWidth / 2,
+                        y: yPos,
+                        type: item.type,
+                        opacity: opacity,
+                        label: item.label
+                    });
+
+                    // Create node element
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.className = `data-node ${item.type}-node`;
+                    nodeDiv.style.left = (xPos + stageWidth / 2 - 30) + 'px';
+                    nodeDiv.style.top = (yPos - 30) + 'px';
+                    nodeDiv.style.opacity = opacity;
+                    nodeDiv.innerHTML = `
+                        <div class="node-circle"></div>
+                        <div class="node-label">${item.label}</div>
+                    `;
+                    vizContainer.appendChild(nodeDiv);
+                });
+
+                xPos += stageWidth;
+            });
+
+            // Draw connecting lines between nodes
+            for (let i = 0; i < nodes.length - 1; i++) {
+                const node1 = nodes[i];
+                const node2 = nodes[i + 1];
+                
+                // Only draw if both nodes have opacity
+                if (node1.opacity > 0 && node2.opacity > 0) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', node1.x);
+                    line.setAttribute('y1', node1.y);
+                    line.setAttribute('x2', node2.x);
+                    line.setAttribute('y2', node2.y);
+                    line.setAttribute('stroke', `rgba(139, 92, 246, ${Math.min(node1.opacity, node2.opacity) * 0.5})`);
+                    line.setAttribute('stroke-width', '2');
+                    svg.appendChild(line);
+
+                    // Animated flow dots
+                    const flowDots = 3;
+                    for (let d = 0; d < flowDots; d++) {
+                        const dotProgress = (progress * 2 + d / flowDots) % 1;
+                        const dotX = node1.x + (node2.x - node1.x) * dotProgress;
+                        const dotY = node1.y + (node2.y - node1.y) * dotProgress;
+
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', dotX);
+                        circle.setAttribute('cy', dotY);
+                        circle.setAttribute('r', 3);
+                        circle.setAttribute('fill', `rgba(139, 92, 246, ${Math.min(node1.opacity, node2.opacity)})`);
+                        svg.appendChild(circle);
+                    }
+                }
+            }
+        }
+
+        const scrollTrigger = document.querySelector('.scroll-trigger');
+        window.addEventListener('scroll', () => {
+            const rect = scrollTrigger.getBoundingClientRect();
+            const scrollProgress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + scrollTrigger.offsetHeight)));
+            createVisualization(scrollProgress);
+        });
+
+        // Initial render
+        createVisualization(0);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            createVisualization(0);
+        });
+    </script>
 </body>
 </html>
