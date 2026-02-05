@@ -13,7 +13,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Sora', sans-serif;
             background: #ffffff;
@@ -21,7 +20,6 @@
             line-height: 1.6;
             overflow-x: hidden;
         }
-
         /* Navigation */
         nav {
             position: fixed;
@@ -36,7 +34,6 @@
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-
         .logo {
             font-size: 1.5rem;
             font-weight: 900;
@@ -45,24 +42,16 @@
             gap: 0.75rem;
             color: #1a1a1a;
         }
-
         .nav-center {
             display: flex;
             gap: 3rem;
         }
-
         .nav-link {
             color: #1a1a1a;
             font-weight: 600;
             font-size: 0.95rem;
             text-decoration: none;
-            transition: color 0.3s;
         }
-
-        .nav-link:hover {
-            color: #0066ff;
-        }
-
         .nav-cta {
             padding: 0.6rem 1.8rem;
             background: #0066ff;
@@ -72,276 +61,171 @@
             font-weight: 700;
             cursor: pointer;
         }
-
         /* Hero */
         .hero {
             padding-top: 6rem;
-            padding-bottom: 3rem;
-            min-height: 100vh;
+            padding-bottom: 2rem;
+            min-height: 80vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
         }
-
         .hero h1 {
-            font-size: 5rem;
+            font-size: 2.1rem;          /* Reduced from 2.5rem */
             font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
+            line-height: 1.15;
+            margin-bottom: 1.25rem;
         }
-
+        @media (min-width: 1024px) {
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+        }
         .hero p {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: #666;
-            margin-bottom: 3rem;
-            max-width: 700px;
+            margin-bottom: 2rem;
+            max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
-
-        .hero-cta-group {
+        .hero-cta {
             display: flex;
             gap: 1rem;
             justify-content: center;
         }
-
         .btn {
-            padding: 1rem 2.5rem;
+            padding: 0.8rem 2rem;
             border: none;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.3s;
         }
-
         .btn-primary {
             background: #0066ff;
             color: white;
         }
-
-        .btn-primary:hover {
-            background: #0052cc;
-            transform: translateY(-3px);
-        }
-
-        /* Scroll Trigger Section */
-        .scroll-trigger {
+        /* Pipeline Section */
+        .pipeline-section {
             position: relative;
-            height: 500vh;
-            padding: 0 4rem;
+            height: 480vh;              /* Gives room for all stages to scroll through */
+            padding: 1rem 2rem;
         }
-
-        .scroll-trigger-sticky {
+        .pipeline-sticky {
             position: sticky;
             top: 0;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(135deg, #f8faff 0%, #ffffff 50%, #f0f5ff 100%);
             overflow: hidden;
-            background: linear-gradient(135deg, #f5f7ff 0%, #fff 50%, #f0f4ff 100%);
         }
-
-        /* Main visualization container */
-        .viz-container {
-            position: relative;
+        canvas {
+            display: block;
             width: 100%;
             height: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
         }
-
-        /* SVG Canvas */
-        .viz-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        /* Data nodes */
-        .data-node {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            z-index: 2;
-        }
-
-        .node-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .node-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        /* Patient nodes */
-        .patient-node .node-circle {
-            background: linear-gradient(135deg, #0066ff, #0052cc);
-            box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
-        }
-
-        /* Process nodes */
-        .process-node .node-circle {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
-            font-size: 0.65rem;
-        }
-
-        /* Plan nodes */
-        .plan-node .node-circle {
-            background: linear-gradient(135deg, #2e7d32, #1b5e20);
-            box-shadow: 0 0 20px rgba(46, 125, 50, 0.4);
-        }
-
-        /* Result nodes */
-        .result-node .node-circle {
-            background: linear-gradient(135deg, #ff8c00, #f57c00);
-            box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
-        }
-
-        /* Stats Section */
+        /* Stats */
         .stats {
-            padding: 8rem 4rem;
+            padding: 6rem 4rem;
             background: #f9fafc;
         }
-
         .stats-title {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
             text-align: center;
         }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 3rem;
+            gap: 2rem;
             max-width: 1200px;
             margin: 0 auto;
         }
-
         .stat {
             text-align: center;
         }
-
         .stat-number {
-            font-size: 4rem;
+            font-size: 3rem;
             font-weight: 900;
             color: #0066ff;
-            margin-bottom: 0.5rem;
         }
-
         .stat-label {
             color: #666;
-            font-size: 1.05rem;
+            font-size: 1rem;
+            margin-top: 0.5rem;
         }
-
         /* CTA */
         .cta {
-            padding: 8rem 4rem;
+            padding: 6rem 4rem;
             background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
             color: white;
             text-align: center;
         }
-
         .cta h2 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
-
         .cta p {
-            font-size: 1.2rem;
-            margin-bottom: 3rem;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
         }
-
         .cta .btn {
             background: white;
             color: #0066ff;
         }
-
         /* Footer */
         footer {
-            padding: 4rem;
+            padding: 3rem 4rem;
             background: #1a1a1a;
             color: white;
         }
-
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 3rem;
-            margin-bottom: 3rem;
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
-
         .footer-col h4 {
             font-weight: 700;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
-
-        .footer-col ul {
-            list-style: none;
-        }
-
         .footer-col a {
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: color 0.3s;
         }
-
-        .footer-col a:hover {
-            color: white;
-        }
-
         @media (max-width: 1024px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-
         @media (max-width: 768px) {
             .hero h1 {
-                font-size: 2.5rem;
+                font-size: 1.9rem;
             }
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            .node-circle {
-                width: 45px;
-                height: 45px;
+            nav {
+                padding: 1rem 1.5rem;
             }
         }
     </style>
 </head>
 <body>
+
     <!-- Navigation -->
     <nav>
         <div class="logo">
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                <path d="M18 2 L28 6 L28 16 C28 26 18 32 18 32 C18 32 8 26 8 16 L8 6 L18 2 Z" 
+                <path d="M18 2 L28 6 L28 16 C28 26 18 32 18 32 C18 32 8 26 8 16 L8 6 L18 2 Z"
                       fill="url(#shieldGradient)" stroke="#0066ff" stroke-width="1.5"/>
                 <circle cx="14" cy="14" r="2" fill="#00d9ff"/>
                 <circle cx="22" cy="14" r="2" fill="#00d9ff"/>
@@ -368,20 +252,19 @@
 
     <!-- Hero -->
     <section class="hero">
-        <div style="text-align: center;">
+        <div>
             <h1>AI That Matches Patients to Perfect Plans</h1>
-            <p>Watch how Synthure processes patient data through an advanced AI pipeline to instantly deliver personalized insurance recommendations.</p>
-            <div class="hero-cta-group">
+            <p>Watch how Synthure's AI processes patient data in real-time to deliver personalized insurance recommendations.</p>
+            <div class="hero-cta">
                 <button class="btn btn-primary">Schedule demo</button>
             </div>
         </div>
     </section>
 
-    <!-- Interactive Visualization -->
-    <section class="scroll-trigger">
-        <div class="scroll-trigger-sticky">
-            <svg class="viz-canvas" id="vizCanvas"></svg>
-            <div class="viz-container" id="vizContainer"></div>
+    <!-- Pipeline Visualization -->
+    <section class="pipeline-section">
+        <div class="pipeline-sticky">
+            <canvas id="pipelineCanvas"></canvas>
         </div>
     </section>
 
@@ -412,7 +295,7 @@
     <section class="cta">
         <h2>Ready to Transform Insurance Operations?</h2>
         <p>See how leading healthcare providers use Synthure to improve accuracy and reduce disputes.</p>
-        <button class="btn">Schedule demo</button>
+        <button class="btn btn-primary">Schedule demo</button>
     </section>
 
     <!-- Footer -->
@@ -420,25 +303,25 @@
         <div class="footer-content">
             <div class="footer-col">
                 <h4>Synthure</h4>
-                <p style="color: rgba(255, 255, 255, 0.7);">AI-powered patient insurance matching.</p>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">AI-powered patient insurance matching.</p>
             </div>
             <div class="footer-col">
                 <h4>Solutions</h4>
-                <ul>
+                <ul style="list-style: none;">
                     <li><a href="#">Patient Matching</a></li>
                     <li><a href="#">Plan Optimization</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>Company</h4>
-                <ul>
+                <ul style="list-style: none;">
                     <li><a href="#">About</a></li>
                     <li><a href="#">Blog</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>Legal</h4>
-                <ul>
+                <ul style="list-style: none;">
                     <li><a href="#">Privacy</a></li>
                     <li><a href="#">Terms</a></li>
                 </ul>
@@ -447,168 +330,142 @@
     </footer>
 
     <script>
-        const pipeline = [
-            {
-                stage: "Data Retrieval",
-                items: [
-                    { label: "Patient\nRecords", type: "patient" },
-                    { label: "Medical\nHistory", type: "patient" },
-                    { label: "Coverage\nNeeds", type: "patient" }
-                ]
-            },
-            {
-                stage: "ETL Pipeline",
-                items: [
-                    { label: "Normalize\nData", type: "process" },
-                    { label: "Validate\nQuality", type: "process" }
-                ]
-            },
-            {
-                stage: "Feature Engineering",
-                items: [
-                    { label: "Medical\nEmbedding", type: "process" },
-                    { label: "Feature\nExtraction", type: "process" }
-                ]
-            },
-            {
-                stage: "Transformer Model",
-                items: [
-                    { label: "Self-\nAttention", type: "process" },
-                    { label: "Pre-\ntraining", type: "process" },
-                    { label: "Fine-\ntuning", type: "process" }
-                ]
-            },
-            {
-                stage: "RAG Search",
-                items: [
-                    { label: "Vector\nRetrieval", type: "process" },
-                    { label: "Policy\nDatabase", type: "plan" }
-                ]
-            },
-            {
-                stage: "Post-Training",
-                items: [
-                    { label: "Focal Loss\nOptimization", type: "process" },
-                    { label: "Confidence\nScoring", type: "process" }
-                ]
-            },
-            {
-                stage: "Recommendation",
-                items: [
-                    { label: "MetaHealth\nPlus", type: "plan" },
-                    { label: "FamilyFirst\nPremium", type: "plan" },
-                    { label: "Specialist\nCare", type: "plan" }
-                ]
-            },
-            {
-                stage: "Final Match",
-                items: [
-                    { label: "96%\nMatch", type: "result" },
-                    { label: "98%\nMatch", type: "result" },
-                    { label: "97%\nMatch", type: "result" }
-                ]
-            }
+        const canvas = document.getElementById('pipelineCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let animationTime = 0;
+        let scrollProgress = 0;
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const stages = [
+            { name: "Data Retrieval",          color: "#0066ff", baseY: 0.12 },
+            { name: "ETL Pipeline",            color: "#0066ff", baseY: 0.20 },
+            { name: "Feature Engineering",     color: "#7c3aed", baseY: 0.29 },
+            { name: "Transformer",             color: "#7c3aed", baseY: 0.38 },
+            { name: "Pre-training",            color: "#7c3aed", baseY: 0.47 },
+            { name: "Fine-tuning",             color: "#7c3aed", baseY: 0.56 },
+            { name: "RAG Search",              color: "#7c3aed", baseY: 0.65 },
+            { name: "Post-Training Alignment", color: "#16a34a", baseY: 0.74 },
+            { name: "Plan Matching",           color: "#16a34a", baseY: 0.86 }
         ];
 
-        const vizContainer = document.getElementById('vizContainer');
-        const svg = document.getElementById('vizCanvas');
-
-        function createVisualization(progress) {
-            // Clear container
-            vizContainer.innerHTML = '';
-            svg.innerHTML = '';
-
-            const containerWidth = vizContainer.offsetWidth;
-            const containerHeight = vizContainer.offsetHeight;
-            svg.setAttribute('viewBox', `0 0 ${containerWidth} ${containerHeight}`);
-
-            let xPos = 50;
-            const yCenter = containerHeight / 2;
-            const stageWidth = (containerWidth - 100) / pipeline.length;
-
-            // Draw connections and nodes
-            const nodes = [];
-
-            pipeline.forEach((stage, stageIndex) => {
-                const stageProgress = Math.max(0, Math.min(1, progress * pipeline.length - stageIndex));
-                const opacity = stageProgress;
-
-                stage.items.forEach((item, itemIndex) => {
-                    const yOffset = (itemIndex - (stage.items.length - 1) / 2) * 90;
-                    const yPos = yCenter + yOffset;
-                    
-                    nodes.push({
-                        x: xPos + stageWidth / 2,
-                        y: yPos,
-                        type: item.type,
-                        opacity: opacity,
-                        label: item.label
-                    });
-
-                    // Create node element
-                    const nodeDiv = document.createElement('div');
-                    nodeDiv.className = `data-node ${item.type}-node`;
-                    nodeDiv.style.left = (xPos + stageWidth / 2 - 30) + 'px';
-                    nodeDiv.style.top = (yPos - 30) + 'px';
-                    nodeDiv.style.opacity = opacity;
-                    nodeDiv.innerHTML = `
-                        <div class="node-circle"></div>
-                        <div class="node-label">${item.label}</div>
-                    `;
-                    vizContainer.appendChild(nodeDiv);
-                });
-
-                xPos += stageWidth;
-            });
-
-            // Draw connecting lines between nodes
-            for (let i = 0; i < nodes.length - 1; i++) {
-                const node1 = nodes[i];
-                const node2 = nodes[i + 1];
-                
-                // Only draw if both nodes have opacity
-                if (node1.opacity > 0 && node2.opacity > 0) {
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', node1.x);
-                    line.setAttribute('y1', node1.y);
-                    line.setAttribute('x2', node2.x);
-                    line.setAttribute('y2', node2.y);
-                    line.setAttribute('stroke', `rgba(139, 92, 246, ${Math.min(node1.opacity, node2.opacity) * 0.5})`);
-                    line.setAttribute('stroke-width', '2');
-                    svg.appendChild(line);
-
-                    // Animated flow dots
-                    const flowDots = 3;
-                    for (let d = 0; d < flowDots; d++) {
-                        const dotProgress = (progress * 2 + d / flowDots) % 1;
-                        const dotX = node1.x + (node2.x - node1.x) * dotProgress;
-                        const dotY = node1.y + (node2.y - node1.y) * dotProgress;
-
-                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        circle.setAttribute('cx', dotX);
-                        circle.setAttribute('cy', dotY);
-                        circle.setAttribute('r', 3);
-                        circle.setAttribute('fill', `rgba(139, 92, 246, ${Math.min(node1.opacity, node2.opacity)})`);
-                        svg.appendChild(circle);
-                    }
-                }
-            }
+        function getY(pos) {
+            return canvas.height * pos;
         }
 
-        const scrollTrigger = document.querySelector('.scroll-trigger');
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            animationTime += 0.016;
+
+            // Global intensity based on scroll (ramps up faster)
+            const intensity = Math.min(1, scrollProgress * 1.8);
+
+            // ─── Connections + flowing particles ───
+            for (let i = 0; i < stages.length - 1; i++) {
+                const s1 = stages[i];
+                const s2 = stages[i + 1];
+
+                const y1 = getY(s1.baseY);
+                const y2 = getY(s2.baseY);
+
+                const curveOffset = Math.sin(animationTime * 1.2 + i * 1.8) * 12 * intensity;
+
+                // Curved line
+                ctx.beginPath();
+                ctx.moveTo(cx - 140, y1);
+                ctx.quadraticCurveTo(
+                    cx + curveOffset * 0.5,
+                    (y1 + y2) / 2,
+                    cx + 140,
+                    y2
+                );
+                ctx.strokeStyle = `rgba(0, 102, 255, ${0.25 + intensity * 0.45})`;
+                ctx.lineWidth = 4 + intensity * 2;
+                ctx.stroke();
+
+                // Flowing particles
+                const particleCount = 5 + Math.floor(intensity * 9);
+                for (let p = 0; p < particleCount; p++) {
+                    const t = (animationTime * (0.8 + intensity * 1.6) + p * 0.22) % 1;
+                    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+                    const px = cx - 140 + 280 * ease + Math.sin(t * Math.PI * 3 + animationTime * 3) * 8;
+                    const py = y1 + (y2 - y1) * ease + Math.sin(t * Math.PI * 4 + i + animationTime * 2.5) * (6 + intensity * 12);
+
+                    const alpha = (1 - t) * (0.7 + intensity * 0.3);
+                    ctx.fillStyle = `rgba(0, 105, 255, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 5 + intensity * 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // ─── Nodes + labels ───
+            stages.forEach((stage, i) => {
+                const y = getY(stage.baseY);
+                const pulse = Math.sin(animationTime * 1.8 + i * 2.1) * (8 + intensity * 12);
+                const radius = 34 + pulse;
+
+                // Glow
+                ctx.save();
+                ctx.filter = `blur(${12 + intensity * 18}px)`;
+                ctx.fillStyle = stage.color + '30';
+                ctx.beginPath();
+                ctx.arc(cx + (i % 2 === 0 ? -160 : 160), y, radius * 1.6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // Node circle
+                ctx.fillStyle = stage.color;
+                ctx.beginPath();
+                ctx.arc(cx + (i % 2 === 0 ? -160 : 160), y, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Label
+                ctx.fillStyle = "#111827";
+                ctx.font = "bold 15px Sora";
+                ctx.textAlign = "center";
+                ctx.fillText(
+                    stage.name,
+                    cx + (i % 2 === 0 ? -160 : 160),
+                    y + radius + 34
+                );
+            });
+
+            // Final emphasized output node
+            const last = stages[stages.length - 1];
+            const finalY = getY(last.baseY);
+            ctx.fillStyle = last.color;
+            ctx.beginPath();
+            ctx.arc(cx, finalY, 52 + Math.sin(animationTime * 1.4) * 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#111827";
+            ctx.font = "bold 18px Sora";
+            ctx.fillText(last.name, cx, finalY + 70);
+
+            requestAnimationFrame(draw);
+        }
+
+        // ─── Scroll progress tracking ───
+        const pipelineSection = document.querySelector('.pipeline-section');
         window.addEventListener('scroll', () => {
-            const rect = scrollTrigger.getBoundingClientRect();
-            const scrollProgress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + scrollTrigger.offsetHeight)));
-            createVisualization(scrollProgress);
+            const rect = pipelineSection.getBoundingClientRect();
+            const start = window.innerHeight * 0.3;
+            const end = window.innerHeight + rect.height - window.innerHeight * 0.4;
+            scrollProgress = Math.max(0, Math.min(1, (window.scrollY - (rect.top + window.scrollY - start)) / (end - start)));
         });
 
-        // Initial render
-        createVisualization(0);
-
-        // Resize handler
-        window.addEventListener('resize', () => {
-            createVisualization(0);
-        });
+        draw(); // start the animation loop
     </script>
 </body>
 </html>
