@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synthure - AI-Powered Patient Insurance Matching</title>
+    <title>Synthure - Patient Insurance Matching that's Smarter. Faster. Better.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,138 +13,141 @@
             font-family: 'Sora', sans-serif;
             background:#ffffff;
             color:#111827;
-            line-height:1.6;
+            line-height:1.7;
         }
         nav {
             position:fixed;
             top:0; width:100%;
-            padding:1.5rem 5%;
+            padding:1.8rem 6%;
             display:flex;
             justify-content:space-between;
             align-items:center;
-            background:rgba(255,255,255,0.97);
-            backdrop-filter:blur(12px);
-            border-bottom:1px solid #e5e7eb;
+            background:rgba(255,255,255,0.96);
+            backdrop-filter:blur(16px);
+            border-bottom:1px solid rgba(30,64,175,0.1);
             z-index:1000;
         }
         .logo {
             display:flex;
             align-items:center;
-            font-size:1.7rem;
+            font-size:1.9rem;
             font-weight:800;
             color:#1e40af;
         }
-        .logo svg { margin-right:0.6rem; width:40px; height:40px; }
+        .logo svg { margin-right:0.8rem; width:48px; height:48px; }
         .nav-links a {
-            margin-left:2.5rem;
+            margin-left:3rem;
             color:#374151;
             font-weight:500;
             text-decoration:none;
+            font-size:1.05rem;
         }
         .nav-cta {
-            padding:0.7rem 1.6rem;
+            padding:0.8rem 2rem;
             background:#1e40af;
             color:white;
             border:none;
-            border-radius:6px;
+            border-radius:50px;
             font-weight:600;
             cursor:pointer;
+            transition:background 0.3s;
         }
-        section { padding:9rem 5% 7rem; }
+        .nav-cta:hover { background:#1e3a99; }
+        section { padding:10rem 6% 8rem; position:relative; }
         .hero {
-            background:linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+            background:linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
             text-align:center;
-            padding-top:16rem;
-            padding-bottom:11rem;
+            padding-top:18rem;
+            padding-bottom:12rem;
             position:relative;
             overflow:hidden;
         }
         .hero::before {
             content:'';
             position:absolute;
-            top:0; left:0; right:0; bottom:0;
-            background:radial-gradient(circle at 30% 70%, rgba(30,64,175,0.08) 0%, transparent 50%);
+            inset:0;
+            background:radial-gradient(circle at 20% 80%, rgba(30,64,175,0.12) 0%, transparent 60%);
             pointer-events:none;
         }
         .hero h1 {
-            font-size:4rem;
+            font-size:4.5rem;
             font-weight:800;
             line-height:1.05;
-            margin-bottom:1.8rem;
+            margin-bottom:1.5rem;
             color:#111827;
         }
         .hero p {
-            font-size:1.45rem;
+            font-size:1.5rem;
             color:#4b5563;
-            max-width:820px;
+            max-width:780px;
             margin:0 auto 3rem;
         }
         .btn {
-            padding:1.1rem 2.4rem;
-            font-size:1.15rem;
+            padding:1.2rem 2.8rem;
+            font-size:1.2rem;
             font-weight:600;
-            border-radius:8px;
+            border-radius:50px;
             cursor:pointer;
-            border:none;
+            transition:all 0.3s;
         }
-        .btn-primary { background:#1e40af; color:white; }
+        .btn-primary { background:#1e40af; color:white; border:none; }
+        .btn-primary:hover { background:#1e3a99; transform:translateY(-2px); }
         .btn-outline {
             background:transparent;
             border:2px solid #1e40af;
             color:#1e40af;
-            margin-left:1.2rem;
+            margin-left:1.5rem;
         }
+        .btn-outline:hover { background:#1e40af; color:white; }
         h2 {
-            font-size:3rem;
+            font-size:3.2rem;
             font-weight:700;
             text-align:center;
-            margin-bottom:3.5rem;
+            margin-bottom:2.5rem;
+            color:#111827;
         }
-        .grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-            gap:2.5rem;
-            max-width:1200px;
+        .benefits {
+            max-width:900px;
             margin:0 auto;
-        }
-        .card {
-            background:#f9fafb;
-            padding:2.2rem;
-            border-radius:12px;
-            border:1px solid #e5e7eb;
-            transition:transform 0.15s, box-shadow 0.15s;
             text-align:center;
         }
-        .card:hover { transform:translateY(-6px); box-shadow:0 10px 20px rgba(0,0,0,0.08); }
-        .card svg { width:48px; height:48px; margin-bottom:1rem; fill:#1e40af; }
-        .card h3 {
-            font-size:1.45rem;
-            margin-bottom:1.2rem;
+        .benefit {
+            margin:4rem 0;
+            padding:0 2rem;
+        }
+        .benefit svg { width:64px; height:64px; margin-bottom:1.5rem; fill:#1e40af; }
+        .benefit h3 {
+            font-size:1.8rem;
+            margin-bottom:1rem;
             color:#1e40af;
         }
-        .steps .card { text-align:left; }
-        .steps .card h3 { display:flex; align-items:center; gap:1rem; }
-        .steps .card h3 svg { width:36px; height:36px; margin:0; }
+        .benefit p { font-size:1.25rem; color:#4b5563; }
+        .wave-divider {
+            height:120px;
+            background:linear-gradient(to bottom, #f8fafc, #ffffff);
+            clip-path:ellipse(150% 100% at 50% 0%);
+            margin:-60px 0 0;
+        }
         .stats-section {
             background:#f8fafc;
             text-align:center;
         }
         .stats-grid {
             display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
             gap:4rem;
             max-width:1100px;
             margin:0 auto;
         }
         .stat-number {
-            font-size:4rem;
+            font-size:4.5rem;
             font-weight:800;
             color:#1e40af;
         }
         .stat-label {
-            font-size:1.15rem;
+            font-size:1.2rem;
             color:#4b5563;
-            margin-top:0.6rem;
+            margin-top:0.8rem;
         }
         .trust-section {
             background:#f8fafc;
@@ -154,41 +157,50 @@
             display:flex;
             flex-wrap:wrap;
             justify-content:center;
-            gap:3rem;
-            max-width:1000px;
-            margin:3rem auto 0;
+            gap:4rem;
+            max-width:1100px;
+            margin:4rem auto 0;
         }
-        .trust-logos svg { width:120px; height:60px; opacity:0.6; filter:grayscale(1); }
+        .trust-logos div {
+            width:140px; height:70px;
+            background:#e5e7eb;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:0.9rem;
+            color:#6b7280;
+            opacity:0.7;
+        }
         .cta-section {
-            background:#1e40af;
+            background:linear-gradient(135deg, #1e40af 0%, #1e3a99 100%);
             color:white;
             text-align:center;
         }
-        .cta-section h2 { color:white; }
+        .cta-section h2 { color:white; margin-bottom:2rem; }
         .form-box {
-            max-width:620px;
-            margin:4rem auto 0;
-            background:white;
+            max-width:580px;
+            margin:0 auto;
+            background:rgba(255,255,255,0.95);
             color:#111827;
-            padding:3rem;
-            border-radius:12px;
+            padding:3.5rem 2.5rem;
+            border-radius:24px;
+            box-shadow:0 20px 40px rgba(0,0,0,0.15);
         }
         footer {
             background:#111827;
             color:#d1d5db;
-            padding:5rem 5% 3rem;
+            padding:6rem 6% 4rem;
             text-align:center;
         }
         @media (max-width:1024px) {
-            .hero h1 { font-size:3.2rem; }
+            .hero h1 { font-size:3.8rem; }
         }
         @media (max-width:768px) {
-            .hero { padding-top:12rem; padding-bottom:8rem; }
-            .hero h1 { font-size:2.6rem; }
-            section { padding:7rem 5% 5rem; }
-            .nav-links a { margin-left:1.5rem; font-size:0.95rem; }
-            .trust-logos { gap:2rem; }
-            .trust-logos svg { width:90px; height:45px; }
+            .hero { padding-top:14rem; padding-bottom:10rem; }
+            .hero h1 { font-size:3rem; }
+            section { padding:8rem 5% 6rem; }
+            .nav-links a { margin-left:1.8rem; font-size:1rem; }
         }
     </style>
 </head>
@@ -197,12 +209,12 @@
     <!-- Navigation -->
     <nav>
         <div class="logo">
-            <svg viewBox="0 0 40 40" fill="none">
-                <path d="M20 4 L32 10 L32 22 C32 30 20 36 20 36 C20 36 8 30 8 22 L8 10 L20 4 Z" fill="#1e40af" fill-opacity="0.15" stroke="#1e40af" stroke-width="2"/>
-                <circle cx="14" cy="16" r="3" fill="#60a5fa"/>
-                <circle cx="26" cy="16" r="3" fill="#60a5fa"/>
-                <circle cx="20" cy="26" r="3" fill="#60a5fa"/>
-                <circle cx="20" cy="20" r="5" fill="none" stroke="#1e40af" stroke-width="1.5" opacity="0.7"/>
+            <svg viewBox="0 0 48 48" fill="none">
+                <path d="M24 6 L38 13 L38 27 C38 37 24 43 24 43 C24 43 10 37 10 27 L10 13 L24 6 Z" fill="#1e40af" fill-opacity="0.2" stroke="#1e40af" stroke-width="2.5"/>
+                <circle cx="18" cy="20" r="4" fill="#60a5fa"/>
+                <circle cx="30" cy="20" r="4" fill="#60a5fa"/>
+                <circle cx="24" cy="32" r="4" fill="#60a5fa"/>
+                <circle cx="24" cy="24" r="6" fill="none" stroke="#1e40af" stroke-width="2" opacity="0.8"/>
             </svg>
             Synthure
         </div>
@@ -217,92 +229,45 @@
     <!-- Hero -->
     <section class="hero">
         <h1>Patient insurance matching that's Smarter. Faster. Better.</h1>
-        <p>Synthure uses real-time AI to match patients to the optimal insurance plan — reducing mismatches, denials, and disputes while accelerating approvals for hospitals, clinics, and providers.</p>
-        <div>
+        <p>From hospitals to clinics and payers to providers — we combine real-time AI with deep plan intelligence to match patients to the perfect coverage: optimal fit, lowest cost, highest approval odds.</p>
+        <div style="margin-top:3rem;">
             <button class="btn btn-primary">Get started</button>
             <button class="btn btn-outline">Talk to an expert</button>
         </div>
     </section>
 
-    <!-- What we deliver -->
-    <section>
-        <h2>What we deliver</h2>
-        <p style="text-align:center; font-size:1.3rem; color:#4b5563; max-width:820px; margin:0 auto 4.5rem;">
-            Built from production-grade AI: automated pipelines, custom transformers, RAG, and MoE routing — delivering measurable impact for healthcare teams.
+    <!-- Benefits / What we offer -->
+    <section style="background:#f8fafc;">
+        <h2>What we offer</h2>
+        <p style="text-align:center; font-size:1.4rem; color:#4b5563; max-width:800px; margin:0 auto 5rem;">
+            We lead with AI precision — powered by deep healthcare understanding. Our system surfaces the right plans instantly so your team delivers faster approvals, fewer denials, and stronger outcomes.
         </p>
-        <div class="grid">
-            <div class="card">
+        <div class="benefits">
+            <div class="benefit">
                 <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                <h3>Instant Matching & Recommendations</h3>
-                <p>Sub-100ms latency inference matches patients to best-coverage, lowest-cost plans using deep plan intelligence and patient history.</p>
+                <h3>Real-time Patient Matching</h3>
+                <p>Instant eligibility checks and personalized plan recommendations — no guesswork, sub-second results.</p>
             </div>
-            <div class="card">
+            <div class="benefit">
                 <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <h3>Drastically Fewer Disputes & Denials</h3>
-                <p>RAG over policy documents + post-training alignment cuts hallucinations and escalations, disputes month-over-month.</p>
+                <h3>Denial Rate Reduction</h3>
+                <p>AI analyzes historical approvals and policy rules to avoid pitfalls — significantly fewer rejections and disputes.</p>
             </div>
-            <div class="card">
+            <div class="benefit">
                 <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                <h3>Accuracy & Rare-Case Priority</h3>
-                <p>Higher recommendation accuracy and fewer mismatches via focal loss, importance weighting, and specialized MoE experts.</p>
+                <h3>Plan Optimization</h3>
+                <p>Find the lowest-cost, highest-coverage option in moments — with explainable trade-offs and rules.</p>
             </div>
-            <div class="card">
+            <div class="benefit">
                 <svg viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                <h3>Robust, Scalable Production</h3>
-                <p>AWS/SQL ETL on large patient datasets (improved quality, fewer failures), stable training, lower latency via MoE routing.</p>
+                <h3>Seamless Workflow Integration</h3>
+                <p>Connects to EHRs, billing systems, and payer APIs — frictionless for your team from day one.</p>
             </div>
         </div>
+        <div class="wave-divider"></div>
     </section>
 
-    <!-- How the Algorithm Matches -->
-    <section id="how" style="background:#f8fafc;">
-        <h2>How the Algorithm Matches</h2>
-        <p style="text-align:center; max-width:900px; margin:0 auto 4rem; color:#4b5563; font-size:1.25rem;">
-            Our end-to-end AI pipeline turns complex patient and policy data into precise, explainable matches in real time.
-        </p>
-        <div class="grid steps">
-            <div class="card">
-                <h3><svg viewBox="0 0 24 24"><path d="M4 7v10h16V7H4zm2 2h12v6H6V9z"/></svg>1. Data Ingestion & ETL</h3>
-                <p>Automated Python + SQL pipelines on AWS process large volumes of patient records daily with validation, checkpoints, and diagnostics for higher quality.</p>
-            </div>
-            <div class="card">
-                <h3><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z"/></svg>2. Pretraining & Feature Learning</h3>
-                <p>Custom PyTorch Transformer learns rich patient-history embeddings via self-attention — enabling deep understanding of medical profiles.</p>
-            </div>
-            <div class="card">
-                <h3><svg viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>3. Fine-Tuning & Alignment</h3>
-                <p>Multi-objective post-training with focal loss and patient importance weighting prioritizes rare/complex cases for better accuracy.</p>
-            </div>
-            <div class="card">
-                <h3><svg viewBox="0 0 24 24"><path d="M17 21h-10a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"/></svg>4. Mixture of Experts Routing</h3>
-                <p>Routes patients to specialized "expert" models by cohort (e.g., chronic conditions) across parallel compute — faster inference.</p>
-            </div>
-            <div class="card">
-                <h3><svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>5. RAG + Re-Ranking</h3>
-                <p>Vector retrieval over policy documents + transformer re-ranking ensures accurate, hallucination-free plan rules — fewer support escalations.</p>
-            </div>
-            <div class="card">
-                <h3><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>6. Final Matching & Output</h3>
-                <p>Delivers ranked plans with cost-coverage trade-offs, filtering, and rule-based explanations — reducing mismatches in production.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trust / Partners -->
-    <section class="trust-section">
-        <h2>Trusted in Healthcare</h2>
-        <p style="text-align:center; max-width:800px; margin:0 auto 2rem; color:#4b5563;">
-            Deployed across hospitals, clinics, and payers — delivering consistent results.
-        </p>
-        <div class="trust-logos">
-            <svg viewBox="0 0 100 50"><rect width="100" height="50" fill="#e5e7eb"/><text x="50" y="30" font-size="14" text-anchor="middle" fill="#6b7280">Hospital System</text></svg>
-            <svg viewBox="0 0 100 50"><rect width="100" height="50" fill="#e5e7eb"/><text x="50" y="30" font-size="14" text-anchor="middle" fill="#6b7280">Clinic Network</text></svg>
-            <svg viewBox="0 0 100 50"><rect width="100" height="50" fill="#e5e7eb"/><text x="50" y="30" font-size="14" text-anchor="middle" fill="#6b7280">Payer Partner</text></svg>
-            <svg viewBox="0 0 100 50"><rect width="100" height="50" fill="#e5e7eb"/><text x="50" y="30" font-size="14" text-anchor="middle" fill="#6b7280">Specialty Care</text></svg>
-        </div>
-    </section>
-
-    <!-- Built on data. Backed by outcomes. -->
+    <!-- Stats -->
     <section class="stats-section">
         <h2>Built on data. Backed by outcomes.</h2>
         <div class="stats-grid">
@@ -323,33 +288,47 @@
                 <div class="stat-label">Fewer Pipeline Failures</div>
             </div>
         </div>
-        <p style="text-align:center; margin-top:5rem; font-size:1.3rem; color:#4b5563;">
-            Real-time intelligence. Automated precision. Outcomes that matter.
+        <p style="text-align:center; margin-top:5rem; font-size:1.4rem; color:#4b5563; max-width:800px; margin-left:auto; margin-right:auto;">
+            Real-time intelligence. Automated precision. Outcomes that matter for providers and patients.
         </p>
+    </section>
+
+    <!-- Trust -->
+    <section class="trust-section">
+        <h2>Trusted across healthcare</h2>
+        <p style="text-align:center; max-width:800px; margin:0 auto 3rem; color:#4b5563;">
+            Hospitals, clinics, specialty practices, and payers rely on Synthure for accurate, fast matching at scale.
+        </p>
+        <div class="trust-logos">
+            <div>Hospital System</div>
+            <div>Clinic Network</div>
+            <div>Payer Partner</div>
+            <div>Specialty Care</div>
+        </div>
     </section>
 
     <!-- CTA -->
     <section class="cta-section">
         <h2>Ready to match patients smarter?</h2>
-        <p style="max-width:720px; margin:0 auto 2.5rem; font-size:1.3rem;">
-            If denials, mismatches, or slow approvals are costing your team — let's fix it with AI that actually works in production.
+        <p style="max-width:720px; margin:0 auto 3rem; font-size:1.4rem; opacity:0.95;">
+            If denials, mismatches, or slow approvals are holding your team back — let's change that with AI built for production healthcare.
         </p>
         <div class="form-box">
-            <h3 style="text-align:center; margin-bottom:1.8rem;">Talk to the team that built it</h3>
-            <p style="text-align:center; margin-bottom:2.5rem; font-size:1.15rem;">
-                From ETL to deployed transformers and RAG — we've run this at scale.
+            <h3 style="text-align:center; margin-bottom:1.5rem; font-size:1.8rem;">Talk to the team</h3>
+            <p style="text-align:center; margin-bottom:2.5rem; font-size:1.2rem;">
+                See how real-time matching and deep plan intelligence can transform your operations.
             </p>
-            <button class="btn btn-primary" style="width:100%; padding:1.3rem; font-size:1.25rem;">Talk to an expert</button>
+            <button class="btn btn-primary" style="width:100%; padding:1.4rem; font-size:1.3rem;">Talk to an expert</button>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
         <p>© Synthure. AI-Powered Patient-Personalized Insurance.</p>
-        <p style="margin-top:1.5rem;">
-            <a href="#" style="color:#9ca3af; margin:0 1.2rem;">Privacy</a>
-            <a href="#" style="color:#9ca3af; margin:0 1.2rem;">Terms</a>
-            <a href="#" style="color:#9ca3af; margin:0 1.2rem;">Contact</a>
+        <p style="margin-top:1.8rem;">
+            <a href="#" style="color:#9ca3af; margin:0 1.5rem;">Privacy</a>
+            <a href="#" style="color:#9ca3af; margin:0 1.5rem;">Terms</a>
+            <a href="#" style="color:#9ca3af; margin:0 1.5rem;">Contact</a>
         </p>
     </footer>
 
