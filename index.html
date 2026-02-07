@@ -3,204 +3,539 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synthure - Patient Insurance Matching that's Smarter. Faster. Better.</title>
+    <title>Synthure — AI-Powered Patient Insurance Matching</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --accent-dark: #1e40af;
+            --accent-light: #60a5fa;
+            --bg-light: #f8fafc;
+            --bg-mid: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+        }
+
         body {
-            font-family: 'Sora', sans-serif;
-            background:#ffffff;
-            color:#111827;
-            line-height:1.7;
+            font-family: 'Inter', sans-serif;
+            background: var(--primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
+
+        /* Navigation */
         nav {
-            position:fixed;
-            top:0; width:100%;
-            padding:1.8rem 6%;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            background:rgba(255,255,255,0.96);
-            backdrop-filter:blur(16px);
-            border-bottom:1px solid rgba(30,64,175,0.1);
-            z-index:1000;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+            z-index: 1000;
         }
+
         .logo {
-            display:flex;
-            align-items:center;
-            font-size:1.9rem;
-            font-weight:800;
-            color:#1e40af;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
         }
-        .logo svg { margin-right:0.8rem; width:48px; height:48px; }
+
+        .logo svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+
         .nav-links a {
-            margin-left:3rem;
-            color:#374151;
-            font-weight:500;
-            text-decoration:none;
-            font-size:1.05rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
         }
+
+        .nav-links a:hover {
+            color: var(--accent-light);
+        }
+
         .nav-cta {
-            padding:0.8rem 2rem;
-            background:#1e40af;
-            color:white;
-            border:none;
-            border-radius:50px;
-            font-weight:600;
-            cursor:pointer;
-            transition:background 0.3s;
+            padding: 0.7rem 1.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
         }
-        .nav-cta:hover { background:#1e3a99; }
-        section { padding:10rem 6% 8rem; position:relative; }
+
+        .nav-cta:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Hero Section */
         .hero {
-            background:linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
-            text-align:center;
-            padding-top:18rem;
-            padding-bottom:12rem;
-            position:relative;
-            overflow:hidden;
+            padding-top: 12rem;
+            padding-bottom: 8rem;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f172a 0%, #1a2849 50%, #0f172a 100%);
         }
+
         .hero::before {
-            content:'';
-            position:absolute;
-            inset:0;
-            background:radial-gradient(circle at 20% 80%, rgba(30,64,175,0.12) 0%, transparent 60%);
-            pointer-events:none;
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
         }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float-reverse 10s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(40px); }
+        }
+
+        @keyframes float-reverse {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-40px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 950px;
+        }
+
         .hero h1 {
-            font-size:4.5rem;
-            font-weight:800;
-            line-height:1.05;
-            margin-bottom:1.5rem;
-            color:#111827;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.8rem;
+            color: white;
+            letter-spacing: -1px;
+            animation: slideInUp 0.8s ease-out;
         }
-        .hero p {
-            font-size:1.5rem;
-            color:#4b5563;
-            max-width:780px;
-            margin:0 auto 3rem;
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            animation: slideInUp 0.8s ease-out 0.15s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            animation: slideInUp 0.8s ease-out 0.3s both;
+        }
+
         .btn {
-            padding:1.2rem 2.8rem;
-            font-size:1.2rem;
-            font-weight:600;
-            border-radius:50px;
-            cursor:pointer;
-            transition:all 0.3s;
+            padding: 1rem 2.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
-        .btn-primary { background:#1e40af; color:white; border:none; }
-        .btn-primary:hover { background:#1e3a99; transform:translateY(-2px); }
-        .btn-outline {
-            background:transparent;
-            border:2px solid #1e40af;
-            color:#1e40af;
-            margin-left:1.5rem;
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
         }
-        .btn-outline:hover { background:#1e40af; color:white; }
-        h2 {
-            font-size:3.2rem;
-            font-weight:700;
-            text-align:center;
-            margin-bottom:2.5rem;
-            color:#111827;
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
         }
-        .benefits {
-            max-width:900px;
-            margin:0 auto;
-            text-align:center;
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-light);
+            color: var(--accent-light);
         }
-        .benefit {
-            margin:4rem 0;
-            padding:0 2rem;
+
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-3px);
         }
-        .benefit svg { width:64px; height:64px; margin-bottom:1.5rem; fill:#1e40af; }
-        .benefit h3 {
-            font-size:1.8rem;
-            margin-bottom:1rem;
-            color:#1e40af;
+
+        /* Features Section */
+        .features {
+            padding: 10rem 5%;
+            background: var(--bg-light);
+            position: relative;
         }
-        .benefit p { font-size:1.25rem; color:#4b5563; }
-        .wave-divider {
-            height:120px;
-            background:linear-gradient(to bottom, #f8fafc, #ffffff);
-            clip-path:ellipse(150% 100% at 50% 0%);
-            margin:-60px 0 0;
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 6rem;
         }
-        .stats-section {
-            background:#f8fafc;
-            text-align:center;
+
+        .section-header h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
         }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 16px 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .feature-card h3 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 8rem 5%;
+            background: linear-gradient(135deg, var(--accent-dark) 0%, #1e3a99 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+        }
+
+        .stats-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-header {
+            color: white;
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .stats-header h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+
         .stats-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-            gap:4rem;
-            max-width:1100px;
-            margin:0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
         }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
         .stat-number {
-            font-size:4.5rem;
-            font-weight:800;
-            color:#1e40af;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            display: block;
         }
+
         .stat-label {
-            font-size:1.2rem;
-            color:#4b5563;
-            margin-top:0.8rem;
+            font-size: 1rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
-        .trust-section {
-            background:#f8fafc;
-            text-align:center;
+
+        /* Waitlist Section */
+        .waitlist {
+            padding: 10rem 5%;
+            background: var(--bg-light);
+            position: relative;
         }
-        .trust-logos {
-            display:flex;
-            flex-wrap:wrap;
-            justify-content:center;
-            gap:4rem;
-            max-width:1100px;
-            margin:4rem auto 0;
+
+        .waitlist-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
         }
-        .trust-logos div {
-            width:140px; height:70px;
-            background:#e5e7eb;
-            border-radius:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:0.9rem;
-            color:#6b7280;
-            opacity:0.7;
+
+        .waitlist h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
         }
-        .cta-section {
-            background:linear-gradient(135deg, #1e40af 0%, #1e3a99 100%);
-            color:white;
-            text-align:center;
+
+        .waitlist p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.8;
         }
-        .cta-section h2 { color:white; margin-bottom:2rem; }
-        .form-box {
-            max-width:580px;
-            margin:0 auto;
-            background:rgba(255,255,255,0.95);
-            color:#111827;
-            padding:3.5rem 2.5rem;
-            border-radius:24px;
-            box-shadow:0 20px 40px rgba(0,0,0,0.15);
+
+        .waitlist-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            transition: all 0.4s;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         }
+
+        .waitlist-form:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: #f0f7ff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .waitlist-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .waitlist-submit:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        .waitlist-submit:active {
+            transform: translateY(0);
+        }
+
+        .form-note {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 1rem;
+        }
+
+        /* Footer */
         footer {
-            background:#111827;
-            color:#d1d5db;
-            padding:6rem 6% 4rem;
-            text-align:center;
+            background: var(--primary);
+            color: #94a3b8;
+            padding: 4rem 5%;
+            text-align: center;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
         }
-        @media (max-width:1024px) {
-            .hero h1 { font-size:3.8rem; }
+
+        footer p {
+            margin: 0.5rem 0;
         }
-        @media (max-width:768px) {
-            .hero { padding-top:14rem; padding-bottom:10rem; }
-            .hero h1 { font-size:3rem; }
-            section { padding:8rem 5% 6rem; }
-            .nav-links a { margin-left:1.8rem; font-size:1rem; }
+
+        .footer-links {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .waitlist h2 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -210,127 +545,227 @@
     <nav>
         <div class="logo">
             <svg viewBox="0 0 48 48" fill="none">
-                <path d="M24 6 L38 13 L38 27 C38 37 24 43 24 43 C24 43 10 37 10 27 L10 13 L24 6 Z" fill="#1e40af" fill-opacity="0.2" stroke="#1e40af" stroke-width="2.5"/>
+                <path d="M24 6 L38 13 L38 27 C38 37 24 43 24 43 C24 43 10 37 10 27 L10 13 L24 6 Z" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6" stroke-width="2.5"/>
                 <circle cx="18" cy="20" r="4" fill="#60a5fa"/>
                 <circle cx="30" cy="20" r="4" fill="#60a5fa"/>
                 <circle cx="24" cy="32" r="4" fill="#60a5fa"/>
-                <circle cx="24" cy="24" r="6" fill="none" stroke="#1e40af" stroke-width="2" opacity="0.8"/>
+                <circle cx="24" cy="24" r="6" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.8"/>
             </svg>
             Synthure
         </div>
         <div class="nav-links">
-            <a href="#how">How It Works</a>
-            <a href="#results">Results</a>
-            <a href="#">About</a>
+            <a href="#features">Features</a>
+            <a href="#stats">Algorithm</a>
+            <a href="#blog">Blog</a>
+            <a href="#waitlist">Join</a>
         </div>
-        <button class="nav-cta">Talk to an expert</button>
+        <button class="nav-cta">Early Access</button>
     </nav>
 
     <!-- Hero -->
     <section class="hero">
-        <h1>Patient insurance matching that's Smarter. Faster. Better.</h1>
-        <p>From hospitals to clinics and payers to providers — we combine real-time AI with deep plan intelligence to match patients to the perfect coverage: optimal fit, lowest cost, highest approval odds.</p>
-        <div style="margin-top:3rem;">
-            <button class="btn btn-primary">Get started</button>
-            <button class="btn btn-outline">Talk to an expert</button>
-        </div>
-    </section>
-
-    <!-- Benefits / What we offer -->
-    <section style="background:#f8fafc;">
-        <h2>What we offer</h2>
-        <p style="text-align:center; font-size:1.4rem; color:#4b5563; max-width:800px; margin:0 auto 5rem;">
-            We lead with AI precision — powered by deep healthcare understanding. Our system surfaces the right plans instantly so your team delivers faster approvals, fewer denials, and stronger outcomes.
-        </p>
-        <div class="benefits">
-            <div class="benefit">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                <h3>Real-time Patient Matching</h3>
-                <p>Instant eligibility checks and personalized plan recommendations — no guesswork, sub-second results.</p>
-            </div>
-            <div class="benefit">
-                <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <h3>Denial Rate Reduction</h3>
-                <p>AI analyzes historical approvals and policy rules to avoid pitfalls — significantly fewer rejections and disputes.</p>
-            </div>
-            <div class="benefit">
-                <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                <h3>Plan Optimization</h3>
-                <p>Find the lowest-cost, highest-coverage option in moments — with explainable trade-offs and rules.</p>
-            </div>
-            <div class="benefit">
-                <svg viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                <h3>Seamless Workflow Integration</h3>
-                <p>Connects to EHRs, billing systems, and payer APIs — frictionless for your team from day one.</p>
-            </div>
-        </div>
-        <div class="wave-divider"></div>
-    </section>
-
-    <!-- Stats -->
-    <section class="stats-section">
-        <h2>Built on data. Backed by outcomes.</h2>
-        <div class="stats-grid">
-            <div>
-                <div class="stat-number">25%</div>
-                <div class="stat-label">Higher Recommendation Accuracy</div>
-            </div>
-            <div>
-                <div class="stat-number">31%</div>
-                <div class="stat-label">Fewer Plan Mismatches</div>
-            </div>
-            <div>
-                <div class="stat-number">94%</div>
-                <div class="stat-label">Reduction in Escalations</div>
-            </div>
-            <div>
-                <div class="stat-number">85%</div>
-                <div class="stat-label">Fewer Pipeline Failures</div>
-            </div>
-        </div>
-        <p style="text-align:center; margin-top:5rem; font-size:1.4rem; color:#4b5563; max-width:800px; margin-left:auto; margin-right:auto;">
-            Real-time intelligence. Automated precision. Outcomes that matter for providers and patients.
-        </p>
-    </section>
-
-    <!-- Trust -->
-    <section class="trust-section">
-        <h2>Trusted across healthcare</h2>
-        <p style="text-align:center; max-width:800px; margin:0 auto 3rem; color:#4b5563;">
-            Hospitals, clinics, specialty practices, and payers rely on Synthure for accurate, fast matching at scale.
-        </p>
-        <div class="trust-logos">
-            <div>Hospital System</div>
-            <div>Clinic Network</div>
-            <div>Payer Partner</div>
-            <div>Specialty Care</div>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="cta-section">
-        <h2>Ready to match patients smarter?</h2>
-        <p style="max-width:720px; margin:0 auto 3rem; font-size:1.4rem; opacity:0.95;">
-            If denials, mismatches, or slow approvals are holding your team back — let's change that with AI built for production healthcare.
-        </p>
-        <div class="form-box">
-            <h3 style="text-align:center; margin-bottom:1.5rem; font-size:1.8rem;">Talk to the team</h3>
-            <p style="text-align:center; margin-bottom:2.5rem; font-size:1.2rem;">
-                See how real-time matching and deep plan intelligence can transform your operations.
+        <div class="hero-content">
+            <h1>Your health, in your language.</h1>
+            <p class="hero-subtitle">
+                Stop reading medical jargon. Synthure translates complex clinical notes into clear, personal narratives. Understand your diagnosis. Answer smart questions. Own your health journey.
             </p>
-            <button class="btn btn-primary" style="width:100%; padding:1.4rem; font-size:1.3rem;">Talk to an expert</button>
+            <div class="hero-cta">
+                <button class="btn btn-primary">Get Early Access</button>
+                <button class="btn btn-secondary">See How It Works</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2>How It Works</h2>
+            <p>Transforming healthcare for patients and physicians alike.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Plain Language Notes</h3>
+                <p>Your doctor's notes translated instantly. No medical degree required. Understand exactly what's happening with your health.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>Smart Patient Questionnaire</h3>
+                <p>Adaptive questions that learn from your answers. Captures what matters to you — symptoms, concerns, social context — before your visit.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Continuous Health Narratives</h3>
+                <p>AI-generated summaries of your complete health story. Track patterns. Understand your condition's arc. Share coherently with providers.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏥</div>
+                <h3>Mental Health Focus</h3>
+                <p>Starting with psychology and behavioral health — where patient understanding impacts outcomes most. Expand to all conditions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>Safer Visits</h3>
+                <p>Prep before appointments. Better-informed conversations with your care team. Fewer questions about your history.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Coverage Clarity</h3>
+                <p>Bonus: Understand your insurance options and what treatments are covered. One less worry.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Demo Section -->
+    <section style="padding: 8rem 5%; background: var(--bg-light); text-align: center;">
+        <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; margin-bottom: 3rem; color: var(--primary);">See It In Action</h2>
+        <div id="video-placeholder" onclick="playVideo()" style="max-width: 900px; margin: 0 auto; position: relative; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #0f172a, #1a2849); border-radius: 16px; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 16px 48px rgba(59, 130, 246, 0.2); transition: all 0.3s; hover: transform translate(0, -4px); box-shadow: 0 20px 56px rgba(59, 130, 246, 0.3);">
+            <svg style="width: 100px; height: 100px; fill: white; opacity: 0.9; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));" viewBox="0 0 24 24">
+                <polygon points="5 3 19 12 5 21" />
+            </svg>
+        </div>
+        <div id="video-container" style="max-width: 900px; margin: 0 auto; position: relative; aspect-ratio: 16 / 9; display: none;">
+            <iframe id="demo-video" width="100%" height="100%" src="" title="Synthure Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 16px;"></iframe>
+        </div>
+        <p style="color: var(--text-secondary); margin-top: 2rem; font-size: 1.05rem;">How Synthure transforms patient understanding and physician insight in real time.</p>
+    </section>
+    <section class="stats" id="stats">
+        <div class="stats-content">
+            <div class="stats-header">
+                <h2>Our AI Architecture</h2>
+                <p style="color: rgba(255, 255, 255, 0.85); margin-top: 1rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                    Multi-agent AI system trained on 500K+ patient records, designed to understand the complete patient story — medical, social, and emotional.
+                </p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; margin-top: 4rem;">
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 1: Narrative Generator</h4>
+                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Extracts clinical signals from EHR data and generates first-person patient narratives. Transforms medical jargon into language patients understand.</p>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 2: Diagnostic Reasoner</h4>
+                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Performs differential diagnosis analysis with chain-of-thought reasoning. Explains the "why" behind clinical assessments for both patients and providers.</p>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 3: Fact Validator</h4>
+                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Cross-references AI outputs against policy documents and clinical guidelines. Eliminates hallucinations through real-time fact-checking and web verification.</p>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 4: Adaptive Questioner</h4>
+                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Generates dynamic, context-aware patient questionnaires. Learns from each response to capture social determinants, personal concerns, and lifestyle factors physicians miss.</p>
+                </div>
+            </div>
+            <div style="margin-top: 4rem; padding: 2rem; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border-left: 4px solid #8b5cf6;">
+                <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.05rem; line-height: 1.8;">
+                    <strong>Result:</strong> Holistic patient profiles that capture medical history, social determinants, and personal health context — giving physicians the full picture they need, and patients the clarity they deserve.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section style="padding: 10rem 5%; background: var(--primary);" id="blog">
+            <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; color: white; margin-bottom: 1rem; text-align: center;">Insights & Updates</h2>
+            <p style="text-align: center; color: #cbd5e1; margin-bottom: 4rem; font-size: 1.1rem;">Latest thinking on patient empowerment, AI in healthcare, and building better health systems.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem;">
+                <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                    <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Patient Empowerment</span>
+                    <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Why Patients Should Understand Their Diagnosis</h3>
+                    <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Medical literacy isn't luxury—it's essential. Here's why clear communication improves outcomes.</p>
+                    <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read article →</a>
+                </article>
+
+                <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                    <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Product Updates</span>
+                    <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Mental Health as Our Starting Point</h3>
+                    <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Why we're launching with psychology first—and the measurable impact on patient outcomes.</p>
+                    <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read article →</a>
+                </article>
+
+                <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                    <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">AI in Healthcare</span>
+                    <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Building AI Your Doctors Can Trust</h3>
+                    <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">How we eliminate hallucinations and validate every clinical claim in real time.</p>
+                    <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read article →</a>
+                </article>
+            </div>
+        </div>
+    </section>
+    <section class="waitlist" id="waitlist">
+        <div class="waitlist-container">
+            <h2>Understand Your Health</h2>
+            <p>Join patients and hospitals beta-testing Synthure. Limited spots for early users who want to understand their diagnosis, own their health data, and take control of their care.</p>
+            <form class="waitlist-form" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="org">I'm a...</label>
+                    <input type="text" id="org" name="org" placeholder="Patient, hospital, clinic, or health system">
+                </div>
+                <button type="submit" class="waitlist-submit">Get Early Access</button>
+                <p class="form-note">✓ We'll reach out within 24 hours with your beta access link.</p>
+            </form>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <p>© Synthure. AI-Powered Patient-Personalized Insurance.</p>
-        <p style="margin-top:1.8rem;">
-            <a href="#" style="color:#9ca3af; margin:0 1.5rem;">Privacy</a>
-            <a href="#" style="color:#9ca3af; margin:0 1.5rem;">Terms</a>
-            <a href="#" style="color:#9ca3af; margin:0 1.5rem;">Contact</a>
+        <p><strong>Synthure</strong> — AI-Powered Patient Insurance Matching</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 1rem;">
+            Real-time intelligence. Automated precision. Outcomes that matter.
         </p>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Contact</a>
+        </div>
     </footer>
+
+    <script>
+        function playVideo() {
+            const placeholder = document.getElementById('video-placeholder');
+            const container = document.getElementById('video-container');
+            const iframe = document.getElementById('demo-video');
+            
+            // Replace src with your video URL when ready (YouTube, Vimeo, etc.)
+            iframe.src = 'https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1';
+            
+            placeholder.style.display = 'none';
+            container.style.display = 'block';
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const org = document.getElementById('org').value;
+
+            // Simulate submission
+            alert(`Thanks ${name}! We'll reach out to ${email} soon.`);
+            event.target.reset();
+            
+            // In production, send to backend
+            console.log({ name, email, org });
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
