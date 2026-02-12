@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insights & Research | Synthure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --accent-dark: #1e40af;
+            --accent-light: #60a5fa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-light: #f9fafb;
+        }
+        body {
+            font-family: 'Merriweather', serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            background: white;
+        }
+        .nav-bar {
+            background: var(--primary);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent-light);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 5% 4rem;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 2rem;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .filter-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 0.7rem 1.5rem;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+        .blog-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .blog-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15);
+            transform: translateY(-4px);
+        }
+        .blog-card-header {
+            padding: 2rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        .blog-category {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+        .blog-category.technical {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-dark);
+        }
+        .blog-category.applied {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        .blog-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            line-height: 1.3;
+        }
+        .blog-card-body {
+            padding: 0 2rem 2rem;
+            flex-grow: 1;
+        }
+        .blog-excerpt {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+        .blog-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+        }
+        .read-more {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .read-more:hover {
+            color: var(--accent-dark);
+        }
+        .footer {
+            background: var(--primary);
+            color: #94a3b8;
+            padding: 3rem 5%;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .blog-grid { grid-template-columns: 1fr; }
+            .filter-section { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="index.html" class="logo">Synthure</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="blog.html" class="active">Blog</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Insights & Research</h1>
+            <p class="page-subtitle">Deep dives into clinical AI, patient outcomes, and healthcare innovation</p>
+        </header>
+
+        <div class="filter-section">
+            <button class="filter-btn active" onclick="filterBlog('all')">All Articles</button>
+            <button class="filter-btn" onclick="filterBlog('technical')">Technical</button>
+            <button class="filter-btn" onclick="filterBlog('applied')">Applied & Clinical</button>
+        </div>
+
+        <div class="blog-grid" id="blogGrid">
+            <!-- Technical 1 -->
+            <div class="blog-card" data-category="technical">
+                <div class="blog-card-header">
+                    <span class="blog-category technical">Technical Deep Dive</span>
+                    <h3>RLHF vs. DPO: Training Clinical Language Models</h3>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-excerpt">
+                        Why we chose Reinforcement Learning from Human Feedback over Direct Preference Optimization for clinical safety. Exploring reward modeling with expert annotations and PPO convergence.
+                    </p>
+                    <div class="blog-meta">
+                        <span>12 min read</span>
+                        <a href="rlhf-vs-dpo-blog.html" class="read-more">Read →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applied 1 -->
+            <div class="blog-card" data-category="applied">
+                <div class="blog-card-header">
+                    <span class="blog-category applied">Clinical Outcomes</span>
+                    <h3>81% Patient Comprehension: What We Learned</h3>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-excerpt">
+                        Results from 200+ beta patients show dramatic improvement over baseline. How plain language translation improves health literacy, medication adherence, and patient outcomes.
+                    </p>
+                    <div class="blog-meta">
+                        <span>10 min read</span>
+                        <a href="patient-comprehension-blog.html" class="read-more">Read →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical 2 -->
+            <div class="blog-card" data-category="technical">
+                <div class="blog-card-header">
+                    <span class="blog-category technical">Infrastructure</span>
+                    <h3>Sub-2s Inference: CUDA Optimization at Scale</h3>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-excerpt">
+                        How we achieved &lt;1.8s P95 latency with vLLM, custom CUDA kernels, and GPU cluster orchestration. Engineering clinical response times.
+                    </p>
+                    <div class="blog-meta">
+                        <span>11 min read</span>
+                        <a href="cuda-optimization-blog.html" class="read-more">Read →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applied 2 -->
+            <div class="blog-card" data-category="applied">
+                <div class="blog-card-header">
+                    <span class="blog-category applied">Healthcare Innovation</span>
+                    <h3>Building AI Doctors Can Trust</h3>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-excerpt">
+                        From 92% hallucination rate to 12%. How real-time fact validation, clinical guideline integration, and expert review transformed AI safety.
+                    </p>
+                    <div class="blog-meta">
+                        <span>10 min read</span>
+                        <a href="ai-safety-blog.html" class="read-more">Read →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical 3 -->
+            <div class="blog-card" data-category="technical">
+                <div class="blog-card-header">
+                    <span class="blog-category technical">Data & Privacy</span>
+                    <h3>Synthetic EHR Data: 60K+ Records, HIPAA Compliant</h3>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-excerpt">
+                        How we generated unlimited labeled training data from MIMIC-IV while maintaining strict privacy. De-identification pipelines and synthetic data validation.
+                    </p>
+                    <div class="blog-meta">
+                        <span>12 min read</span>
+                        <a href="synthetic-data-blog.html" class="read-more">Read →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applied 3 -->
+            <div class="blog-card" data-category="applied">
+                <div class="blog-card-header">
+                    <span class="blog-category applied">Patient Empowerment</span>
+                    <h3>Why Medical Literacy Drives Better Outcomes</h3>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-excerpt">
+                        Patients who understand their diagnosis have higher medication adherence, fewer ED visits, and better long-term health. How AI-powered translation bridges the literacy gap.
+                    </p>
+                    <div class="blog-meta">
+                        <span>9 min read</span>
+                        <a href="medical-literacy-blog.html" class="read-more">Read →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p><strong>Synthure</strong> — Clinical AI Research & Product Blog</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Evidence-based. Expert-validated. Patient-first.</p>
+    </footer>
+
+    <script>
+        function filterBlog(category) {
+            const cards = document.querySelectorAll('.blog-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

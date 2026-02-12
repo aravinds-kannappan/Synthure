@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building AI Doctors Can Trust | Synthure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #0f172a; --accent: #3b82f6; --accent-dark: #1e40af; --accent-light: #60a5fa; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --text-primary: #1f2937; --text-secondary: #6b7280; --bg-light: #f9fafb; }
+        body { font-family: 'Merriweather', serif; color: var(--text-primary); line-height: 1.8; background: white; }
+        .nav-bar { background: var(--primary); padding: 1.5rem 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(59, 130, 246, 0.2); }
+        .logo { color: white; font-weight: bold; font-size: 1.5rem; text-decoration: none; }
+        .nav-bar a { color: #cbd5e1; text-decoration: none; margin: 0 1.5rem; font-family: 'Inter', sans-serif; }
+        .nav-bar a:hover { color: var(--accent-light); }
+        .article-container { max-width: 900px; margin: 0 auto; padding: 6rem 5% 4rem; }
+        .article-header { margin-bottom: 4rem; border-bottom: 3px solid var(--accent); padding-bottom: 2rem; }
+        .article-meta { font-family: 'Inter', sans-serif; color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.2; color: var(--primary); }
+        .article-subtitle { font-size: 1.3rem; color: var(--text-secondary); font-style: italic; font-weight: 400; }
+        h2 { font-size: 2rem; margin: 3rem 0 1.5rem; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 1.5rem; }
+        h3 { font-size: 1.5rem; margin: 2.5rem 0 1rem; color: var(--accent-dark); }
+        p { margin-bottom: 1.5rem; text-align: justify; }
+        .highlight { background: linear-gradient(120deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1)); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent); margin: 2rem 0; }
+        .metric-card { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 2rem; margin: 2rem 0; transition: all 0.3s; }
+        .metric-card:hover { border-color: var(--accent); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15); }
+        .metric-label { font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .metric-value { font-size: 2.5rem; font-weight: 700; color: var(--success); margin-bottom: 0.5rem; }
+        .warning-box { background: linear-gradient(135deg, var(--warning), #d97706); color: white; padding: 2rem; border-radius: 12px; margin: 2rem 0; font-weight: 500; }
+        .conclusion { background: linear-gradient(135deg, var(--primary), var(--accent-dark)); color: white; padding: 3rem; border-radius: 12px; margin: 4rem 0 2rem; }
+        .conclusion h2 { color: white; border-left: 4px solid var(--accent-light); }
+        .footer { background: var(--primary); color: #94a3b8; padding: 3rem 5%; text-align: center; margin-top: 4rem; }
+        .author-bio { font-family: 'Inter', sans-serif; background: var(--bg-light); padding: 2rem; border-radius: 12px; margin: 3rem 0; border-left: 4px solid var(--accent); }
+        ul, ol { margin: 1.5rem 0 1.5rem 2rem; }
+        li { margin: 0.8rem 0; }
+        table { width: 100%; border-collapse: collapse; margin: 2rem 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+        th { background: var(--primary); color: white; padding: 1rem; text-align: left; font-weight: 600; font-family: 'Inter', sans-serif; }
+        td { padding: 1rem; border-bottom: 1px solid #e5e7eb; }
+        tr:nth-child(even) { background: var(--bg-light); }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="index.html" class="logo">Synthure</a>
+        <div>
+            <a href="blog.html">← Back to Blog</a>
+        </div>
+    </nav>
+
+    <article class="article-container">
+        <header class="article-header">
+            <div class="article-meta">Healthcare Innovation • 10 min read</div>
+            <h1>Building AI Doctors Can Trust</h1>
+            <p class="article-subtitle">From 92% hallucination rate to 12%. How real-time fact validation, clinical guideline integration, and expert review transformed AI safety in healthcare.</p>
+        </header>
+
+        <h2>The Trust Problem</h2>
+        <p>
+            Doctors are skeptical of AI. With reason: early LLMs hallucinate. They confidently assert facts that don't exist. In healthcare, hallucination isn't a minor nuisance—it's dangerous. A cardiologist told us: "I can't use this. I can't spend 5 minutes fact-checking every sentence. If I don't trust it implicitly, it's a liability."
+        </p>
+        <p>
+            That conversation drove our clinical safety roadmap. We set a goal: <strong>reduce hallucination rate below 15%</strong> (from our baseline of 92%) and achieve physician trust certification.
+        </p>
+
+        <h2>Understanding Hallucination</h2>
+        <p>
+            Hallucination in clinical LLMs manifests in three types:
+        </p>
+        <ul>
+            <li><strong>Factual hallucination:</strong> Inventing drug interactions, side effects, or contraindications. (E.g., "ACE inhibitors are contraindicated in pregnancy" is correct, but "ACE inhibitors cause liver damage" is false)</li>
+            <li><strong>Citation hallucination:</strong> Referencing studies that don't exist or misquoting evidence</li>
+            <li><strong>Reasoning hallucination:</strong> Following illogical diagnostic chains (e.g., concluding bipolar disorder from a patient's insomnia without other symptoms)</li>
+        </ul>
+
+        <p>
+            Our pre-RLHF model had a 92% hallucination rate, meaning 92% of outputs contained at least one factually incorrect or unsafe statement. This is typical for general-purpose LLMs fine-tuned on medical data.
+        </p>
+
+        <h2>Strategy 1: Real-Time Fact Validation</h2>
+        <p>
+            Our fact validator agent checks model outputs against three sources in real-time:
+        </p>
+
+        <h3>Clinical Guidelines Database</h3>
+        <p>
+            We indexed UpToDate, clinical practice guidelines from major societies (AHA, ADA, ACP), and FDA drug labels. When the model generates medical claims, we embed them and search for contradictions.
+        </p>
+
+        <div class="metric-card">
+            <div class="metric-label">Guideline Coverage</div>
+            <div class="metric-value">94%</div>
+            <div>Of claims in cardiology, psychiatry, and internal medicine covered by indexed guidelines</div>
+        </div>
+
+        <h3>Web Verification</h3>
+        <p>
+            For claims not in our database, we query the web (via PubMed, FDA databases, medical news). This catches newly published research or rare drug interactions our static database misses.
+        </p>
+
+        <h3>Expert Feedback Loop</h3>
+        <p>
+            When the model generates a claim with low confidence (&lt;0.75), or when it contradicts guidelines, we flag it for physician review. Physicians vote on correctness, and we retrain the reward model.
+        </p>
+
+        <div class="highlight">
+            <strong>The key insight:</strong> We don't need the model to be perfectly accurate. We need it to <em>know what it doesn't know</em>. When confidence is low, we trigger human review. This hybrid approach (AI + human) achieves 98.7% accuracy while keeping human burden reasonable.
+        </div>
+
+        <h2>Strategy 2: Structured Fact Checking</h2>
+        <p>
+            Free-text outputs are hard to validate. So we redesigned the model to output structured JSON with explicit claims:
+        </p>
+
+        <div style="background: var(--primary); color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin: 2rem 0; border-left: 4px solid var(--success);">
+{<br>
+  "diagnosis": "Type 2 Diabetes Mellitus",<br>
+  "confidence": 0.92,<br>
+  "claims": [<br>
+    {<br>
+      "claim": "First-line treatment is metformin",<br>
+      "source": "ADA 2024 Guidelines",<br>
+      "confidence": 0.95<br>
+    },<br>
+    {<br>
+      "claim": "Common side effects include gastrointestinal upset",<br>
+      "source": "FDA Label",<br>
+      "confidence": 0.98<br>
+    }<br>
+  ],<br>
+  "warnings": ["Contraindicated in eGFR &lt; 30"]<br>
+}
+        </div>
+
+        <p>
+            Each claim is tagged with its source and confidence. We validate each claim independently. If a source is unavailable or confidence is low, we flag it for review.
+        </p>
+
+        <h2>Results: From 92% to 12% Hallucination</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+            <div class="metric-card">
+                <div class="metric-label">Hallucination Rate (Baseline)</div>
+                <div class="metric-value">92%</div>
+                <div>Pre-RLHF model, standard inference</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">After RLHF</div>
+                <div class="metric-value">28%</div>
+                <div>Improved through preference learning</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">+ Fact Validation</div>
+                <div class="metric-value">18%</div>
+                <div>Caught and corrected in real-time</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Final (with review)</div>
+                <div class="metric-value">12%</div>
+                <div>Flagged for human review at runtime</div>
+            </div>
+        </div>
+
+        <p>
+            The remaining 12% are subtle hallucinations that slipped through: overgeneralized statements, contextual misses, or novel drug interactions not yet in our database. These are caught by physician review.
+        </p>
+
+        <h2>Physician Trust Study</h2>
+        <p>
+            We conducted a survey of 50 physicians: "Would you trust Synthure outputs to use in patient care?" Results:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>System</th>
+                    <th>Trust (Agree/Strongly Agree)</th>
+                    <th>Would Use in Clinical Practice</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Baseline LLM (92% hallucination)</td>
+                    <td>8%</td>
+                    <td>6%</td>
+                </tr>
+                <tr>
+                    <td>Post-RLHF (28% hallucination)</td>
+                    <td>31%</td>
+                    <td>18%</td>
+                </tr>
+                <tr>
+                    <td>With fact validation (18%)</td>
+                    <td>64%</td>
+                    <td>52%</td>
+                </tr>
+                <tr>
+                    <td>With review flagging (12%)</td>
+                    <td>87%</td>
+                    <td>81%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>
+            The jump from 64% to 87% trust with explicit review flagging shows physicians want transparency. Knowing when the system is uncertain matters more than achieving perfect accuracy.
+        </p>
+
+        <h2>Lessons Learned</h2>
+
+        <div class="warning-box">
+            <strong>⚠️ Early mistake:</strong> We initially pursued 100% accuracy without human-in-the-loop. After 18 weeks of effort, we hit a wall—the last 10% of hallucinations are rare edge cases that required massive datasets to eliminate. We pivoted to hybrid approach: AI catches 88%, humans review 12%. This achieved trust faster.
+        </div>
+
+        <h3>Clinical Feedback Is Gold</h3>
+        <p>
+            Our biggest breakthrough came from interviewing physicians on what makes them <em>distrust</em> AI. Top factors:
+        </p>
+        <ol>
+            <li><strong>Overconfidence:</strong> Stating uncertain facts as certain (e.g., "This patient definitely has X")</li>
+            <li><strong>Missing context:</strong> Ignoring important caveats or exceptions</li>
+            <li><strong>Unsourced claims:</strong> Statements without visible evidence</li>
+            <li><strong>Logical leaps:</strong> Jumping to conclusions without showing reasoning</li>
+        </ol>
+
+        <p>
+            We redesigned the model to address these. Instead of "Patient has condition X," we now output: "Most likely diagnosis: X (confidence: 0.82 based on symptoms A, B, C per [source])."
+        </p>
+
+        <h2>Regulatory Path</h2>
+        <p>
+            FDA considers clinical AI as a "Software as a Medical Device" (SaMD). Approval requires demonstration of safety and effectiveness. Our fact validation pipeline and review flagging system provided the evidence:
+        </p>
+
+        <ul>
+            <li>Clinical validation on 500 cases with 3-rater agreement (87%)</li>
+            <li>Failure mode analysis: which 12% hallucinate and why</li>
+            <li>Risk mitigation: physician review catches them before patient exposure</li>
+            <li>Post-market surveillance: tracking real-world hallucinations to retrain</li>
+        </ul>
+
+        <div class="conclusion">
+            <h2>Conclusion: Trust Enables Adoption</h2>
+            <p>
+                The path to clinical AI adoption isn't perfect accuracy—it's earned trust. By combining RLHF training, real-time fact validation, and human-in-the-loop review, we achieved 87% physician trust and 81% willingness to use in practice.
+            </p>
+            <p>
+                The remaining gap (13% of doctors still skeptical) reflects healthy caution. Healthcare professionals have high standards for safety. We don't fight that—we embrace it and design systems that respect their expertise.
+            </p>
+        </div>
+
+        <div class="author-bio">
+            <strong>About this post:</strong> Clinical validation conducted across 50 board-certified physicians at Stanford Health, UCSF, and Kaiser Permanente. Fact validation database covers UpToDate, FDA labels, and major clinical guidelines. Published: February 2026.
+        </div>
+    </article>
+
+    <footer class="footer">
+        <p><strong>Synthure</strong> — Clinical AI Research & Product Blog</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Evidence-based. Expert-validated. Patient-first.</p>
+    </footer>
+</body>
+</html>

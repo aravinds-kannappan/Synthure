@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub-2s Inference: CUDA Optimization at Scale | Synthure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --accent-dark: #1e40af;
+            --accent-light: #60a5fa;
+            --success: #10b981;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-light: #f9fafb;
+        }
+        body {
+            font-family: 'Merriweather', serif;
+            color: var(--text-primary);
+            line-height: 1.8;
+            background: white;
+        }
+        .nav-bar {
+            background: var(--primary);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .logo { color: white; font-weight: bold; font-size: 1.5rem; text-decoration: none; }
+        .nav-bar a { color: #cbd5e1; text-decoration: none; margin: 0 1.5rem; font-family: 'Inter', sans-serif; }
+        .nav-bar a:hover { color: var(--accent-light); }
+        .article-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 6rem 5% 4rem;
+        }
+        .article-header {
+            margin-bottom: 4rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 2rem;
+        }
+        .article-meta {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.2; color: var(--primary); }
+        .article-subtitle { font-size: 1.3rem; color: var(--text-secondary); font-style: italic; font-weight: 400; }
+        h2 {
+            font-size: 2rem;
+            margin: 3rem 0 1.5rem;
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+            padding-left: 1.5rem;
+        }
+        h3 { font-size: 1.5rem; margin: 2.5rem 0 1rem; color: var(--accent-dark); }
+        p { margin-bottom: 1.5rem; text-align: justify; }
+        .code-block {
+            background: var(--primary);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--success);
+            line-height: 1.6;
+        }
+        .math-block {
+            background: var(--bg-light);
+            border: 2px solid #e5e7eb;
+            border-left: 4px solid var(--accent);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            overflow-x: auto;
+        }
+        .highlight {
+            background: linear-gradient(120deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            margin: 2rem 0;
+        }
+        .metric-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s;
+        }
+        .metric-card:hover { border-color: var(--accent); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15); }
+        .metric-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .visualization {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .conclusion {
+            background: linear-gradient(135deg, var(--primary), var(--accent-dark));
+            color: white;
+            padding: 3rem;
+            border-radius: 12px;
+            margin: 4rem 0 2rem;
+        }
+        .conclusion h2 { color: white; border-left: 4px solid var(--accent-light); }
+        .footer { background: var(--primary); color: #94a3b8; padding: 3rem 5%; text-align: center; margin-top: 4rem; }
+        .author-bio {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 3rem 0;
+            border-left: 4px solid var(--accent);
+        }
+        ul, ol { margin: 1.5rem 0 1.5rem 2rem; }
+        li { margin: 0.8rem 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        th { background: var(--primary); color: white; padding: 1rem; text-align: left; font-weight: 600; font-family: 'Inter', sans-serif; }
+        td { padding: 1rem; border-bottom: 1px solid #e5e7eb; }
+        tr:nth-child(even) { background: var(--bg-light); }
+        em { color: var(--accent-dark); font-style: italic; }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="index.html" class="logo">Synthure</a>
+        <div>
+            <a href="blog.html">← Back to Blog</a>
+        </div>
+    </nav>
+
+    <article class="article-container">
+        <header class="article-header">
+            <div class="article-meta">Infrastructure • 11 min read</div>
+            <h1>Sub-2s Inference: CUDA Optimization at Scale</h1>
+            <p class="article-subtitle">How we achieved &lt;1.8s P95 latency with vLLM, custom CUDA kernels, and GPU cluster orchestration. Engineering clinical response times for production healthcare.</p>
+        </header>
+
+        <h2>Why Latency Matters in Healthcare</h2>
+        <p>
+            In consumer applications, a 5-second API response is acceptable. In healthcare, it's a problem. When a clinician is standing at a patient's bedside, every second counts. A 10-second delay to see a plain-language translation of the patient's diagnosis creates friction that discourages adoption. At Synthure, we set an ambitious target: <strong>sub-2 second inference (P95) for end-to-end translation</strong>.
+        </p>
+        <p>
+            This required optimizing at every level: model quantization, kernel fusion, batch scheduling, and cluster-level resource management. We went from a naive baseline of 8.2 seconds to 1.8 seconds—a 4.5x speedup.
+        </p>
+
+        <h2>Baseline: The Naive Approach</h2>
+        <p>
+            We started with a standard setup: 7B parameter model on a single A100 GPU, using PyTorch's default inference.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Baseline</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Latency (P95)</td>
+                    <td>8.2 seconds</td>
+                    <td>512-token input, 256-token output</td>
+                </tr>
+                <tr>
+                    <td>Throughput</td>
+                    <td>12 req/sec</td>
+                    <td>Single GPU, batch size 1</td>
+                </tr>
+                <tr>
+                    <td>GPU Utilization</td>
+                    <td>42%</td>
+                    <td>I/O bound, memory not saturated</td>
+                </tr>
+                <tr>
+                    <td>Cost per request</td>
+                    <td>$0.08</td>
+                    <td>A100 GPU-hour allocation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>
+            The bottleneck was clear: <strong>memory bandwidth</strong>. Language model inference is dominated by loading model weights from GPU memory, not compute. The 7B model has ~14GB of weights, and we were doing this repeatedly for each token generation.
+        </p>
+
+        <h2>Optimization 1: Quantization</h2>
+        <p>
+            Model quantization reduces the precision of weights and activations, trading a small amount of accuracy for dramatic speed improvements. We tested three approaches:
+        </p>
+
+        <h3>INT8 Quantization</h3>
+        <p>
+            Convert float32 weights to int8 (8-bit integers). This reduces model size by 75% and accelerates matrix multiplications via specialized INT8 GEMM kernels.
+        </p>
+
+        <div class="math-block">
+            <strong>Quantization Formula:</strong><br><br>
+            x<sub>quant</sub> = round(x<sub>float</sub> / scale)<br><br>
+            where scale = (max(|x<sub>float</sub>|) / 127)<br><br>
+            Dequantization: x<sub>float</sub> ≈ x<sub>quant</sub> × scale
+        </div>
+
+        <p>
+            Results: 2.8x speedup, but 2.5% accuracy loss on clinical Q&A benchmarks. For patient safety, 2.5% is too risky—we need near-perfect medical accuracy.
+        </p>
+
+        <h3>INT4 + FP16 Hybrid</h3>
+        <p>
+            A compromise: quantize most layers to INT4, keep attention layers in FP16. Reduces model size to 3.5GB while minimizing accuracy loss.
+        </p>
+
+        <p>
+            Results: 3.2x speedup, 0.8% accuracy loss. Better, but still measurable impact on medical reasoning.
+        </p>
+
+        <h3>FP8 Quantization</h3>
+        <p>
+            Use NVIDIA's FP8 format (standardized in H100s, supported via vLLM on A100s). 8-bit floating point maintains better numerical precision than INT8.
+        </p>
+
+        <div class="math-block">
+            FP8 uses 1 sign bit + 4 exponent bits + 3 mantissa bits<br>
+            ~4x memory reduction vs FP32<br>
+            Maintains numerical stability better than INT8
+        </div>
+
+        <p>
+            Results: 2.9x speedup, 0.3% accuracy loss. We chose this as the baseline for further optimization.
+        </p>
+
+        <h2>Optimization 2: vLLM Serving</h2>
+        <p>
+            vLLM is an open-source LLM serving engine that dramatically speeds up inference through two key innovations:
+        </p>
+
+        <h3>Paged Attention</h3>
+        <p>
+            Traditional transformers cache the key-value (KV) states for all previous tokens during generation. For a 256-token output, this creates 256 "attention blocks" of KV cache, which fragment GPU memory.
+        </p>
+
+        <p>
+            vLLM's paged attention divides the KV cache into fixed-size pages (e.g., 16 tokens per page), allowing better memory utilization and reducing fragmentation.
+        </p>
+
+        <div class="highlight">
+            <strong>Impact:</strong> Reduced memory fragmentation from ~40% to ~10%, enabling larger batch sizes and better GPU utilization.
+        </div>
+
+        <h3>Continuous Batching</h3>
+        <p>
+            Instead of waiting for all requests in a batch to complete, vLLM interleaves tokens from multiple requests. If Request A is waiting for token 10 and Request B is on token 5, vLLM can process B's token 5 while A computes token 10 in parallel.
+        </p>
+
+        <div class="code-block">
+# Traditional batching: Wait for slowest request
+# Time: 0 -------- [Request A] -------- [Request B]
+#
+# Continuous batching: Interleave token generation
+# Token 1: [A B C]
+# Token 2: [A B C]  (C finished, new request D replaces C)
+# Token 3: [A B D]
+        </div>
+
+        <p>
+            Switching to vLLM alone improved throughput 2.1x and reduced latency to 3.9 seconds (P95).
+        </p>
+
+        <h2>Optimization 3: Custom CUDA Kernels</h2>
+        <p>
+            Generic operations still had overhead. We wrote custom CUDA kernels for two bottleneck operations:
+        </p>
+
+        <h3>Fused Attention Kernel</h3>
+        <p>
+            Standard attention (Q, K, V tensors) requires 5 GPU kernel launches:
+        </p>
+
+        <div class="code-block">
+attention(Q, K, V):
+  1. S = matmul(Q, K^T) / sqrt(d_k)    # matmul
+  2. S_mask = apply_causal_mask(S)     # elementwise
+  3. P = softmax(S_mask)                # softmax
+  4. O = matmul(P, V)                   # matmul
+  5. return O
+        </div>
+
+        <p>
+            Each kernel launch has overhead. Our fused kernel combines all 5 operations into a single CUDA kernel, eliminating launch overhead and enabling better memory access patterns.
+        </p>
+
+        <div class="math-block">
+            <strong>Fused Attention Complexity:</strong><br><br>
+            Naive: O(n²d) memory reads (Q, K, V loaded separately)<br>
+            Fused: O(n²) memory reads (tiles cached in shared memory)<br><br>
+            Where n = sequence length, d = head dimension
+        </div>
+
+        <p>
+            Results: 1.3x speedup on the attention operation, which is ~40% of total inference time.
+        </p>
+
+        <h3>Quantized MatMul Kernel</h3>
+        <p>
+            For FP8 matrix multiplications, we tuned the CUTLASS library template for our specific tensor shapes (batch_size=128, seq_len=512, d_model=4096).
+        </p>
+
+        <div class="code-block">
+// Tuned matmul: FP8 input, FP32 output
+// M=128, N=4096, K=4096
+using MatMulOp = cutlass::gemm::device::Gemm<
+  cutlass::float8_t,  // element_a
+  cutlass::layout::RowMajor,  // layout_a
+  cutlass::float8_t,  // element_b
+  cutlass::layout::RowMajor,  // layout_b
+  float,  // element_c
+  cutlass::layout::RowMajor,  // layout_c
+  float,  // element_accumulator
+  cutlass::arch::OpMultiplyAddFastF32>;
+        </div>
+
+        <p>
+            Results: 1.2x speedup on matmul, which is ~50% of inference time.
+        </p>
+
+        <h2>End-to-End Optimization Results</h2>
+        <p>
+            Combining all three optimizations:
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+            <div class="metric-card">
+                <div class="metric-label">Latency Reduction</div>
+                <div class="metric-value">4.5x</div>
+                <div>8.2s → 1.8s (P95)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Throughput Increase</div>
+                <div class="metric-value">6.8x</div>
+                <div>12 req/sec → 82 req/sec</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Cost per Request</div>
+                <div class="metric-value">-68%</div>
+                <div>$0.08 → $0.025</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Accuracy Loss</div>
+                <div class="metric-value">0.3%</div>
+                <div>Clinical safety maintained</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Optimization</th>
+                    <th>Speedup</th>
+                    <th>Cumulative</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Baseline (FP32)</td>
+                    <td>1.0x</td>
+                    <td>8.2s</td>
+                </tr>
+                <tr>
+                    <td>FP8 Quantization</td>
+                    <td>2.9x</td>
+                    <td>2.8s</td>
+                </tr>
+                <tr>
+                    <td>vLLM + Paged Attention</td>
+                    <td>1.4x</td>
+                    <td>2.0s</td>
+                </tr>
+                <tr>
+                    <td>Fused Attention Kernel</td>
+                    <td>1.18x</td>
+                    <td>1.7s</td>
+                </tr>
+                <tr>
+                    <td>Quantized MatMul Kernel</td>
+                    <td>1.05x</td>
+                    <td>1.62s</td>
+                </tr>
+                <tr>
+                    <td><strong>Final (P95)</strong></td>
+                    <td><strong>5.0x</strong></td>
+                    <td><strong>1.8s*</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            *P95 accounts for network latency (~100ms) and request queuing. Raw inference is 1.7s.
+        </p>
+
+        <h2>Scaling to Production: Multi-GPU Cluster</h2>
+        <p>
+            Single-GPU inference is fast, but at scale, we need to handle traffic spikes. We deploy across 8x A100 GPUs in a load-balanced cluster:
+        </p>
+
+        <div class="code-block">
+# Synthure Inference Cluster Configuration
+GPU Cluster:
+  - 8x A100 (80GB memory)
+  - 1x Load Balancer (NVIDIA Triton)
+  - Round-robin request distribution
+  - Dynamic batching (group requests arriving within 50ms)
+
+Per-GPU Throughput:
+  - 82 requests/sec (batch-optimized)
+  - 8 GPUs → 656 req/sec cluster capacity
+
+Cost:
+  - $3.06/GPU-hour
+  - 8 GPUs × 24 hours = $588/day
+  - 656 req/sec × 86,400 sec/day = 56.7M req/day
+  - Cost per request: $0.01 (at full capacity)
+        </div>
+
+        <p>
+            In practice, we operate at 40-60% capacity (due to traffic patterns), which puts cost at $0.017-0.025 per request.
+        </p>
+
+        <h2>Latency Under Load</h2>
+        <p>
+            Latency degrades gracefully under load. At 80% cluster utilization, P95 latency increases from 1.8s to 2.1s due to queueing. At 95% utilization, it reaches 3.2s.
+        </p>
+
+        <div class="visualization">
+            <h4>Latency vs. Cluster Utilization</h4>
+            <svg viewBox="0 0 800 400" style="max-width: 100%; height: auto;">
+                <!-- Grid -->
+                <line x1="50" y1="350" x2="750" y2="350" stroke="#e5e7eb" stroke-width="2"/>
+                <line x1="50" y1="50" x2="50" y2="350" stroke="#e5e7eb" stroke-width="2"/>
+                <!-- Grid lines -->
+                <line x1="50" y1="300" x2="750" y2="300" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="50" y1="250" x2="750" y2="250" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="50" y1="200" x2="750" y2="200" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="50" y1="150" x2="750" y2="150" stroke="#f3f4f6" stroke-width="1"/>
+                <line x1="50" y1="100" x2="750" y2="100" stroke="#f3f4f6" stroke-width="1"/>
+                <!-- Axes labels -->
+                <text x="30" y="305" font-size="12" fill="#6b7280">0s</text>
+                <text x="20" y="255" font-size="12" fill="#6b7280">1s</text>
+                <text x="20" y="205" font-size="12" fill="#6b7280">2s</text>
+                <text x="20" y="155" font-size="12" fill="#6b7280">3s</text>
+                <text x="20" y="105" font-size="12" fill="#6b7280">4s</text>
+                <text x="350" y="390" font-size="14" fill="#1f2937" font-weight="600" text-anchor="middle">Cluster Utilization (%)</text>
+                <text x="15" y="200" font-size="14" fill="#1f2937" font-weight="600" transform="rotate(-90 15 200)">P95 Latency</text>
+                <!-- Curve -->
+                <path d="M 70 285 Q 200 280 350 260 T 750 100" stroke="#3b82f6" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <!-- Points -->
+                <circle cx="70" cy="285" r="4" fill="#10b981"/>
+                <text x="80" y="280" font-size="11" fill="#10b981">20%: 1.8s</text>
+                <circle cx="350" cy="260" r="4" fill="#f59e0b"/>
+                <text x="360" y="255" font-size="11" fill="#f59e0b">60%: 2.1s</text>
+                <circle cx="750" cy="100" r="4" fill="#ef4444"/>
+                <text x="690" y="95" font-size="11" fill="#ef4444">95%: 3.2s</text>
+            </svg>
+        </div>
+
+        <h2>Real-World Deployment: Lessons Learned</h2>
+        <p>
+            Theory met practice when we deployed to production. Key insights:
+        </p>
+
+        <h3>Network Latency Dominates at Scale</h3>
+        <p>
+            We achieved 1.8s P95 latency, but production APIs added network overhead. API request → load balancer → GPU cluster → response takes ~200-300ms at P95. Our target shifted from 1.8s inference to 2.0s end-to-end.
+        </p>
+
+        <h3>Batch Size Tuning is Delicate</h3>
+        <p>
+            We set batch size to 128 for optimal GPU utilization. But during quiet hours, requests arrive slowly, and holding a request for 50ms (to batch) violates our latency target. Solution: dynamic batch size based on arrival rate.
+        </p>
+
+        <h3>Quantization Affects Edge Cases</h3>
+        <p>
+            FP8 quantization introduced rare (0.3%) accuracy losses. Most were benign (slightly different phrasing), but 1-2 patients saw the model hesitate on complex drug interactions. We added a fallback: if confidence &lt; 0.85, re-run in FP32 (costs 3s but guarantees accuracy).
+        </p>
+
+        <div class="conclusion">
+            <h2>Conclusion: Performance Enables Adoption</h2>
+            <p>
+                Sub-2 second inference isn't just a nice-to-have. In clinical settings, it's the difference between a tool clinicians use and one they ignore. By combining quantization, vLLM's paged attention, and custom CUDA kernels, we achieved 4.5x speedup while maintaining 99.7% accuracy.
+            </p>
+            <p>
+                The real lesson: infrastructure optimization is inseparable from product success. Every 100ms we save is a doctor who spends less time waiting and more time with patients.
+            </p>
+        </div>
+
+        <div class="author-bio">
+            <strong>About this post:</strong> This technical deep dive reflects 6 months of infrastructure optimization at Synthure, from initial profiling to production deployment. CUDA kernel code was written using NVIDIA's CUTLASS library. vLLM integration tested with PyTorch 2.1 and CUDA 12.1. Published: February 2026.
+        </div>
+    </article>
+
+    <footer class="footer">
+        <p><strong>Synthure</strong> — Clinical AI Research & Product Blog</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Evidence-based. Expert-validated. Patient-first.</p>
+    </footer>
+</body>
+</html>
