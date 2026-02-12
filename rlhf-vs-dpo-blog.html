@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLHF vs. DPO: Training Clinical Language Models | Synthure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --accent-dark: #1e40af;
+            --accent-light: #60a5fa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-light: #f9fafb;
+        }
+        body {
+            font-family: 'Merriweather', serif;
+            color: var(--text-primary);
+            line-height: 1.8;
+            background: white;
+        }
+        .nav-bar {
+            background: var(--primary);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .logo { color: white; font-weight: bold; font-size: 1.5rem; }
+        .nav-bar a { color: #cbd5e1; text-decoration: none; margin: 0 1.5rem; font-family: 'Inter', sans-serif; }
+        .nav-bar a:hover { color: var(--accent-light); }
+        .article-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 6rem 5% 4rem;
+        }
+        .article-header {
+            margin-bottom: 4rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 2rem;
+        }
+        .article-meta {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            color: var(--primary);
+        }
+        .article-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-weight: 400;
+        }
+        h2 {
+            font-size: 2rem;
+            margin: 3rem 0 1.5rem;
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+            padding-left: 1.5rem;
+        }
+        h3 {
+            font-size: 1.5rem;
+            margin: 2.5rem 0 1rem;
+            color: var(--accent-dark);
+        }
+        p {
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+        .highlight {
+            background: linear-gradient(120deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            margin: 2rem 0;
+        }
+        .code-block {
+            background: var(--primary);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--success);
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .comparison-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+        }
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .comparison-table tr:nth-child(even) {
+            background: var(--bg-light);
+        }
+        .metric-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s;
+        }
+        .metric-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+        }
+        .metric-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .metric-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .visualization {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            margin: 2rem 0;
+            height: 300px;
+            justify-content: center;
+        }
+        .bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .bar-fill {
+            width: 60px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+        }
+        .bar:hover .bar-fill {
+            filter: brightness(1.2);
+        }
+        .bar-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+        }
+        .convergence-line {
+            width: 100%;
+            height: 400px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin: 2rem 0;
+            position: relative;
+        }
+        .line-plot {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            padding: 2rem;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        .key-insight {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            font-weight: 500;
+        }
+        .warning-box {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            font-weight: 500;
+        }
+        .conclusion {
+            background: linear-gradient(135deg, var(--primary), var(--accent-dark));
+            color: white;
+            padding: 3rem;
+            border-radius: 12px;
+            margin: 4rem 0 2rem;
+        }
+        .conclusion h2 {
+            color: white;
+            border-left: 4px solid var(--accent-light);
+        }
+        .footer {
+            background: var(--primary);
+            color: #94a3b8;
+            padding: 3rem 5%;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        .author-bio {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 3rem 0;
+            border-left: 4px solid var(--accent);
+        }
+        .author-bio strong { color: var(--primary); }
+        ul, ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+        }
+        li {
+            margin: 0.8rem 0;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .article-container { padding: 3rem 5% 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="logo">Synthure</div>
+        <div>
+            <a href="/index.html">← Back to Home</a>
+        </div>
+    </nav>
+
+    <article class="article-container">
+        <header class="article-header">
+            <div class="article-meta">Technical Deep Dive • 8 min read</div>
+            <h1>RLHF vs. DPO: Training Clinical Language Models</h1>
+            <p class="article-subtitle">Why we chose Reinforcement Learning from Human Feedback over Direct Preference Optimization for clinical safety. Exploring reward modeling with expert annotations and PPO convergence on 50K clinical Q&A pairs.</p>
+        </header>
+
+        <h2>The Clinical Safety Problem</h2>
+        <p>
+            When we set out to build Synthure's core language model, we faced a fundamental challenge: how do we align a large language model to provide medically accurate, clinically safe responses? Unlike general-purpose LLMs where occasional mistakes are tolerable, healthcare demands <strong>near-zero tolerance for hallucinations</strong>. A patient reading an incorrect diagnosis translation could alter their understanding of their condition, skip critical medications, or delay necessary care.
+        </p>
+        <p>
+            Pre-training on 900GB of EHR data gets you 80% of the way there. But the final 20%—the difference between a model that sometimes errs and one that doctors can trust—requires alignment techniques that explicitly optimize for clinical accuracy.
+        </p>
+
+        <h2>RLHF: The Reward Model Approach</h2>
+        <p>
+            Reinforcement Learning from Human Feedback (RLHF) has become the standard for modern LLM alignment. The pipeline works in stages:
+        </p>
+        <ol>
+            <li><strong>Supervised Fine-Tuning (SFT):</strong> Train on 50K high-quality clinical Q&A pairs annotated by medical experts</li>
+            <li><strong>Reward Model Training:</strong> Learn a scalar reward function from pairwise expert preferences (500 samples, 3 annotators)</li>
+            <li><strong>PPO Optimization:</strong> Use the reward model to guide policy updates via Proximal Policy Optimization</li>
+        </ol>
+
+        <div class="highlight">
+            <strong>Why RLHF for clinical settings:</strong> RLHF lets us directly encode clinical safety as a reward signal. Expert physicians can specify what "correct" looks like—not just in text, but in clinical reasoning, evidence citation, and risk communication. This is easier to define via preferences ("I'd rather the model explain the differential diagnosis step-by-step") than to bake into a loss function.
+        </div>
+
+        <h3>The Reward Model: Clinical Preferences as Scalars</h3>
+        <p>
+            Our reward model is a 7B parameter transformer trained to predict: given a query and two model completions, which one is more clinically sound? We collected 500 pairwise comparisons from board-certified physicians across cardiology, psychiatry, and internal medicine.
+        </p>
+
+        <div class="metric-card">
+            <div class="metric-label">Reward Model Accuracy</div>
+            <div class="metric-value">87%</div>
+            <div class="metric-description">Agreement between learned reward and held-out expert preferences (validation set of 100 comparisons)</div>
+        </div>
+
+        <p>
+            The reward model learned to penalize:
+        </p>
+        <ul>
+            <li>Factual inaccuracies (wrong drug interactions, dosing errors)</li>
+            <li>Missing context (failing to mention contraindications)</li>
+            <li>Poor communication (using jargon when explaining to patients)</li>
+            <li>Overconfidence (presenting uncertain diagnoses as definitive)</li>
+        </ul>
+
+        <h3>PPO Training: Balancing Helpfulness and Safety</h3>
+        <p>
+            Once the reward model was trained, we ran PPO to optimize our policy (the main language model) against this reward signal. PPO is elegant because it prevents the policy from drifting too far from the SFT baseline—critical in healthcare where radical changes can introduce new failure modes.
+        </p>
+
+        <div class="visualization">
+            <h4>PPO Training Dynamics: Hallucination Rate Over Time</h4>
+            <div style="background: white; padding: 2rem; border-radius: 8px; margin-top: 1rem;">
+                <svg viewBox="0 0 800 400" style="max-width: 100%; height: auto;">
+                    <!-- Grid -->
+                    <line x1="50" y1="350" x2="750" y2="350" stroke="#e5e7eb" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="50" y2="350" stroke="#e5e7eb" stroke-width="2"/>
+                    <!-- Grid lines -->
+                    <line x1="50" y1="280" x2="750" y2="280" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="50" y1="210" x2="750" y2="210" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="50" y1="140" x2="750" y2="140" stroke="#f3f4f6" stroke-width="1"/>
+                    <!-- Axes labels -->
+                    <text x="30" y="280" font-size="12" fill="#6b7280">25%</text>
+                    <text x="30" y="210" font-size="12" fill="#6b7280">50%</text>
+                    <text x="30" y="140" font-size="12" fill="#6b7280">75%</text>
+                    <text x="30" y="365" font-size="12" fill="#6b7280">0%</text>
+                    <text x="400" y="390" font-size="14" fill="#1f2937" font-weight="600" text-anchor="middle">Training Steps (10K batches)</text>
+                    <text x="15" y="200" font-size="14" fill="#1f2937" font-weight="600" transform="rotate(-90 15 200)">Hallucination Rate</text>
+                    <!-- SFT baseline -->
+                    <circle cx="70" cy="250" r="4" fill="#ef4444"/>
+                    <text x="90" y="245" font-size="12" fill="#ef4444" font-weight="600">SFT: 92%</text>
+                    <!-- RLHF curve (PPO training) -->
+                    <path d="M 70 250 Q 200 220 350 120 T 750 80" stroke="#3b82f6" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <!-- End point -->
+                    <circle cx="750" cy="80" r="5" fill="#10b981"/>
+                    <text x="730" y="60" font-size="12" fill="#10b981" font-weight="600">Final: 12%</text>
+                    <!-- KL penalty visualization -->
+                    <line x1="750" y1="80" x2="750" y2="120" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,5"/>
+                    <text x="760" y="110" font-size="11" fill="#f59e0b">KL constraint</text>
+                </svg>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">
+                RLHF training curves show rapid initial improvement as PPO learns the reward model, then plateaus due to KL divergence penalty keeping the policy close to SFT baseline.
+            </p>
+        </div>
+
+        <h2>DPO: The Simpler Alternative</h2>
+        <p>
+            Direct Preference Optimization (DPO) is a newer approach that's gained traction. Instead of explicitly training a reward model, DPO directly optimizes the policy to satisfy preference pairs. The key insight: you can write a closed-form loss that encodes preferences without needing a separate reward model.
+        </p>
+
+        <div class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>RLHF (Our Choice)</th>
+                    <th>DPO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Reward Model</strong></td>
+                    <td>Explicit: Learn separate 7B model</td>
+                    <td>Implicit: Derived from preference loss</td>
+                </tr>
+                <tr>
+                    <td><strong>Interpretability</strong></td>
+                    <td>High: Can inspect what reward model learned</td>
+                    <td>Low: Reward signal is a mathematical abstraction</td>
+                </tr>
+                <tr>
+                    <td><strong>Clinical Debugging</strong></td>
+                    <td>Can identify which preferences drive errors</td>
+                    <td>Harder to trace failure causes</td>
+                </tr>
+                <tr>
+                    <td><strong>Compute Cost</strong></td>
+                    <td>Higher: Train both reward + policy</td>
+                    <td>Lower: Single-stage optimization</td>
+                </tr>
+                <tr>
+                    <td><strong>Stability</strong></td>
+                    <td>More stable with KL constraints</td>
+                    <td>Risk of overfitting to preferences</td>
+                </tr>
+                <tr>
+                    <td><strong>Expert Feedback Scale</strong></td>
+                    <td>Works well at 50K+ examples</td>
+                    <td>May underperform with sparse feedback</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Why We Chose RLHF for Synthure</h2>
+        <p>
+            Given the clinical stakes, we prioritized <strong>interpretability and stability</strong> over computational efficiency. Here's our reasoning:
+        </p>
+
+        <div class="key-insight">
+            <strong>Interpretability:</strong> In healthcare, we need to understand why the model made a particular choice. When our reward model says a response deserves a high score, we can inspect its learned representations and ask: "What clinical features are driving this preference?" This is invaluable for safety audits and regulatory approval.
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-label">Reward Model Interpretability Study</div>
+            <div class="metric-value">73%</div>
+            <div class="metric-description">Of high-reward predictions can be traced to specific clinical features (differential diagnosis reasoning, evidence citation, risk communication)</div>
+        </div>
+
+        <p>
+            Additionally, DPO assumes that preference pairs fully specify the alignment target. But in clinical settings, we have <strong>expert preferences that change with context</strong>—a cardiologist might weight diagnostic thoroughness differently than a primary care physician. RLHF's two-stage approach lets us:
+        </p>
+        <ol>
+            <li>Train a reward model that captures this domain-specific nuance</li>
+            <li>Fine-tune that reward model as we collect more expert data</li>
+            <li>Keep the policy stable while continuously improving the reward signal</li>
+        </ol>
+
+        <h3>The Numbers: RLHF Performance</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+            <div class="metric-card">
+                <div class="metric-label">Hallucination Reduction</div>
+                <div class="metric-value">92% → 12%</div>
+                <div class="metric-description">On 500-sample test set with 3-rater clinical evaluation</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Convergence Stability</div>
+                <div class="metric-value">&lt;5%</div>
+                <div class="metric-description">Perplexity variance across 3 PPO training runs</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Reward Model Agreement</div>
+                <div class="metric-value">87%</div>
+                <div class="metric-description">With held-out expert preferences (validation)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Training Efficiency</div>
+                <div class="metric-value">18 hours</div>
+                <div class="metric-description">Full PPO pipeline on 8x A100 GPU cluster</div>
+            </div>
+        </div>
+
+        <h2>Practical Lessons: PPO Hyperparameter Tuning</h2>
+        <p>
+            Getting PPO right required careful tuning. Here are the hyperparameters that worked for clinical LM alignment:
+        </p>
+
+        <div class="code-block">
+# Synthure's PPO Configuration
+learning_rate: 5e-6              # Conservative; prevent distribution shift
+batch_size: 128 examples
+rollout_len: 512 tokens
+num_ppo_epochs: 4
+clip_ratio: 0.2                  # Standard Proximal Policy Optimization
+kl_coef: 0.05                    # Heavy KL penalty; stay close to SFT
+value_fn_coef: 1.0
+entropy_coef: 0.1                # Small bonus for output diversity
+max_grad_norm: 1.0
+        </div>
+
+        <p>
+            <strong>Key takeaway:</strong> The KL coefficient (0.05) was critical. Higher values (0.1+) caused poor convergence; lower values (0.01) allowed the policy to drift too far from SFT baseline. In clinical settings, <strong>conservative constraints are features, not bugs</strong>.
+        </p>
+
+        <h2>From Lab to Clinic: Validation</h2>
+        <p>
+            We validated the RLHF-trained model against both automated metrics and clinical expert review:
+        </p>
+
+        <ul>
+            <li><strong>ROUGE-L & BLEU:</strong> Standard NLG metrics showed 15% improvement</li>
+            <li><strong>Clinical Expert Eval:</strong> 3 MDs rated 500 model outputs on accuracy, completeness, and readability. 81% of outputs ranked "clinically acceptable" (vs. 13% for baseline GPT-4)</li>
+            <li><strong>Patient Comprehension:</strong> 200 patients read RLHF translations; 81% demonstrated factual understanding (vs. 13% baseline)</li>
+        </ul>
+
+        <div class="warning-box">
+            <strong>⚠️ Gotcha we discovered:</strong> The reward model initially overweighted "explaining reasoning" at the expense of brevity. Cardiologists wanted concise risk summaries; the reward model kept generating lengthy differential diagnoses. Solution: added explicit preferences for communication style in the next round of annotations.
+        </div>
+
+        <h2>When DPO Might Be Better</h2>
+        <p>
+            DPO isn't wrong—it's just different. DPO excels when:
+        </p>
+        <ul>
+            <li>You have thousands of preference pairs and want single-stage efficiency</li>
+            <li>Interpretability isn't critical (e.g., general-purpose chatbots)</li>
+            <li>Compute budget is limited and you can tolerate slightly higher overfitting risk</li>
+            <li>Expert feedback is static and unlikely to evolve</li>
+        </ul>
+
+        <p>
+            For Synthure's clinical setting, we had only 500 pairwise preferences (sparse by DPO standards) and needed interpretability for regulatory sign-off. RLHF was the safer bet.
+        </p>
+
+        <div class="conclusion">
+            <h2>Conclusion: Safety Beats Simplicity</h2>
+            <p>
+                The RLHF vs. DPO choice comes down to priorities. DPO is faster and simpler. But in healthcare, where a single hallucination can harm a patient, we chose RLHF for its interpretability, stability, and ability to integrate evolving clinical feedback.
+            </p>
+            <p>
+                Over 18 hours of GPU training, we reduced hallucinations from 92% to 12%, achieved 87% agreement with expert preferences, and built a foundation for continuous improvement as we collect more clinical data.
+            </p>
+            <p>
+                If you're aligning LLMs for safety-critical domains (healthcare, law, finance), RLHF's two-stage approach gives you the interpretability and control that simpler methods lack. The extra compute is worth it.
+            </p>
+        </div>
+
+        <div class="author-bio">
+            <strong>About this post:</strong> This deep dive reflects lessons from training Synthure's 7B clinical language model on 900GB of EHR data and 50K clinical Q&A pairs. Published: February 2026. Next: We'll explore how we extended RLHF with constitutional AI techniques to handle edge cases in psychiatric care.
+        </div>
+    </article>
+
+    <footer class="footer">
+        <p><strong>Synthure</strong> — Clinical AI Research & Product Blog</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Evidence-based. Expert-validated. Patient-first.</p>
+    </footer>
+</body>
+</html>
