@@ -8,848 +8,321 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary: #0f172a;
             --accent: #3b82f6;
             --accent-dark: #1e40af;
             --accent-light: #60a5fa;
             --bg-light: #f8fafc;
-            --bg-mid: #e2e8f0;
             --text-primary: #0f172a;
             --text-secondary: #475569;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Main content container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1.5rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
-            z-index: 1000;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        .logo svg {
-            width: 36px;
-            height: 36px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 3rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-light);
-        }
-
-        .nav-cta {
-            padding: 0.7rem 1.8rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .nav-cta:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-
-        /* Hero Section */
-        .hero {
-            padding-top: 12rem;
-            padding-bottom: 8rem;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #0f172a 0%, #1a2849 50%, #0f172a 100%);
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: float 8s ease-in-out infinite;
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: -10%;
-            left: -10%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: float-reverse 10s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(40px); }
-        }
-
-        @keyframes float-reverse {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-40px); }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 950px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .hero h1 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 4rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.8rem;
-            color: white;
-            letter-spacing: -1px;
-            animation: slideInUp 0.8s ease-out;
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero-subtitle {
-            font-size: 1.35rem;
-            color: #cbd5e1;
-            max-width: 700px;
-            margin-bottom: 3rem;
-            line-height: 1.8;
-            animation: slideInUp 0.8s ease-out 0.15s both;
-        }
-
-        .hero-cta {
-            display: flex;
-            gap: 1.5rem;
-            animation: slideInUp 0.8s ease-out 0.3s both;
-        }
-
-        .btn {
-            padding: 1rem 2.2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid var(--accent-light);
-            color: var(--accent-light);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(59, 130, 246, 0.1);
-            transform: translateY(-3px);
-        }
-
-        /* Features Section */
-        .features {
-            padding: 10rem 5%;
-            background: var(--bg-light);
-            position: relative;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 6rem;
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .section-header h2 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .section-header p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 3rem;
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), #8b5cf6);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent);
-            box-shadow: 0 16px 40px rgba(59, 130, 246, 0.15);
-        }
-
-        .feature-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-
-        .feature-card h3 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 1.3rem;
-            margin-bottom: 0.8rem;
-            color: var(--primary);
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-
-        /* Stats Section */
-        .stats {
-            padding: 8rem 5%;
-            background: linear-gradient(135deg, var(--accent-dark) 0%, #1e3a99 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stats::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-        }
-
-        .stats-content {
-            position: relative;
-            z-index: 2;
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .stats-header {
-            color: white;
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .stats-header h2 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 3rem;
-        }
-
-        .stat-item {
-            text-align: center;
-            color: white;
-        }
-
-        .stat-number {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        /* Waitlist Section */
-        .waitlist {
-            padding: 10rem 5%;
-            background: var(--bg-light);
-            position: relative;
-        }
-
-        .waitlist-container {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: center;
-            padding: 0 2rem;
-        }
-
-        .waitlist h2 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: 2.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-
-        .waitlist p {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 3rem;
-            line-height: 1.8;
-        }
-
-        .waitlist-form {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            border: 2px solid transparent;
-            transition: all 0.4s;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        }
-
-        .waitlist-form:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.2);
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.6rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.9rem 1.2rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: #f0f7ff;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .waitlist-submit {
-            width: 100%;
-            padding: 1rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .waitlist-submit:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-
-        .waitlist-submit:active {
-            transform: translateY(0);
-        }
-
-        .form-note {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-top: 1rem;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--primary);
-            color: #94a3b8;
-            padding: 4rem 5%;
-            text-align: center;
-            border-top: 1px solid rgba(59, 130, 246, 0.1);
-        }
-
-        footer p {
-            margin: 0.5rem 0;
-        }
-
-        .footer-links {
-            margin-top: 2rem;
-            display: flex;
-            justify-content: center;
-            gap: 2.5rem;
-        }
-
-        .footer-links a {
-            color: #94a3b8;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-light);
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .hero h1 { font-size: 3.2rem; }
-            .hero-subtitle { font-size: 1.2rem; }
-            .features-grid { grid-template-columns: repeat(2, 1fr); }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
+        body { font-family: 'Inter', sans-serif; background: var(--primary); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; }
+        nav { position: fixed; top: 0; width: 100%; padding: 1.5rem 5%; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(59, 130, 246, 0.15); z-index: 1000; }
+        .logo { display: flex; align-items: center; gap: 0.8rem; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.6rem; font-weight: 700; color: white; }
+        .nav-links { display: flex; gap: 3rem; align-items: center; }
+        .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; transition: color 0.3s; font-size: 0.95rem; }
+        .nav-links a:hover { color: var(--accent-light); }
+        .nav-cta { padding: 0.7rem 1.8rem; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .nav-cta:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3); }
+        .hero { padding-top: 12rem; padding-bottom: 8rem; position: relative; overflow: hidden; background: linear-gradient(135deg, #0f172a 0%, #1a2849 50%, #0f172a 100%); }
+        .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 800px; height: 800px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%); border-radius: 50%; animation: float 8s ease-in-out infinite; }
+        .hero::after { content: ''; position: absolute; bottom: -10%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%); border-radius: 50%; animation: float-reverse 10s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(40px); } }
+        @keyframes float-reverse { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-40px); } }
+        .hero-content { position: relative; z-index: 2; max-width: 950px; margin: 0 auto; padding: 0 2rem; }
+        .hero h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.8rem; color: white; animation: slideInUp 0.8s ease-out; }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .hero-subtitle { font-size: 1.35rem; color: #cbd5e1; max-width: 700px; margin-bottom: 3rem; line-height: 1.8; }
+        .hero-cta { display: flex; gap: 1.5rem; }
+        .btn { padding: 1rem 2.2rem; font-size: 1rem; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-dark); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4); }
+        .btn-secondary { background: transparent; border: 2px solid var(--accent-light); color: var(--accent-light); }
+        .btn-secondary:hover { background: rgba(59, 130, 246, 0.1); }
+        .features { padding: 10rem 5%; background: var(--bg-light); }
+        .section-header { text-align: center; margin-bottom: 6rem; max-width: 1000px; margin: 0 auto 6rem; }
+        .section-header h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary); }
+        .section-header p { font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; max-width: 1300px; margin: 0 auto; padding: 0 2rem; }
+        .feature-card { background: white; padding: 2.5rem; border-radius: 16px; border: 1px solid #e2e8f0; transition: all 0.4s; }
+        .feature-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 16px 40px rgba(59, 130, 246, 0.15); }
+        .feature-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .feature-card h3 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.3rem; margin-bottom: 0.8rem; color: var(--primary); }
+        .feature-card p { color: var(--text-secondary); line-height: 1.7; }
+        .stats { padding: 8rem 5%; background: linear-gradient(135deg, var(--accent-dark) 0%, #1e3a99 100%); position: relative; }
+        .stats::before { content: ''; position: absolute; top: -50%; right: -10%; width: 700px; height: 700px; background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%); }
+        .stats-content { position: relative; z-index: 2; max-width: 1300px; margin: 0 auto; padding: 0 2rem; }
+        .stats-header { color: white; text-align: center; margin-bottom: 4rem; }
+        .stats-header h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; margin-bottom: 1rem; }
+        .tech-metric { background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2); text-align: center; color: white; }
+        .tech-metric-value { font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.5rem; font-weight: 800; color: var(--accent-light); margin-bottom: 0.5rem; }
+        .tech-metric-label { font-size: 0.9rem; opacity: 0.85; line-height: 1.5; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .metric-section { margin-top: 4rem; }
+        .metric-section h3 { color: var(--accent-light); font-size: 1.8rem; margin-bottom: 2rem; text-align: center; font-family: 'Bricolage Grotesque', sans-serif; }
+        .waitlist { padding: 10rem 5%; background: var(--bg-light); }
+        .waitlist-container { max-width: 600px; margin: 0 auto; text-align: center; padding: 0 2rem; }
+        .waitlist h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; margin-bottom: 1.5rem; color: var(--primary); }
+        .waitlist p { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 3rem; line-height: 1.8; }
+        .waitlist-form { background: white; padding: 2.5rem; border-radius: 16px; border: 2px solid transparent; transition: all 0.4s; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.6rem; font-weight: 500; color: var(--text-primary); }
+        .form-group input { width: 100%; padding: 0.9rem 1.2rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: var(--accent); background: #f0f7ff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .waitlist-submit { width: 100%; padding: 1rem; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+        .waitlist-submit:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3); }
+        .form-note { font-size: 0.85rem; color: #94a3b8; margin-top: 1rem; }
+        footer { background: var(--primary); color: #94a3b8; padding: 4rem 5%; text-align: center; border-top: 1px solid rgba(59, 130, 246, 0.1); }
+        footer p { margin: 0.5rem 0; }
+        .footer-links { margin-top: 2rem; display: flex; justify-content: center; gap: 2.5rem; }
+        .footer-links a { color: #94a3b8; text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--accent-light); }
         @media (max-width: 768px) {
-            nav {
-                padding: 1.2rem 4%;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .hero {
-                padding-top: 10rem;
-                padding-bottom: 6rem;
-            }
-
-            .hero h1 {
-                font-size: 2.2rem;
-                margin-bottom: 1.2rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-                margin-bottom: 2rem;
-            }
-
-            .hero-cta {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .btn {
-                width: 100%;
-                padding: 0.9rem 2rem;
-            }
-
-            section {
-                padding: 6rem 4% 5rem;
-            }
-
-            .section-header h2 {
-                font-size: 2rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                padding: 0;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 2.5rem;
-            }
-
-            .stats-content {
-                padding: 0;
-            }
-
-            .waitlist h2 {
-                font-size: 2rem;
-            }
-
-            .waitlist-container {
-                padding: 0;
-            }
-
-            .hero-content {
-                padding: 0;
-            }
-
-            .nav-cta {
-                padding: 0.6rem 1.4rem;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            nav {
-                padding: 1rem 3%;
-            }
-
-            .logo {
-                font-size: 1.4rem;
-            }
-
-            .logo svg {
-                width: 30px;
-                height: 30px;
-            }
-
-            .hero h1 {
-                font-size: 1.8rem;
-                line-height: 1.2;
-            }
-
-            .hero-subtitle {
-                font-size: 0.95rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .section-header h2 {
-                font-size: 1.6rem;
-            }
-
-            .feature-card {
-                padding: 1.5rem;
-            }
-
-            .feature-icon {
-                width: 48px;
-                height: 48px;
-                font-size: 1.6rem;
-            }
-
-            section {
-                padding: 4rem 3% 3rem;
-            }
-
-            .stats-header h2 {
-                font-size: 1.8rem;
-            }
-
-            .stat-number {
-                font-size: 2.5rem;
-            }
-
-            .stat-label {
-                font-size: 0.9rem;
-            }
-
-            .waitlist h2 {
-                font-size: 1.6rem;
-            }
-
-            .waitlist-form {
-                padding: 1.5rem;
-            }
-
-            .form-group {
-                margin-bottom: 1rem;
-            }
-
-            .form-group input {
-                padding: 0.8rem 1rem;
-                font-size: 16px;
-            }
-
-            .btn {
-                padding: 0.8rem 1.5rem;
-                font-size: 0.95rem;
-            }
-
-            footer {
-                padding: 3rem 3%;
-            }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.2rem; }
+            .features-grid, .metric-grid { grid-template-columns: 1fr; }
+            section { padding: 6rem 4% 5rem; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Navigation -->
     <nav>
-        <div class="logo">
-            <svg viewBox="0 0 48 48" fill="none">
-                <path d="M24 6 L38 13 L38 27 C38 37 24 43 24 43 C24 43 10 37 10 27 L10 13 L24 6 Z" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6" stroke-width="2.5"/>
-                <circle cx="18" cy="20" r="4" fill="#60a5fa"/>
-                <circle cx="30" cy="20" r="4" fill="#60a5fa"/>
-                <circle cx="24" cy="32" r="4" fill="#60a5fa"/>
-                <circle cx="24" cy="24" r="6" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.8"/>
-            </svg>
-            Synthure
-        </div>
+        <div class="logo">Synthure</div>
         <div class="nav-links">
             <a href="#features">Features</a>
-            <a href="#stats">Algorithm</a>
-            <a href="#blog">Blog</a>
+            <a href="#tech">Technology</a>
             <a href="#waitlist">Join</a>
         </div>
         <button class="nav-cta">Early Access</button>
     </nav>
 
-    <!-- Hero -->
     <section class="hero">
         <div class="hero-content">
             <h1>Your health, in your language.</h1>
             <p class="hero-subtitle">
-                Stop reading medical jargon. Synthure translates complex clinical notes into clear, personal narratives. Understand your diagnosis. Answer smart questions. Own your health journey.
+                Stop reading medical jargon. Synthure translates complex clinical notes into clear, personal narratives. Understand your diagnosis. Own your health.
             </p>
             <div class="hero-cta">
                 <button class="btn btn-primary">Get Early Access</button>
-                <button class="btn btn-secondary">See How It Works</button>
+                <button class="btn btn-secondary">Learn More</button>
             </div>
         </div>
     </section>
 
-    <!-- Features -->
     <section class="features" id="features">
         <div class="section-header">
             <h2>How It Works</h2>
-            <p>Transforming healthcare for patients and physicians alike.</p>
+            <p>Multi-agent AI system powered by clinical-grade infrastructure and validated outcomes.</p>
         </div>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">📝</div>
                 <h3>Plain Language Notes</h3>
-                <p>Your doctor's notes translated instantly. No medical degree required. Understand exactly what's happening with your health.</p>
+                <p>Doctor's notes translated instantly. Understand exactly what's happening with your health—no medical degree required.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🧠</div>
                 <h3>Smart Patient Questionnaire</h3>
-                <p>Adaptive questions that learn from your answers. Captures what matters to you — symptoms, concerns, social context — before your visit.</p>
+                <p>Adaptive questions learn from your answers. Captures symptoms, concerns, and social context before your visit.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🔄</div>
                 <h3>Continuous Health Narratives</h3>
-                <p>AI-generated summaries of your complete health story. Track patterns. Understand your condition's arc. Share coherently with providers.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🏥</div>
-                <h3>Mental Health Focus</h3>
-                <p>Starting with psychology and behavioral health — where patient understanding impacts outcomes most. Expand to all conditions.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">💡</div>
-                <h3>Safer Visits</h3>
-                <p>Prep before appointments. Better-informed conversations with your care team. Fewer questions about your history.</p>
+                <p>AI-generated summaries of your complete health story. Track patterns and share coherently with providers.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">💰</div>
                 <h3>Coverage Clarity</h3>
-                <p>Bonus: Understand your insurance options and what treatments are covered. One less worry.</p>
+                <p>Understand insurance options and what treatments are covered. One less worry.</p>
             </div>
         </div>
     </section>
 
-    <!-- Video Demo Section -->
-    <section style="padding: 8rem 5%; background: var(--bg-light); text-align: center;">
-        <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; margin-bottom: 3rem; color: var(--primary);">See It In Action</h2>
-        <div id="video-placeholder" onclick="playVideo()" style="max-width: 900px; margin: 0 auto; position: relative; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #0f172a, #1a2849); border-radius: 16px; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 16px 48px rgba(59, 130, 246, 0.2); transition: all 0.3s; hover: transform translate(0, -4px); box-shadow: 0 20px 56px rgba(59, 130, 246, 0.3);">
-            <svg style="width: 100px; height: 100px; fill: white; opacity: 0.9; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));" viewBox="0 0 24 24">
-                <polygon points="5 3 19 12 5 21" />
-            </svg>
+    <section style="padding: 10rem 5%; background: white;">
+        <div class="section-header">
+            <h2>How Our AI Works</h2>
+            <p>Multi-agent reasoning system with real-time clinical validation and hallucination detection.</p>
         </div>
-        <div id="video-container" style="max-width: 900px; margin: 0 auto; position: relative; aspect-ratio: 16 / 9; display: none;">
-            <iframe id="demo-video" width="100%" height="100%" src="" title="Synthure Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 16px;"></iframe>
+        <div class="features-grid">
+            <div class="feature-card" style="border-left: 4px solid var(--accent);">
+                <div class="feature-icon">🔄</div>
+                <h3>Agent 1: Narrative Generator</h3>
+                <p>Extracts clinical signals from EHR data using attention mechanisms. Generates first-person patient narratives with autoregressive language modeling, transforming medical jargon into accessible language.</p>
+            </div>
+            <div class="feature-card" style="border-left: 4px solid var(--accent);">
+                <div class="feature-icon">🧠</div>
+                <h3>Agent 2: Diagnostic Reasoner</h3>
+                <p>Chain-of-thought reasoning engine. Performs differential diagnosis analysis with multi-step logical inference, explaining clinical assessments transparently to both patients and providers.</p>
+            </div>
+            <div class="feature-card" style="border-left: 4px solid var(--accent);">
+                <div class="feature-icon">✓</div>
+                <h3>Agent 3: Fact Validator</h3>
+                <p>Real-time cross-reference against clinical guidelines and policy documents. Detects hallucinations before patient exposure through continuous validation and web verification.</p>
+            </div>
+            <div class="feature-card" style="border-left: 4px solid var(--accent);">
+                <div class="feature-icon">❓</div>
+                <h3>Agent 4: Adaptive Questioner</h3>
+                <p>Dynamic questionnaire generation with contextual learning. Adapts questions based on prior responses to capture social determinants, comorbidities, and lifestyle factors physicians miss.</p>
+            </div>
+            <div class="feature-card" style="border-left: 4px solid var(--accent);">
+                <div class="feature-icon">⚙️</div>
+                <h3>Data Pipeline</h3>
+                <p>SQL-optimized extraction from MIMIC-IV. Python batch serialization with CUDA kernel acceleration on GPU clusters. De-identified, HIPAA-compliant synthetic data generation (60K+ records).</p>
+            </div>
+            <div class="feature-card" style="border-left: 4px solid var(--accent);">
+                <div class="feature-icon">🔒</div>
+                <h3>Validation Engine</h3>
+                <p>Continuous real-time validation against live clinical guidelines. Reward model-based scoring with PPO optimization. Pre/post A/B testing with clinical expert annotation (500-sample evaluation).</p>
+            </div>
         </div>
-        <p style="color: var(--text-secondary); margin-top: 2rem; font-size: 1.05rem;">How Synthure transforms patient understanding and physician insight in real time.</p>
     </section>
-    <section class="stats" id="stats">
+
+    <section class="stats" id="tech">
         <div class="stats-content">
             <div class="stats-header">
-                <h2>Our AI Architecture</h2>
-                <p style="color: rgba(255, 255, 255, 0.85); margin-top: 1rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-                    Multi-agent AI system trained on 500K+ patient records, designed to understand the complete patient story — medical, social, and emotional.
+                <h2>Technical Metrics</h2>
+                <p style="color: rgba(255, 255, 255, 0.85); margin-top: 1rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    Production-grade infrastructure: 900GB EHR data from 60K+ MIMIC-IV records, CUDA-optimized GPU inference, RLHF post-training with 88% hallucination reduction.
                 </p>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; margin-top: 4rem;">
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 1: Narrative Generator</h4>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Extracts clinical signals from EHR data and generates first-person patient narratives. Transforms medical jargon into language patients understand.</p>
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 2: Diagnostic Reasoner</h4>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Performs differential diagnosis analysis with chain-of-thought reasoning. Explains the "why" behind clinical assessments for both patients and providers.</p>
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 3: Fact Validator</h4>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Cross-references AI outputs against policy documents and clinical guidelines. Eliminates hallucinations through real-time fact-checking and web verification.</p>
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Agent 4: Adaptive Questioner</h4>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Generates dynamic, context-aware patient questionnaires. Learns from each response to capture social determinants, personal concerns, and lifestyle factors physicians miss.</p>
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Synthetic Data Pipeline</h4>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">500K+ synthetic patient records trained on real EHR data. Generates unlimited labeled training data while maintaining HIPAA compliance and privacy standards.</p>
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 2.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <h4 style="color: var(--accent-light); font-size: 1.2rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif;">Real-Time Validation Engine</h4>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">Continuously validates AI outputs against live clinical guidelines and insurance policies. Catches errors before they reach patients or providers.</p>
+
+            <div class="metric-section">
+                <h3>Infrastructure & Performance</h3>
+                <div class="metric-grid">
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">&lt;1.8s</div>
+                        <div class="tech-metric-label">P95 Latency<br><span style="font-size: 0.85rem; opacity: 0.7;">vLLM optimized</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">900GB</div>
+                        <div class="tech-metric-label">Training Data<br><span style="font-size: 0.85rem; opacity: 0.7;">EHR + interaction</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">CUDA</div>
+                        <div class="tech-metric-label">GPU Kernels<br><span style="font-size: 0.85rem; opacity: 0.7;">Cluster optimized</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">&lt;5%</div>
+                        <div class="tech-metric-label">Perplexity Variance<br><span style="font-size: 0.85rem; opacity: 0.7;">Stable convergence</span></div>
+                    </div>
                 </div>
             </div>
+
+            <div class="metric-section">
+                <h3>Training & Validation</h3>
+                <div class="metric-grid">
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">92% → 12%</div>
+                        <div class="tech-metric-label">Hallucination Reduction<br><span style="font-size: 0.85rem; opacity: 0.7;">RLHF + PPO</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">50K</div>
+                        <div class="tech-metric-label">Clinical Q&A Pairs<br><span style="font-size: 0.85rem; opacity: 0.7;">Supervised tuning</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">3 Expert</div>
+                        <div class="tech-metric-label">Clinical Eval<br><span style="font-size: 0.85rem; opacity: 0.7;">500-sample set</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">PyTorch</div>
+                        <div class="tech-metric-label">Pre-training<br><span style="font-size: 0.85rem; opacity: 0.7;">AdamW optimizer</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-section">
+                <h3>Clinical Impact</h3>
+                <div class="metric-grid">
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">81%</div>
+                        <div class="tech-metric-label">Patient Comprehension<br><span style="font-size: 0.85rem; opacity: 0.7;">vs 13% baseline</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">JAMA</div>
+                        <div class="tech-metric-label">Benchmark Aligned<br><span style="font-size: 0.85rem; opacity: 0.7;">PEMAT standard</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">60K+</div>
+                        <div class="tech-metric-label">MIMIC Records<br><span style="font-size: 0.85rem; opacity: 0.7;">De-identified</span></div>
+                    </div>
+                    <div class="tech-metric">
+                        <div class="tech-metric-value">200+</div>
+                        <div class="tech-metric-label">Pilot Patients<br><span style="font-size: 0.85rem; opacity: 0.7;">A/B validated</span></div>
+                    </div>
+                </div>
+            </div>
+
             <div style="margin-top: 4rem; padding: 2rem; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border-left: 4px solid #8b5cf6;">
                 <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.05rem; line-height: 1.8;">
-                    <strong>Result:</strong> Holistic patient profiles that capture medical history, social determinants, and personal health context — giving physicians the full picture they need, and patients the clarity they deserve.
+                    <strong>Architecture:</strong> SQL data extraction → Python batch serialization → CUDA kernel optimization → vLLM inference acceleration. Result: Sub-2s latency with 88% hallucination reduction and clinical expert validation.
                 </p>
             </div>
         </div>
     </section>
 
-    <!-- Blog Section -->
-    <section style="padding: 10rem 5%; background: var(--primary);" id="blog">
-            <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.8rem; color: white; margin-bottom: 1rem; text-align: center;">Insights & Updates</h2>
-            <p style="text-align: center; color: #cbd5e1; margin-bottom: 4rem; font-size: 1.1rem;">Latest thinking on patient empowerment, AI in healthcare, and building better health systems.</p>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem;">
-                <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
-                    <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Patient Empowerment</span>
-                    <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Why Patients Should Understand Their Diagnosis</h3>
-                    <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Medical literacy isn't luxury—it's essential. Here's why clear communication improves outcomes.</p>
-                    <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read article →</a>
-                </article>
+    <section style="padding: 10rem 5%; background: var(--primary);">
+        <div class="section-header" style="color: white; margin-bottom: 6rem;">
+            <h2 style="color: white; font-size: 2.8rem;">Insights & Research</h2>
+            <p style="color: rgba(255, 255, 255, 0.75); font-size: 1.1rem;">Deep dives into clinical AI, patient outcomes, and healthcare innovation.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem; max-width: 1300px; margin: 0 auto; padding: 0 2rem;">
+            <!-- Technical Topic 1 -->
+            <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Technical Deep Dive</span>
+                <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">RLHF vs. DPO: Training Clinical Language Models</h3>
+                <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Why we chose Reinforcement Learning from Human Feedback over Direct Preference Optimization for clinical safety. Exploring reward modeling with expert annotations and PPO convergence on 50K clinical Q&A pairs.</p>
+                <a href="rlhf-vs-dpo-blog.html" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read more →</a>
+            </article>
 
-                <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
-                    <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Product Updates</span>
-                    <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Mental Health as Our Starting Point</h3>
-                    <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Why we're launching with psychology first—and the measurable impact on patient outcomes.</p>
-                    <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read article →</a>
-                </article>
+            <!-- Applied Topic 1 -->
+            <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Clinical Outcomes</span>
+                <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">81% Patient Comprehension: What We Learned</h3>
+                <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Results from 200+ beta patients show dramatic improvement over baseline. How plain language translation improves health literacy, medication adherence, and patient-provider trust in clinical settings.</p>
+                <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read more →</a>
+            </article>
 
-                <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
-                    <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">AI in Healthcare</span>
-                    <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Building AI Your Doctors Can Trust</h3>
-                    <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">How we eliminate hallucinations and validate every clinical claim in real time.</p>
-                    <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read article →</a>
-                </article>
-            </div>
+            <!-- Technical Topic 2 -->
+            <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Infrastructure</span>
+                <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Sub-2s Inference: CUDA Optimization at Scale</h3>
+                <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">How we achieved &lt;1.8s P95 latency with vLLM, custom CUDA kernels, and GPU cluster orchestration. Balancing throughput with clinical response time requirements.</p>
+                <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read more →</a>
+            </article>
+
+            <!-- Applied Topic 2 -->
+            <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Healthcare Innovation</span>
+                <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Building AI Doctors Can Trust</h3>
+                <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">From 92% hallucination rate to 12%. How real-time fact validation, clinical guideline integration, and expert review transformed AI safety in healthcare.</p>
+                <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read more →</a>
+            </article>
+
+            <!-- Technical Topic 3 -->
+            <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Data & Privacy</span>
+                <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Synthetic EHR Data: 60K+ Records, HIPAA Compliant</h3>
+                <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">How we generated unlimited labeled training data from MIMIC-IV while maintaining strict privacy. De-identification pipelines, synthetic data validation, and clinical realism.</p>
+                <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read more →</a>
+            </article>
+
+            <!-- Applied Topic 3 -->
+            <article style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.15); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(59, 130, 246, 0.15)';">
+                <span style="color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Patient Empowerment</span>
+                <h3 style="color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; margin: 1rem 0; line-height: 1.4;">Why Medical Literacy Drives Better Outcomes</h3>
+                <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem;">Research shows patients who understand their diagnosis have higher medication adherence, fewer ED visits, and better long-term health. How AI-powered translation bridges the literacy gap.</p>
+                <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 600; font-size: 0.95rem;">Read more →</a>
+            </article>
         </div>
     </section>
+
     <section class="waitlist" id="waitlist">
         <div class="waitlist-container">
             <h2>Understand Your Health</h2>
-            <p>Join patients and hospitals beta-testing Synthure. Limited spots for early users who want to understand their diagnosis, own their health data, and take control of their care.</p>
+            <p>Join beta testing today. Limited spots for early users who want to understand their diagnosis and take control of their care.</p>
             <form class="waitlist-form" onsubmit="handleSubmit(event)">
                 <div class="form-group">
                     <label for="name">Full Name</label>
@@ -869,12 +342,9 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
-        <p><strong>Synthure</strong> — AI-Powered Patient Insurance Matching</p>
-        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 1rem;">
-            Real-time intelligence. Automated precision. Outcomes that matter.
-        </p>
+        <p><strong>Synthure</strong> — AI-Powered Patient Health Translation</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 1rem;">Clinical accuracy. Real impact. Patient-first design.</p>
         <div class="footer-links">
             <a href="#">Privacy</a>
             <a href="#">Terms</a>
@@ -883,43 +353,20 @@
     </footer>
 
     <script>
-        function playVideo() {
-            const placeholder = document.getElementById('video-placeholder');
-            const container = document.getElementById('video-container');
-            const iframe = document.getElementById('demo-video');
-            
-            // Replace src with your video URL when ready (YouTube, Vimeo, etc.)
-            iframe.src = 'https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1';
-            
-            placeholder.style.display = 'none';
-            container.style.display = 'block';
-        }
-
         function handleSubmit(event) {
             event.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
-            const org = document.getElementById('org').value;
-
-            // Simulate submission
             alert(`Thanks ${name}! We'll reach out to ${email} soon.`);
             event.target.reset();
-            
-            // In production, send to backend
-            console.log({ name, email, org });
         }
-
-        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
             });
         });
     </script>
-
 </body>
 </html>
