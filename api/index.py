@@ -1,6 +1,7 @@
 import os
 import time
 from functools import wraps
+from typing import Optional
 
 import jwt
 import anthropic
@@ -28,7 +29,7 @@ ERROR_CODES = {
 }
 
 
-def structured_error(code: str, detail: str | None = None):
+def structured_error(code: str, detail: Optional[str] = None):
     msg, status = ERROR_CODES.get(code, ("Unknown error", 500))
     body = {"error": {"code": code, "message": msg}}
     if detail:
@@ -54,7 +55,7 @@ def require_auth(f):
     return decorated
 
 
-def get_client() -> anthropic.Anthropic | None:
+def get_client() -> Optional[anthropic.Anthropic]:
     if not ANTHROPIC_API_KEY:
         return None
     return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)

@@ -133,7 +133,7 @@ class BM25Retriever:
 
 
 # Module-level singleton — built once on import
-_retriever: BM25Retriever | None = None
+_retriever: Optional[BM25Retriever] = None
 
 
 def get_retriever() -> BM25Retriever:

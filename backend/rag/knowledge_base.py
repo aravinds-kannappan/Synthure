@@ -3,6 +3,8 @@ Medical knowledge base: ICD-10/CPT codes, denial patterns, insurance policy docu
 Serves as the RAG corpus indexed by BM25Retriever.
 """
 
+from typing import Optional
+
 def _text(*fields) -> str:
     """Flatten fields into a single searchable string."""
     parts = []
@@ -626,6 +628,6 @@ def _build_corpus() -> list[dict]:
 CORPUS: list[dict] = _build_corpus()
 
 
-def get_document(doc_id: str) -> dict | None:
+def get_document(doc_id: str) -> Optional[dict]:
     """Look up a document by ID."""
     return next((d for d in CORPUS if d["id"] == doc_id), None)
