@@ -133,31 +133,6 @@ CHAIN OF THOUGHT: Before deciding, reason through:
 
 ---
 
-## Deployment
-
-### Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/aravinds-kannappan/Synthure)
-
-Or manually:
-
-1. Fork or clone this repository
-2. Import the repo at [vercel.com/new](https://vercel.com/new)
-3. No build command or output directory needed — Vercel auto-detects the Python serverless function in `api/` and serves static files from the root
-4. Add environment variables (see below)
-5. Deploy
-
-The app runs fully in **demo mode** without an API key — all three features return realistic fallback data with a complete multi-stage pipeline trace shown in the UI.
-
-### Environment Variables
-
-Set these in **Vercel Dashboard → Project Settings → Environment Variables**:
-
-| Variable | Required | Description |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | Optional | Enables live Claude AI. Without it, the app uses realistic demo fallback data. |
-| `JWT_SECRET` | Optional | Secret for signing JWT tokens. Defaults to a hardcoded demo value — set this in production. |
-
 ### Demo Credentials
 
 ```
