@@ -7,7 +7,7 @@ import anthropic
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from .agents import orchestrator
+from api.agents import orchestrator
 
 app = Flask(__name__)
 CORS(app)
@@ -147,7 +147,7 @@ def submit_claim():
 @app.get("/api/health")
 def health():
     try:
-        from .rag.knowledge_base import CORPUS
+        from api.rag.knowledge_base import CORPUS
         corpus_size = len(CORPUS)
     except Exception:
         corpus_size = 0
