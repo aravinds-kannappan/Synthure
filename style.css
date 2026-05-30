@@ -900,6 +900,182 @@ main { flex: 1; padding: 28px 24px; }
   margin-top: 4px;
 }
 
+/* ── Source pill (inline citation on condition terms) ──────── */
+.source-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--teal-subtle);
+  border: 1px solid rgba(45,212,191,0.18);
+  color: var(--teal-dim);
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-family: 'SF Mono','Fira Code',monospace;
+  font-weight: 600;
+  padding: 1px 6px;
+  margin-left: 6px;
+  letter-spacing: 0.2px;
+  vertical-align: middle;
+}
+
+/* ── Pipeline trace ────────────────────────────────────────── */
+.pipeline-trace {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+
+.pipeline-trace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pipeline-trace-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.conf-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--teal-dim);
+  background: var(--teal-subtle);
+  border: 1px solid rgba(45,212,191,0.18);
+  border-radius: 20px;
+  padding: 2px 9px;
+}
+
+.trace-steps {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.trace-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+  min-width: 100px;
+  flex: 1;
+}
+
+.trace-step-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.trace-step-body { flex: 1; min-width: 0; }
+
+.trace-step-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.trace-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.trace-chip {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+.trace-chip-warn {
+  color: var(--yellow);
+  border-color: rgba(251,191,36,0.3);
+  background: rgba(251,191,36,0.07);
+}
+
+.trace-chip-dim { opacity: 0.6; }
+
+.trace-arrow {
+  color: var(--text-muted);
+  font-size: 10px;
+  align-self: center;
+  flex-shrink: 0;
+  padding: 0 1px;
+}
+
+.trace-issues {
+  margin-top: 4px;
+  font-size: 9.5px;
+  color: var(--yellow);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quality-warnings {
+  background: rgba(251,191,36,0.07);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.quality-warning-row {
+  font-size: 11px;
+  color: #fbbf24;
+  line-height: 1.5;
+}
+
+/* ── Citations ─────────────────────────────────────────────── */
+.citations {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.citations-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.citation-chip {
+  font-size: 9.5px;
+  font-weight: 600;
+  font-family: 'SF Mono','Fira Code',monospace;
+  color: var(--teal-dim);
+  background: var(--teal-subtle);
+  border: 1px solid rgba(45,212,191,0.18);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   header { grid-template-columns: auto 1fr auto; gap: 12px; }
