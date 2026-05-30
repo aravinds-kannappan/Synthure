@@ -7,7 +7,7 @@ import anthropic
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from api.agents import orchestrator
+from backend.agents import orchestrator
 
 app = Flask(__name__)
 CORS(app)
@@ -25,7 +25,6 @@ ERROR_CODES = {
     "VALIDATION_FAILED":    ("Request validation failed", 400),
     "COMPLIANCE_VIOLATION": ("Request failed compliance check", 422),
     "ROUTING_FAILED":       ("Pipeline routing failed", 500),
-    "INFERENCE_TIMEOUT":    ("AI inference timed out", 503),
 }
 
 
@@ -55,8 +54,7 @@ def require_auth(f):
     return decorated
 
 
-def get_claude_client() -> anthropic.Anthropic | None:
-    """Return an authenticated Claude client, or None if no API key configured."""
+def get_client() -> anthropic.Anthropic | None:
     if not ANTHROPIC_API_KEY:
         return None
     return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -80,7 +78,7 @@ def login():
     return jsonify({"token": token, "name": user["name"], "role": user["role"]})
 
 
-# ── Feature 1: Jargon Decoder ─────────────────────────────────────────────────
+# ── Jargon Decoder ────────────────────────────────────────────────────────────
 
 @app.post("/api/explain-jargon")
 @require_auth
@@ -90,54 +88,50 @@ def explain_jargon():
     if not notes:
         return structured_error("VALIDATION_FAILED", "Field 'notes' is required")
     if len(notes) > 5000:
-        return structured_error("COMPLIANCE_VIOLATION", "Notes exceed maximum allowed length (5000 chars)")
+        return structured_error("COMPLIANCE_VIOLATION", "Notes exceed 5000 character limit")
     try:
-        output = orchestrator.run_jargon_pipeline(notes, get_claude_client())
-        return jsonify(output.to_dict())
+        return jsonify(orchestrator.run_jargon_pipeline(notes, get_client()).to_dict())
     except Exception as e:
         return structured_error("ROUTING_FAILED", str(e))
 
 
-# ── Feature 2: Insurance Matcher ──────────────────────────────────────────────
+# ── Insurance Matcher ─────────────────────────────────────────────────────────
 
 @app.post("/api/match-insurance")
 @require_auth
 def match_insurance():
     body = request.get_json(silent=True) or {}
-    for field in ["age", "annual_income", "employed"]:
-        if field not in body:
-            return structured_error("VALIDATION_FAILED", f"Missing required field: {field}")
+    for f in ["age", "annual_income", "employed"]:
+        if f not in body:
+            return structured_error("VALIDATION_FAILED", f"Missing required field: {f}")
     try:
         int(body["age"]); int(body["annual_income"])
     except (ValueError, TypeError):
         return structured_error("VALIDATION_FAILED", "age and annual_income must be integers")
     try:
-        output = orchestrator.run_insurance_pipeline(body, get_claude_client())
-        return jsonify(output.to_dict())
+        return jsonify(orchestrator.run_insurance_pipeline(body, get_client()).to_dict())
     except Exception as e:
         return structured_error("ROUTING_FAILED", str(e))
 
 
-# ── Feature 3: Claim Routing ──────────────────────────────────────────────────
+# ── Claim Routing ─────────────────────────────────────────────────────────────
 
 @app.post("/api/claim/submit")
 @require_auth
 def submit_claim():
     body = request.get_json(silent=True) or {}
-    for field in ["patient_id", "diagnosis_codes", "procedure_code", "amount", "provider_npi"]:
-        if not body.get(field):
-            return structured_error("VALIDATION_FAILED", f"Missing required field: {field}")
+    for f in ["patient_id", "diagnosis_codes", "procedure_code", "amount", "provider_npi"]:
+        if not body.get(f):
+            return structured_error("VALIDATION_FAILED", f"Missing required field: {f}")
     try:
-        amount = float(body["amount"])
-        if amount <= 0:
+        if float(body["amount"]) <= 0:
             raise ValueError()
     except (ValueError, TypeError):
         return structured_error("VALIDATION_FAILED", "amount must be a positive number")
     if not isinstance(body["diagnosis_codes"], list) or not body["diagnosis_codes"]:
         return structured_error("VALIDATION_FAILED", "diagnosis_codes must be a non-empty array")
     try:
-        output = orchestrator.run_claim_pipeline(body, get_claude_client())
-        return jsonify(output.to_dict())
+        return jsonify(orchestrator.run_claim_pipeline(body, get_client()).to_dict())
     except Exception as e:
         return structured_error("ROUTING_FAILED", str(e))
 
@@ -147,7 +141,7 @@ def submit_claim():
 @app.get("/api/health")
 def health():
     try:
-        from api.rag.knowledge_base import CORPUS
+        from backend.rag.knowledge_base import CORPUS
         corpus_size = len(CORPUS)
     except Exception:
         corpus_size = 0

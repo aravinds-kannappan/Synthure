@@ -25,21 +25,21 @@ Claims are scored for complexity across six weighted signals (diagnosis count, p
 Request
   │
   ▼
-api/index.py                ← thin Flask routes; input validation only
+api/index.py                       ← Vercel entry point: thin Flask routes, input validation only
   │
   ▼
-agents/orchestrator.py      ← pipeline coordinator
+backend/agents/orchestrator.py     ← pipeline coordinator
   │
-  ├─ 1. ir/quality_gate.py          ICD-10/CPT format check · SHA-256 dedup · confidence scoring
+  ├─ 1. backend/ir/quality_gate.py          ICD-10/CPT format check · SHA-256 dedup · confidence scoring
   │
-  ├─ 2. agents/entity_extractor.py  claude-haiku-4-5 · tool_use NER
-  │                                  extracts typed entities with confidence scores
+  ├─ 2. backend/agents/entity_extractor.py  claude-haiku-4-5 · tool_use NER
+  │                                          extracts typed entities with confidence scores
   │
-  ├─ 3. rag/retriever.py            BM25 over medical knowledge base
-  │      rag/knowledge_base.py      80+ ICD-10/CPT docs · 9 denial patterns · 8 policy docs
+  ├─ 3. backend/rag/retriever.py            BM25 over medical knowledge base
+  │      backend/rag/knowledge_base.py      80+ ICD-10/CPT docs · 9 denial patterns · 8 policy docs
   │
-  └─ 4. agents/generator.py         claude-haiku-4-5 or claude-sonnet-4-6 · tool_use
-                                     gated output: sources_cited enforced + post-validation
+  └─ 4. backend/agents/generator.py         claude-haiku-4-5 or claude-sonnet-4-6 · tool_use
+                                             gated output: sources_cited enforced + post-validation
 ```
 
 ### RAG Knowledge Base (`api/rag/knowledge_base.py`)
@@ -172,13 +172,12 @@ Password: demo1234
 ### Backend
 
 ```bash
-# Install dependencies
 pip install -r requirements.txt
 
-# Run without AI (demo fallback mode — no API key needed)
+# Demo mode — no API key needed, returns realistic fallback data
 python -m api.index
 
-# Run with live Claude AI
+# Live AI mode
 ANTHROPIC_API_KEY=your_key_here python -m api.index
 ```
 
@@ -186,14 +185,17 @@ The API server starts on `http://localhost:5050`.
 
 ### Frontend
 
-Serve static files from the project root:
-
 ```bash
+cd public
 python3 -m http.server 3000
 # or: npx serve .
 ```
 
-Visit `http://localhost:3000`. The frontend auto-detects localhost and calls the backend at the same origin.
+Visit `http://localhost:3000`. By default `app.js` uses a relative `API_BASE = ''`, so API calls go to the same origin. For local dev against the Flask server on 5050, change the top of `app.js`:
+
+```js
+const API_BASE = 'http://localhost:5050';
+```
 
 ---
 
@@ -201,32 +203,36 @@ Visit `http://localhost:3000`. The frontend auto-detects localhost and calls the
 
 ```
 synthure/
-├── index.html              Frontend SPA
-├── style.css               Dark theme UI (Inter font, animated login, pipeline trace)
-├── app.js                  Frontend logic + pipeline trace renderer + demo data
-├── vercel.json             Vercel deployment config
-├── requirements.txt        Python dependencies
+├── public/                    ← Frontend — Vercel serves this directory as the web root
+│   ├── index.html             Single-page app shell
+│   ├── style.css              Dark theme UI (Inter, animated login, pipeline trace)
+│   └── app.js                 API client, tab logic, result renderers
 │
-└── api/
-    ├── index.py            Flask routes (thin — input validation + delegate to orchestrator)
-    │
-    ├── rag/
-    │   ├── knowledge_base.py   Medical corpus: ICD-10, CPT, denial patterns, policy docs
-    │   └── retriever.py        BM25 retrieval engine (pure Python stdlib)
-    │
-    ├── ir/
-    │   ├── schemas.py          Typed IR dataclasses: ClinicalNoteIR, ClaimIR, InsuranceProfileIR
-    │   └── quality_gate.py     ICD-10/CPT validation · SHA-256 dedup cache · confidence scoring
-    │
-    ├── agents/
-    │   ├── orchestrator.py     Pipeline coordinator — 3 pipeline functions
-    │   ├── entity_extractor.py Haiku NER agent (tool_use forced, never generates prose)
-    │   └── generator.py        Gated generation agent (tool_use, post-validated citations)
-    │
-    └── prompts/
-        ├── jargon.py           System prompts + tool schemas for Jargon Decoder
-        ├── insurance.py        System prompts + tool schemas for Insurance Matcher
-        └── claims.py           System prompts + tool schemas for Claim Routing
+├── backend/                   ← All Python business logic
+│   ├── rag/
+│   │   ├── knowledge_base.py  Medical corpus: ICD-10, CPT, denial patterns, policy docs
+│   │   └── retriever.py       BM25 retrieval engine (pure Python stdlib)
+│   │
+│   ├── ir/
+│   │   ├── schemas.py         Typed IR dataclasses flowing through each pipeline stage
+│   │   └── quality_gate.py    ICD-10/CPT validation · SHA-256 dedup · confidence scoring
+│   │
+│   ├── agents/
+│   │   ├── orchestrator.py    Pipeline coordinator — 3 pipeline functions
+│   │   ├── entity_extractor.py Haiku NER agent (tool_use, never generates prose)
+│   │   └── generator.py       Gated generation (tool_use, post-validated citations)
+│   │
+│   └── prompts/
+│       ├── jargon.py          System prompts + tool schemas for Jargon Decoder
+│       ├── insurance.py       System prompts + tool schemas for Insurance Matcher
+│       └── claims.py          System prompts + tool schemas for Claim Routing
+│
+├── api/
+│   └── index.py               Vercel serverless entry point (thin Flask routes only)
+│
+├── vercel.json                Vercel config: outputDirectory + API routing
+├── requirements.txt           Python dependencies
+└── README.md
 ```
 
 ---

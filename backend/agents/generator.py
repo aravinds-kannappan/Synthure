@@ -9,11 +9,11 @@ from typing import Optional
 
 import anthropic
 
-from api.ir.schemas import ClinicalNoteIR, ClaimIR, InsuranceProfileIR
-from api.rag.retriever import RetrievedDoc
-from api.prompts import jargon as jargon_prompts
-from api.prompts import insurance as insurance_prompts
-from api.prompts import claims as claims_prompts
+from backend.ir.schemas import ClinicalNoteIR, ClaimIR, InsuranceProfileIR
+from backend.rag.retriever import RetrievedDoc
+from backend.prompts import jargon as jargon_prompts
+from backend.prompts import insurance as insurance_prompts
+from backend.prompts import claims as claims_prompts
 
 _HAIKU  = "claude-haiku-4-5-20251001"
 _SONNET = "claude-sonnet-4-6"

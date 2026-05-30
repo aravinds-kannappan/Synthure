@@ -9,10 +9,10 @@ from typing import Optional
 
 import anthropic
 
-from api.ir import schemas
-from api.ir import quality_gate
-from api.rag import retriever as rag
-from api.agents import entity_extractor, generator
+from backend.ir import schemas
+from backend.ir import quality_gate
+from backend.rag import retriever as rag
+from backend.agents import entity_extractor, generator
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 

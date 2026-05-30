@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from collections import defaultdict
 from typing import Optional
 
-from api.rag.knowledge_base import CORPUS, get_document
+from backend.rag.knowledge_base import CORPUS, get_document
 
 
 @dataclass

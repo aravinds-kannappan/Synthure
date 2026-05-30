@@ -6,7 +6,7 @@ Non-blocking by default — flags issues in the IR but continues the pipeline.
 
 import re
 import time
-from api.ir.schemas import ClinicalNoteIR, ClaimIR, InsuranceProfileIR, QualityGateResult
+from backend.ir.schemas import ClinicalNoteIR, ClaimIR, InsuranceProfileIR, QualityGateResult
 
 # ── Code format validators ────────────────────────────────────────────────────
 
