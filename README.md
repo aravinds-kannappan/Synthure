@@ -203,10 +203,9 @@ const API_BASE = 'http://localhost:5050';
 
 ```
 synthure/
-├── public/                    ← Frontend — Vercel serves this directory as the web root
-│   ├── index.html             Single-page app shell
-│   ├── style.css              Dark theme UI (Inter, animated login, pipeline trace)
-│   └── app.js                 API client, tab logic, result renderers
+├── index.html                 Single-page app shell (served from root by Vercel)
+├── style.css                  Dark theme UI (Inter, animated login, pipeline trace)
+├── app.js                     API client, tab logic, result renderers
 │
 ├── backend/                   ← All Python business logic
 │   ├── rag/
@@ -230,7 +229,7 @@ synthure/
 ├── api/
 │   └── index.py               Vercel serverless entry point (thin Flask routes only)
 │
-├── vercel.json                Vercel config: outputDirectory + API routing
+├── vercel.json                Vercel routing config
 ├── requirements.txt           Python dependencies
 └── README.md
 ```
