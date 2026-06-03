@@ -1,0 +1,17 @@
+[
+  {
+    "notes": "Patient presents with I10 essential hypertension and E78.5 dyslipidemia. Started lisinopril 10mg QD and atorvastatin 20mg QHS.",
+    "expected_icd10_codes": ["I10", "E78.5"],
+    "expected_urgency": "soon"
+  },
+  {
+    "notes": "CHF exacerbation. I50.9. BNP elevated. Increased furosemide to 80mg BID. Cardiology consult placed.",
+    "expected_icd10_codes": ["I50.9"],
+    "expected_urgency": "now"
+  },
+  {
+    "notes": "Routine follow-up for DM2 E11.9. HbA1c 7.2%, at goal. Continued metformin 500mg BID.",
+    "expected_icd10_codes": ["E11.9"],
+    "expected_urgency": "routine"
+  }
+]
