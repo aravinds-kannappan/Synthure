@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #04091a;
+  --navy-surface: #0d1525;
+  --navy-elevated: #162035;
+  --teal: #00e5c3;
+  --indigo: #818cf8;
+  --amber: #fbbf24;
+  --success: #34d399;
+  --error: #f87171;
+  --violet: #a78bfa;
+}
+
+body {
+  background-color: var(--navy);
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Synthure scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: #1e2d45; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3f5f; }
