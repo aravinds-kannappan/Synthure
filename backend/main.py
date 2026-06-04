@@ -24,20 +24,39 @@ from backend.api.hospital.crm import communications as crm_communications
 # Hospital — RCM
 from backend.api.hospital.rcm import claims as claims_module
 
+# Hospital — Analytics
+from backend.api.hospital import analytics as hospital_analytics
+
 # Physician
 from backend.api.physician import navigator as navigator_module
+
+# Patient portal
+from backend.api.patient import portal as patient_portal
+
+# Employer analytics
+from backend.api.employer import analytics as employer_analytics
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+
+    # Seed insurance plan knowledge base into RAG corpus on startup
+    try:
+        from backend.ml.insurance_rag import seed_insurance_corpus
+        count = seed_insurance_corpus()
+        if count > 0:
+            print(f"[startup] Seeded {count} insurance plan documents into RAG corpus")
+    except Exception as exc:
+        print(f"[startup] Insurance corpus seed skipped: {exc}")
+
     yield
 
 
 app = FastAPI(
     title="Synthure API",
     description="Clinical AI platform — four portals, one engine.",
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 
@@ -52,7 +71,7 @@ app.add_middleware(
 # ── Auth
 app.include_router(auth_module.router, prefix="/api/auth", tags=["auth"])
 
-# ── AI Features
+# ── AI Features (standalone)
 app.include_router(jargon_module.router, prefix="/api/features", tags=["features"])
 app.include_router(insurance_module.router, prefix="/api/features", tags=["features"])
 
@@ -66,8 +85,17 @@ app.include_router(crm_communications.router, prefix="/api/hospital/crm", tags=[
 # ── Hospital RCM
 app.include_router(claims_module.router, prefix="/api/hospital/rcm", tags=["rcm"])
 
+# ── Hospital Analytics (new)
+app.include_router(hospital_analytics.router, prefix="/api/hospital/analytics", tags=["hospital-analytics"])
+
 # ── Physician
 app.include_router(navigator_module.router, prefix="/api/physician", tags=["physician"])
+
+# ── Patient Portal (new)
+app.include_router(patient_portal.router, prefix="/api/patient", tags=["patient"])
+
+# ── Employer Analytics (new)
+app.include_router(employer_analytics.router, prefix="/api/employer", tags=["employer"])
 
 
 @app.get("/api/health")
@@ -97,5 +125,5 @@ async def health():
         "ai_enabled": bool(settings.anthropic_api_key),
         "rag_corpus_size": corpus_size,
         "rag_corpus_source": corpus_source,
-        "version": "0.3.0",
+        "version": "0.4.0",
     }

@@ -6,8 +6,8 @@ ML models used (all lazy-loaded from real data on first call):
   denial_predictor  — GradientBoosting trained on DataFog/medical-transcription-instruct
   readmission       — ICD-10 frequency index from birgermoell/icd10-clinical-notes + CMS HRRP
   entity_extractor  — HuggingFace Inference API → Claude Haiku → regex
+  insurance_rag     — RAG-based plan matching from CMS/ACA knowledge base (replaces rule engine)
 """
-
 from __future__ import annotations
 
 import time
@@ -20,9 +20,10 @@ from backend.ir import quality_gate
 from backend.rag import retriever as rag
 from backend.agents import entity_extractor, generator
 from backend.ml import denial_predictor, readmission
+from backend.ml import insurance_rag
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────────────────
 
 def _mean_confidence(entities: list[schemas.EntityTag]) -> float:
     if not entities:
@@ -30,54 +31,12 @@ def _mean_confidence(entities: list[schemas.EntityTag]) -> float:
     return round(sum(e.confidence for e in entities) / len(entities), 3)
 
 
-def _rule_based_match(patient: dict) -> list[dict]:
-    """Deterministic insurance plan scoring from ACA/CMS eligibility rules."""
-    age      = int(patient.get("age", 0))
-    income   = int(patient.get("annual_income", 0))
-    employed = patient.get("employed", False)
-    has_deps = patient.get("has_dependents", False)
-    condition = patient.get("chronic_condition", False)
-    fpl      = 20120 + (4720 * (2 if has_deps else 0))
-
-    score_map: dict[str, int] = {}
-    if age >= 65:                           score_map["Medicare"] = 95
-    elif age >= 60:                         score_map["Medicare"] = 40
-    if income <= fpl:                       score_map["Medicaid"] = 90
-    elif income <= fpl * 1.5:              score_map["Medicaid"] = 50
-    if employed:                            score_map["Employer-Sponsored (ESI)"] = 85
-    if fpl < income <= fpl * 4:            score_map["ACA Marketplace (Subsidized)"] = 80
-    elif income > fpl * 4:                 score_map["ACA Marketplace (Full Price)"] = 65
-    if has_deps and income <= fpl * 2:     score_map["CHIP (for dependents)"] = 70
-    if income > 60000 and not condition and age < 50:
-        score_map["HDHP + HSA"] = 60
-
-    reasons = {
-        "Medicare":                      f"Age {age} qualifies for federal Medicare coverage",
-        "Medicaid":                      f"Income ${income:,}/yr falls within Medicaid eligibility threshold",
-        "Employer-Sponsored (ESI)":      "Employer-sponsored insurance typically offers best value when available",
-        "ACA Marketplace (Subsidized)":  "Income qualifies for premium tax credits — significant monthly savings available",
-        "ACA Marketplace (Full Price)":  "Marketplace plan with comprehensive coverage; no subsidy at this income level",
-        "CHIP (for dependents)":         "Dependents qualify for Children's Health Insurance Program",
-        "HDHP + HSA":                    "High-deductible plan with HSA maximizes tax savings for healthy high earners",
-    }
-    return [
-        {"plan": name, "match_score": score, "reason": reasons.get(name, "")}
-        for name, score in sorted(score_map.items(), key=lambda x: -x[1])
-    ][:4]
-
-
 def _compute_complexity(claim: dict, notes: str = "") -> tuple[int, denial_predictor.DenialPrediction]:
-    """
-    Compute claim complexity using the real ML denial predictor.
-    Returns (complexity_0_100, DenialPrediction).
-    Replaces the old hardcoded flag-counting heuristic.
-    """
     flags = {
         "prior_denial":           bool(claim.get("prior_denial", False)),
         "out_of_network":         bool(claim.get("out_of_network", False)),
         "experimental_treatment": bool(claim.get("experimental_treatment", False)),
     }
-    # Use clinical notes if provided, otherwise use serialized claim data as text
     text = notes or (
         f"procedure {claim.get('procedure_code', '')} "
         f"diagnoses {' '.join(claim.get('diagnosis_codes', []))} "
@@ -87,12 +46,11 @@ def _compute_complexity(claim: dict, notes: str = "") -> tuple[int, denial_predi
     return denial_predictor.to_complexity_score_100(pred), pred
 
 
-# ── Pipeline 1: Jargon Decoder ────────────────────────────────────────────────
+# ── Pipeline 1: Jargon Decoder ───────────────────────────────────────────────────────────
 
-def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> schemas.JargonOutput:
+def run_jargon_pipeline(notes: str, client: anthropic.Anthropic) -> schemas.JargonOutput:
     trace: list[schemas.TraceStep] = []
 
-    # Stage 1 — Build IR + Quality Gate
     t0 = time.monotonic()
     ir = schemas.ClinicalNoteIR.build(notes)
     gate = quality_gate.validate_clinical_note(ir)
@@ -103,7 +61,6 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
         issues=gate.issues,
     ))
 
-    # Stage 2 — Entity Extraction (HF NER → Claude Haiku → regex)
     entities, model_used, duration = entity_extractor.extract_from_clinical_note(notes, client)
     ir.entities = entities
     ir.entity_confidence = _mean_confidence(entities)
@@ -115,7 +72,6 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
         confidence=ir.entity_confidence,
     ))
 
-    # Stage 3 — RAG Retrieval (pgvector → BM25 fallback)
     t0 = time.monotonic()
     code_tokens = " ".join(e.code for e in entities)
     query = f"{code_tokens} {notes[:200]}"
@@ -128,7 +84,6 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
         confidence=retrieved[0].relevance if retrieved else 0.0,
     ))
 
-    # Stage 3b — Readmission risk (ML model from birgermoell + CMS HRRP)
     t0 = time.monotonic()
     icd10_codes = [e.code for e in entities if e.entity_type == "diagnosis"]
     readmission_risk = readmission.score_patient(icd10_codes)
@@ -138,10 +93,8 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
         confidence=readmission_risk.score,
     ))
 
-    # Stage 4 — Gated Generation (Claude Haiku with RAG context)
     data, gen_model, gen_duration, sources_cited, hallucinations_stripped = generator.generate_jargon(ir, client)
 
-    # Inject readmission risk into output
     data["readmission_risk"] = {
         "score": readmission_risk.score,
         "level": readmission_risk.risk_level,
@@ -157,7 +110,6 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
         hallucinations_stripped=hallucinations_stripped,
     ))
 
-    # Stage 5 — Citation validation
     t0 = time.monotonic()
     valid_ids = {d.id for d in retrieved}
     for cond in data.get("conditions", []):
@@ -172,7 +124,7 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
 
     return schemas.JargonOutput(
         data=data,
-        source=gen_model if gen_model != "demo" else "demo",
+        source=gen_model,
         pipeline_trace=trace,
         entity_confidence=ir.entity_confidence,
         sources_cited=sources_cited,
@@ -180,11 +132,11 @@ def run_jargon_pipeline(notes: str, client: Optional[anthropic.Anthropic]) -> sc
     )
 
 
-# ── Pipeline 2: Insurance Matcher ─────────────────────────────────────────────
+# ── Pipeline 2: Insurance Matcher (RAG-based) ───────────────────────────────────────
 
 def run_insurance_pipeline(
     profile: dict,
-    client: Optional[anthropic.Anthropic],
+    client: anthropic.Anthropic,
 ) -> schemas.InsuranceOutput:
     trace: list[schemas.TraceStep] = []
 
@@ -197,12 +149,19 @@ def run_insurance_pipeline(
         has_dependents=bool(profile.get("has_dependents", False)),
         chronic_condition=bool(profile.get("chronic_condition", False)),
     )
-    ir.rule_engine_recs = _rule_based_match(profile)
+
+    # ── RAG retrieval: embed patient profile, retrieve matching plan docs
+    query = insurance_rag.profile_to_query(profile)
+    retrieved = rag.retrieve(query, top_k=5, doc_type="insurance_policy")
+    ir.retrieved_docs = retrieved
+    ir.rule_engine_recs = insurance_rag.rank_plans(profile, retrieved)
+
     gate = quality_gate.validate_insurance_profile(ir)
     trace.append(schemas.TraceStep(
-        stage="quality_gate",
+        stage="rag_insurance_match",
         duration_ms=int((time.monotonic() - t0) * 1000),
-        confidence=gate.confidence,
+        docs_retrieved=len(retrieved),
+        confidence=retrieved[0].relevance if retrieved else 0.0,
         issues=gate.issues,
     ))
 
@@ -214,18 +173,6 @@ def run_insurance_pipeline(
             pipeline_trace=trace,
             quality_issues=gate.issues,
         )
-
-    t0 = time.monotonic()
-    query = " ".join(r["plan"] for r in ir.rule_engine_recs[:2])
-    query += f" {profile.get('state', '')} income {ir.annual_income}"
-    retrieved = rag.retrieve(query, top_k=3, doc_type="insurance_policy")
-    ir.retrieved_docs = retrieved
-    trace.append(schemas.TraceStep(
-        stage="rag_retrieval",
-        duration_ms=int((time.monotonic() - t0) * 1000),
-        docs_retrieved=len(retrieved),
-        confidence=retrieved[0].relevance if retrieved else 0.0,
-    ))
 
     overlay, gen_model, gen_duration, sources_cited, stripped = generator.generate_insurance_overlay(ir, client)
     trace.append(schemas.TraceStep(
@@ -239,22 +186,21 @@ def run_insurance_pipeline(
     return schemas.InsuranceOutput(
         recommendations=ir.rule_engine_recs,
         ai_insight=overlay,
-        source=f"rule-engine + {gen_model}" if gen_model != "demo" else "rule-engine + demo",
+        source=gen_model,
         pipeline_trace=trace,
         sources_cited=sources_cited,
         quality_issues=gate.issues,
     )
 
 
-# ── Pipeline 3: Claim Routing ─────────────────────────────────────────────────
+# ── Pipeline 3: Claim Routing ───────────────────────────────────────────────────────────
 
 def run_claim_pipeline(
     claim: dict,
-    client: Optional[anthropic.Anthropic],
+    client: anthropic.Anthropic,
 ) -> schemas.ClaimOutput:
     trace: list[schemas.TraceStep] = []
 
-    # Stage 1 — ML complexity scoring (replaces hardcoded heuristic)
     t0 = time.monotonic()
     complexity, denial_pred = _compute_complexity(claim)
     route = "frontier" if complexity > 60 else "standard"
@@ -308,7 +254,6 @@ def run_claim_pipeline(
             quality_issues=gate.issues,
         )
 
-    # Stage 2 — Code validation (Claude Haiku)
     validated, val_model, val_duration = entity_extractor.extract_claim_codes(
         ir.procedure_code, ir.diagnosis_codes, client
     )
@@ -322,7 +267,6 @@ def run_claim_pipeline(
         confidence=mean_conf,
     ))
 
-    # Stage 3 — RAG (denial patterns + CPT profiles)
     t0 = time.monotonic()
     flag_keywords = []
     if ir.flags["prior_denial"]:           flag_keywords.append("prior denial authorization")
@@ -347,10 +291,7 @@ def run_claim_pipeline(
         confidence=retrieved[0].relevance if retrieved else 0.0,
     ))
 
-    # Stage 4 — Gated adjudication
     result, gen_model, gen_duration, sources_cited, stripped = generator.generate_claim_decision(ir, client)
-
-    # Attach ML denial probability to result
     result["ml_denial_probability"] = denial_pred.denial_probability
     result["ml_features"] = denial_pred.features_used[:5]
 
@@ -363,13 +304,12 @@ def run_claim_pipeline(
     ))
 
     claim_id = f"CLM-{int(time.time())}-{ir.patient_id[:4].upper()}"
-
     return schemas.ClaimOutput(
         claim_id=claim_id,
         complexity_score=complexity,
         route=route,
         result=result,
-        source=gen_model if gen_model != "demo" else "demo",
+        source=gen_model,
         pipeline_trace=trace,
         entity_confidence=mean_conf,
         sources_cited=sources_cited,
