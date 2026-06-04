@@ -63,7 +63,7 @@ export default function NavigatorPage() {
 
       {result && (
         <div className="space-y-4">
-          {result.pipelines?.jargon && (
+          {!!result.pipelines?.jargon && (
             <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-sm font-medium text-slate-300">Jargon Decoder</h2>
@@ -74,7 +74,7 @@ export default function NavigatorPage() {
               </pre>
             </div>
           )}
-          {result.pipelines?.insurance && (
+          {!!result.pipelines?.insurance && (
             <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-sm font-medium text-slate-300">Insurance Matcher</h2>
