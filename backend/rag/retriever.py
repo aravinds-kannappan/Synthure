@@ -1,15 +1,20 @@
 """
 Semantic retrieval via Supabase pgvector (all-MiniLM-L6-v2, 384-dim).
-Falls back to BM25 over the seed corpus when the DB is unavailable.
+Embeddings are generated via the HuggingFace Inference API so that PyTorch
+does not need to be installed locally — keeping the bundle under Vercel’s
+250 MB serverless limit.
+Falls back to BM25 over the seed corpus when the DB or HF API is unavailable.
 """
-
 from __future__ import annotations
 
 import math
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Optional
+
+import httpx
 
 
 @dataclass
@@ -21,24 +26,54 @@ class RetrievedDoc:
     relevance: float
 
 
-# ── Embedding model (lazy-loaded to avoid cold-start cost) ────────────────────
+# ── Embeddings via HF Inference API ────────────────────────────────────────────────────
+# Uses the same all-MiniLM-L6-v2 model that was previously loaded locally.
+# No PyTorch required.
 
-_embed_model = None
-
-
-def _get_embed_model():
-    global _embed_model
-    if _embed_model is None:
-        from sentence_transformers import SentenceTransformer
-        _embed_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-    return _embed_model
+_HF_TOKEN = os.environ.get("HF_TOKEN", "")
+_EMBED_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
 
 
 def _embed(text: str) -> list[float]:
-    return _get_embed_model().encode(text, normalize_embeddings=True).tolist()
+    """
+    Return a normalised 384-dim embedding for `text` via HF Inference API.
+    Returns an empty list if HF_TOKEN is not set or the API call fails;
+    callers fall back to BM25 in that case.
+    """
+    if not _HF_TOKEN:
+        return []
+    try:
+        with httpx.Client(timeout=30) as client:
+            resp = client.post(
+                _EMBED_URL,
+                headers={"Authorization": f"Bearer {_HF_TOKEN}"},
+                json={"inputs": text[:512], "options": {"wait_for_model": True}},
+            )
+            if resp.status_code != 200:
+                return []
+            result = resp.json()
+
+        # Response shape: [[f, f, ...]] for a single input string
+        if isinstance(result, list) and result and isinstance(result[0], list):
+            vec: list[float] = result[0]
+        elif isinstance(result, list) and result and isinstance(result[0], (int, float)):
+            vec = [float(x) for x in result]
+        else:
+            return []
+
+        # L2-normalise so cosine similarity == dot product (matches pgvector <=>)
+        norm = math.sqrt(sum(x * x for x in vec))
+        return [x / norm for x in vec] if norm > 0 else vec
+    except Exception:
+        return []
 
 
-# ── pgvector semantic retrieval ───────────────────────────────────────────────
+# Backwards-compat alias used by insurance_rag.py seed function
+def embed_text(text: str) -> list[float]:
+    return _embed(text)
+
+
+# ── pgvector semantic retrieval ───────────────────────────────────────────────────────────────
 
 def _pgvector_retrieve(
     query: str,
@@ -50,8 +85,10 @@ def _pgvector_retrieve(
     db = get_db()
     if db is None:
         return []
+    embedding = _embed(query)
+    if not embedding:
+        return []  # no token — BM25 fallback will handle it
     try:
-        embedding = _embed(query)
         result = db.rpc(
             "match_rag_documents",
             {
@@ -75,7 +112,7 @@ def _pgvector_retrieve(
         return []
 
 
-# ── BM25 fallback (offline / no DB) ──────────────────────────────────────────
+# ── BM25 fallback (no DB or no HF token) ────────────────────────────────────────────
 
 def _tokenize(text: str) -> list[str]:
     return re.findall(r"[a-z0-9]+", text.lower())
@@ -87,7 +124,6 @@ def _bm25_retrieve(
     doc_type: Optional[str],
 ) -> list[RetrievedDoc]:
     from backend.rag.knowledge_base import CORPUS
-
     docs = [d for d in CORPUS if doc_type is None or d.get("type") == doc_type]
     if not docs:
         return []
@@ -140,7 +176,7 @@ def _bm25_retrieve(
     ]
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
+# ── Public API ──────────────────────────────────────────────────────────────────────────────
 
 def retrieve(
     query: str,
@@ -148,10 +184,6 @@ def retrieve(
     source: Optional[str] = None,
     doc_type: Optional[str] = None,
 ) -> list[RetrievedDoc]:
-    """
-    Retrieve top_k documents semantically relevant to query.
-    Uses pgvector when Supabase is connected, BM25 seed corpus otherwise.
-    """
     docs = _pgvector_retrieve(query, top_k, source, doc_type)
     if docs:
         return docs
@@ -159,8 +191,6 @@ def retrieve(
 
 
 class BM25Retriever:
-    """Backwards-compatible wrapper — routes to pgvector with BM25 fallback."""
-
     def retrieve(
         self,
         query: str,
