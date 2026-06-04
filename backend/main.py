@@ -1,4 +1,4 @@
-"""Synthure FastAPI application factory — Phase 1 (CRM + Next.js)."""
+"""Synthure FastAPI application factory."""
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Synthure API",
     description="Clinical AI platform — four portals, one engine.",
-    version="0.2.0",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
@@ -72,14 +72,30 @@ app.include_router(navigator_module.router, prefix="/api/physician", tags=["phys
 
 @app.get("/api/health")
 async def health():
+    corpus_size = 0
+    corpus_source = "none"
     try:
-        from backend.rag.knowledge_base import CORPUS
-        corpus_size = len(CORPUS)
+        from backend.core.database import get_db
+        db = get_db()
+        if db:
+            result = db.rpc("rag_corpus_size", {}).execute()
+            corpus_size = int(result.data or 0)
+            corpus_source = "pgvector"
     except Exception:
-        corpus_size = 0
+        pass
+
+    if corpus_size == 0:
+        try:
+            from backend.rag.knowledge_base import CORPUS
+            corpus_size = len(CORPUS)
+            corpus_source = "seed"
+        except Exception:
+            pass
+
     return {
         "status": "ok",
         "ai_enabled": bool(settings.anthropic_api_key),
         "rag_corpus_size": corpus_size,
-        "version": "0.2.0",
+        "rag_corpus_source": corpus_source,
+        "version": "0.3.0",
     }
