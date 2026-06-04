@@ -6,15 +6,15 @@ import { useAuth } from '@/lib/auth'
 import { AIChip } from '@/components/shared/AIChip'
 import { Users, FileText, Activity, AlertCircle, ChevronRight, TrendingUp } from 'lucide-react'
 
-type Overview  = Record<string, unknown>
-type Physician = Record<string, unknown>
+interface Overview  { patients?: number; clinical_notes?: number; physicians?: number; high_readmission_count?: number; avg_readmission_risk?: number; top_conditions?: { code: string; count: number }[] }
+interface Physician { physician_id: string; name: string; email?: string; patient_count: number; note_count: number }
 
 export default function HospitalDashboard() {
   const { user, ready } = useAuth()
-  const [overview,    setOverview]    = useState<Overview | null>(null)
-  const [physicians,  setPhysicians]  = useState<Physician[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [error,       setError]       = useState('')
+  const [overview,   setOverview]   = useState<Overview | null>(null)
+  const [physicians, setPhysicians] = useState<Physician[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState('')
 
   useEffect(() => {
     if (!ready || !user?.token) { setLoading(false); return }
@@ -24,14 +24,14 @@ export default function HospitalDashboard() {
       api.hospitalPhysicians(t),
     ])
       .then(([ov, phys]) => {
-        setOverview(ov)
-        setPhysicians((phys as { physicians: Physician[] }).physicians || [])
+        setOverview(ov as unknown as Overview)
+        setPhysicians((phys as unknown as { physicians: Physician[] }).physicians || [])
       })
-      .catch(e => setError(e.message))
+      .catch(e => setError((e as Error).message))
       .finally(() => setLoading(false))
   }, [ready, user])
 
-  const topConditions = (overview?.top_conditions as { code: string; count: number }[]) || []
+  const topConditions = overview?.top_conditions || []
 
   return (
     <div className="p-8 max-w-5xl">
@@ -40,7 +40,7 @@ export default function HospitalDashboard() {
         <AIChip label="Live data" size="md" />
       </div>
 
-      {error && (
+      {!!error && (
         <div className="flex items-center gap-2 text-red-400 text-sm mb-6">
           <AlertCircle className="w-4 h-4" />{error}
         </div>
@@ -49,10 +49,10 @@ export default function HospitalDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Patients',      value: overview?.patients,        icon: Users,      color: 'indigo' },
-          { label: 'Clinical Notes', value: overview?.clinical_notes, icon: FileText,   color: 'teal'   },
-          { label: 'Physicians',    value: overview?.physicians,       icon: Activity,   color: 'violet' },
-          { label: 'High Risk',     value: overview?.high_readmission_count, icon: AlertCircle, color: 'amber' },
+          { label: 'Patients',       value: overview?.patients,               icon: Users,       color: 'indigo' },
+          { label: 'Clinical Notes', value: overview?.clinical_notes,         icon: FileText,    color: 'teal'   },
+          { label: 'Physicians',     value: overview?.physicians,             icon: Activity,    color: 'violet' },
+          { label: 'High Risk',      value: overview?.high_readmission_count, icon: AlertCircle, color: 'amber'  },
         ].map(card => (
           <div key={card.label} className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -75,7 +75,7 @@ export default function HospitalDashboard() {
             <AIChip />
           </div>
           <p className="text-4xl font-light text-white mb-1">
-            {loading ? '…' : `${((overview?.avg_readmission_risk as number ?? 0) * 100).toFixed(1)}%`}
+            {loading ? '…' : `${((overview?.avg_readmission_risk ?? 0) * 100).toFixed(1)}%`}
           </p>
           <p className="text-xs text-slate-500">across all patients with AI-processed notes</p>
         </div>
@@ -111,14 +111,14 @@ export default function HospitalDashboard() {
           {physicians.map((p, i) => (
             <Link
               key={i}
-              href={`/hospital/crm?physician_id=${p.physician_id as string}`}
+              href={`/hospital/crm?physician_id=${p.physician_id}`}
               className="flex items-center justify-between px-6 py-4 hover:bg-slate-800/30 transition-colors"
             >
               <div>
-                <p className="text-sm text-slate-100">{p.name as string}</p>
+                <p className="text-sm text-slate-100">{p.name}</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {p.patient_count as number} patient{(p.patient_count as number) !== 1 ? 's' : ''} · 
-                  {p.note_count as number} note{(p.note_count as number) !== 1 ? 's' : ''}
+                  {p.patient_count} patient{p.patient_count !== 1 ? 's' : ''} · 
+                  {p.note_count} note{p.note_count !== 1 ? 's' : ''}
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-600" />

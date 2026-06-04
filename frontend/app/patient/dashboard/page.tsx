@@ -43,8 +43,9 @@ export default function PatientDashboard() {
     ])
       .then(([prof, notesResp, timelineResp]) => {
         setProfile(prof as Record<string, unknown>)
-        setNotes((notesResp as { notes: Note[] }).notes || [])
-        setTimeline((timelineResp as { events: TimelineEvent[] }).events || [])
+        // Cast through unknown: API returns Record<string,unknown>[] but we know the shape
+        setNotes((notesResp as unknown as { notes: Note[] }).notes || [])
+        setTimeline((timelineResp as unknown as { events: TimelineEvent[] }).events || [])
       })
       .catch(err => setError((err as Error).message))
       .finally(() => setLoading(false))

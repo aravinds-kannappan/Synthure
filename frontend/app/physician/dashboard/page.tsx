@@ -32,7 +32,7 @@ export default function PhysicianDashboard() {
   useEffect(() => {
     if (!ready || !user?.token) { setLoading(false); return }
     api.getMyPatients(user.token)
-      .then(r => setPatients(r.patients as Patient[]))
+      .then(r => setPatients(r.patients as unknown as Patient[]))
       .catch(e => setError((e as Error).message))
       .finally(() => setLoading(false))
   }, [ready, user])

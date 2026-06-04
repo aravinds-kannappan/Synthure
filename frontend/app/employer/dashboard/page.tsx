@@ -5,17 +5,17 @@ import { useAuth } from '@/lib/auth'
 import { AIChip } from '@/components/shared/AIChip'
 import { Building2, Users, FileText, AlertCircle, TrendingUp, Activity } from 'lucide-react'
 
-type Overview  = Record<string, unknown>
-type Hospital  = Record<string, unknown>
-type Condition = { code: string; count: number; prevalence_pct: number }
+interface Overview  { hospitals?: number; patients?: number; clinical_notes?: number; high_readmission_count?: number; avg_readmission_risk?: number }
+interface Hospital  { hospital_id: string; name: string; patient_count: number; physician_count: number; note_count: number }
+interface Condition { code: string; count: number; prevalence_pct: number }
 
 export default function EmployerDashboard() {
   const { user, ready } = useAuth()
-  const [overview,    setOverview]    = useState<Overview | null>(null)
-  const [hospitals,   setHospitals]   = useState<Hospital[]>([])
-  const [conditions,  setConditions]  = useState<Condition[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [error,       setError]       = useState('')
+  const [overview,   setOverview]   = useState<Overview | null>(null)
+  const [hospitals,  setHospitals]  = useState<Hospital[]>([])
+  const [conditions, setConditions] = useState<Condition[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState('')
 
   useEffect(() => {
     if (!ready || !user?.token) { setLoading(false); return }
@@ -26,11 +26,11 @@ export default function EmployerDashboard() {
       api.populationConditions(t),
     ])
       .then(([ov, hosp, cond]) => {
-        setOverview(ov)
-        setHospitals((hosp as { hospitals: Hospital[] }).hospitals || [])
-        setConditions((cond as { conditions: Condition[] }).conditions || [])
+        setOverview(ov as unknown as Overview)
+        setHospitals((hosp as unknown as { hospitals: Hospital[] }).hospitals || [])
+        setConditions((cond as unknown as { conditions: Condition[] }).conditions || [])
       })
-      .catch(e => setError(e.message))
+      .catch(e => setError((e as Error).message))
       .finally(() => setLoading(false))
   }, [ready, user])
 
@@ -41,7 +41,7 @@ export default function EmployerDashboard() {
         <AIChip label="Aggregated" size="md" />
       </div>
 
-      {error && (
+      {!!error && (
         <div className="flex items-center gap-2 text-red-400 text-sm mb-6">
           <AlertCircle className="w-4 h-4" />{error}
         </div>
@@ -50,10 +50,10 @@ export default function EmployerDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Hospitals',         value: overview?.hospitals,        icon: Building2,   color: 'violet' },
-          { label: 'Covered Patients',  value: overview?.patients,         icon: Users,       color: 'indigo' },
-          { label: 'Clinical Notes',    value: overview?.clinical_notes,   icon: FileText,    color: 'teal'   },
-          { label: 'High Risk Patients', value: overview?.high_readmission_count, icon: AlertCircle, color: 'amber' },
+          { label: 'Hospitals',          value: overview?.hospitals,               icon: Building2,   color: 'violet' },
+          { label: 'Covered Patients',   value: overview?.patients,                icon: Users,       color: 'indigo' },
+          { label: 'Clinical Notes',     value: overview?.clinical_notes,          icon: FileText,    color: 'teal'   },
+          { label: 'High Risk Patients', value: overview?.high_readmission_count,  icon: AlertCircle, color: 'amber'  },
         ].map(card => (
           <div key={card.label} className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -76,7 +76,7 @@ export default function EmployerDashboard() {
             <AIChip />
           </div>
           <p className="text-4xl font-light text-white mb-1">
-            {loading ? '…' : `${((overview?.avg_readmission_risk as number ?? 0) * 100).toFixed(1)}%`}
+            {loading ? '…' : `${((overview?.avg_readmission_risk ?? 0) * 100).toFixed(1)}%`}
           </p>
           <p className="text-xs text-slate-500">across all covered hospitals</p>
         </div>
@@ -121,11 +121,11 @@ export default function EmployerDashboard() {
           {hospitals.map((h, i) => (
             <div key={i} className="flex items-center justify-between px-6 py-4">
               <div>
-                <p className="text-sm text-slate-100">{h.name as string}</p>
+                <p className="text-sm text-slate-100">{h.name}</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {h.patient_count as number} patient{(h.patient_count as number) !== 1 ? 's' : ''} · 
-                  {h.physician_count as number} physician{(h.physician_count as number) !== 1 ? 's' : ''} · 
-                  {h.note_count as number} note{(h.note_count as number) !== 1 ? 's' : ''}
+                  {h.patient_count} patient{h.patient_count !== 1 ? 's' : ''} · 
+                  {h.physician_count} physician{h.physician_count !== 1 ? 's' : ''} · 
+                  {h.note_count} note{h.note_count !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
