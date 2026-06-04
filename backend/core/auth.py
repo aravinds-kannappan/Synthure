@@ -1,4 +1,13 @@
-"""JWT verification + role detection for Supabase-issued and demo tokens."""
+"""JWT verification + role detection for Synthure tokens.
+
+JWT payload fields:
+  sub        -- email address
+  name       -- display name
+  role       -- patient | physician | hospital_admin | employer_admin | provider
+  org_id     -- hospital or employer org UUID
+  user_id    -- users.id UUID (used for physician_id in notes, etc.)
+  patient_id -- patients.id UUID (only present for role == 'patient')
+"""
 from __future__ import annotations
 import time
 from typing import Optional
@@ -43,6 +52,8 @@ def create_access_token(
     name: str,
     role: str,
     org_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+    patient_id: Optional[str] = None,
     ttl_hours: int = 24,
 ) -> str:
     payload: dict = {
@@ -53,4 +64,8 @@ def create_access_token(
     }
     if org_id:
         payload["org_id"] = org_id
+    if user_id:
+        payload["user_id"] = user_id
+    if patient_id:
+        payload["patient_id"] = patient_id
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
