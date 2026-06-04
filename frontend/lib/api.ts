@@ -31,6 +31,12 @@ export const api = {
       'POST', '/api/auth/login', { email, password }
     ),
 
+  /** Demo login — no credentials, self-seeding. role = physician | patient | hospital_admin | employer_admin */
+  demoLogin: (role: string) =>
+    request<{ token: string; name: string; role: string; org_id?: string; user_id?: string; patient_id?: string }>(
+      'POST', `/api/auth/demo?role=${encodeURIComponent(role)}`
+    ),
+
   // ── Features (standalone pipelines)
   explainJargon: (notes: string, token: string) =>
     request('POST', '/api/features/explain-jargon', { notes }, token),
