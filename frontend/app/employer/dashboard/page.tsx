@@ -1,26 +1,112 @@
+'use client'
+import { useDemoEncounter } from '@/lib/demo-state'
+import { AIChip } from '@/components/shared/AIChip'
+import { TrendingUp, Users, DollarSign, Activity, CheckCircle } from 'lucide-react'
+
 export default function EmployerDashboard() {
+  const enc = useDemoEncounter()
+
+  const metrics = [
+    { label: 'Enrolled Employees', value: '247', icon: Users },
+    { label: 'Monthly Cost / Employee', value: '$412', icon: DollarSign },
+    { label: 'Utilization Rate', value: enc ? '0.4%' : '0%', icon: Activity },
+    { label: 'Open Enrollment', value: 'Closed', icon: CheckCircle },
+  ]
+
   return (
     <div className="p-8 max-w-5xl">
-      <h1 className="text-2xl font-light text-slate-100 mb-2">Benefits Overview</h1>
+      <div className="flex items-center gap-3 mb-2">
+        <h1 className="text-2xl font-light text-slate-100">Benefits Overview</h1>
+        {enc && <span className="ml-auto text-xs text-slate-500">Updated {new Date(enc.timestamp).toLocaleTimeString()}</span>}
+      </div>
       <p className="text-slate-400 text-sm mb-8">Workforce health data analyzed. Optimizations surfaced automatically.</p>
 
+      {/* Metric cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        {[
-          { label: 'Enrolled Employees', value: '—' },
-          { label: 'Monthly Cost / Employee', value: '—' },
-          { label: 'Utilization Rate', value: '—' },
-          { label: 'Open Enrollment', value: 'Closed' },
-        ].map((m) => (
+        {metrics.map((m) => (
           <div key={m.label} className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
-            <p className="text-xs text-slate-500 mb-1">{m.label}</p>
+            <div className="flex items-center gap-2 mb-3">
+              <m.icon className="w-4 h-4 text-violet-400" />
+              <p className="text-xs text-slate-500">{m.label}</p>
+            </div>
             <p className="text-3xl font-light text-slate-100">{m.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-[#0d1525] border border-violet-500/20 rounded-xl p-6">
-        <h2 className="text-sm font-medium text-violet-400 mb-3">✨ Benefits Optimizer</h2>
-        <p className="text-slate-400 text-sm">AI-driven plan comparison with projected savings — Phase 9 (Employer Portal).</p>
+      {/* Recent utilization event */}
+      {enc && (
+        <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6 mb-6">
+          <div className="flex items-center gap-2 mb-5">
+            <Activity className="w-4 h-4 text-violet-400" />
+            <h2 className="text-sm font-medium text-slate-300">Recent Utilization Event</h2>
+            <AIChip />
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              {[
+                { label: 'Employee', value: enc.patientName },
+                { label: 'Service date', value: new Date(enc.timestamp).toLocaleDateString() },
+                { label: 'Specialty', value: enc.specialty },
+                { label: 'Claim amount', value: `$${enc.claimAmount.toFixed(2)}` },
+              ].map((f) => (
+                <div key={f.label}>
+                  <p className="text-xs text-slate-500">{f.label}</p>
+                  <p className="text-sm text-slate-200 mt-0.5">{f.value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: 'CPT code', value: enc.cptCode },
+                { label: 'ICD-10 codes', value: enc.conditions.map(c => c.icd10).join(', ') },
+                { label: 'Prior auth', value: enc.priorAuthFiled ? 'Auto-filed by agent' : 'Not required' },
+                { label: 'Denial risk', value: `${Math.round(enc.denialProbability * 100)}% (${enc.denialProbability < 0.4 ? 'Low' : enc.denialProbability < 0.65 ? 'Moderate' : 'High'})` },
+              ].map((f) => (
+                <div key={f.label}>
+                  <p className="text-xs text-slate-500">{f.label}</p>
+                  <p className="text-sm text-slate-200 mt-0.5">{f.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Benefits optimizer */}
+      <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="w-4 h-4 text-violet-400" />
+          <h2 className="text-sm font-medium text-slate-300">Benefits Optimizer</h2>
+          <AIChip />
+        </div>
+        <div className="bg-[#0a1020] rounded-xl p-5 border border-violet-500/10">
+          <p className="text-sm text-slate-300 leading-relaxed mb-3">
+            <span className="text-violet-300 font-medium">Recommended:</span> Migrate 40% of low-utilization employees under age 40 from PPO to HDHP+HSA.
+            {enc && ` Based on current utilization (${enc.claimAmount.toFixed(0)} avg claim), projected annual savings: `}
+            {enc && <span className="text-teal-400 font-medium">$18,400/year</span>}.
+          </p>
+          <p className="text-xs text-slate-500">Analysis based on workforce demographics · Generated by Claude Sonnet · Updated monthly</p>
+        </div>
+      </div>
+
+      {/* Cost trend placeholder */}
+      <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
+        <h2 className="text-sm font-medium text-slate-300 mb-5">Monthly Cost per Employee</h2>
+        <div className="flex items-end gap-2 h-24">
+          {[380, 395, 401, 388, 410, 405, 412].map((v, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className={`w-full rounded-sm ${i === 6 ? 'bg-violet-500/60' : 'bg-violet-500/20'}`}
+                style={{ height: `${((v - 370) / 50) * 100}%` }}
+              />
+              <span className="text-xs text-slate-700 font-mono">${v}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between text-xs text-slate-700 mt-2 px-1">
+          {['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((m) => <span key={m}>{m}</span>)}
+        </div>
       </div>
     </div>
   )
