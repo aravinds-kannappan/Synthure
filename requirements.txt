@@ -15,13 +15,17 @@ anthropic>=0.39.0
 supabase>=2.0.0
 httpx>=0.27.0
 
-# ML (Phase 3)
+# ML
 scikit-learn>=1.4.0
 numpy>=1.26.0
 pandas>=2.2.0
 
-# RAG / embeddings (Phase 3)
-# sentence-transformers>=3.0.0  # heavy; loaded on demand
+# RAG / embeddings — all-MiniLM-L6-v2 (384-dim, runs on CPU)
+sentence-transformers>=3.0.0
+
+# HuggingFace dataset ingestion (run once: python -m backend.rag.ingest)
+datasets>=2.20.0
+tqdm>=4.66.0
 
 # Integrations (Phase 6)
 # twilio>=9.0.0
