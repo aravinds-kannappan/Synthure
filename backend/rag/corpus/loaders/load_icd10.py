@@ -1,18 +1,28 @@
-"""Load ICD-10-CM code descriptions into pgvector embeddings table."""
+"""
+Load ICD-10-CM code/description pairs into pgvector.
+
+Dataset: wangyichen25/ICD-10-CM_Code-Description_Pairs (verified: 1.43M rows)
+Real schema (verified):
+  - 'output'  → ICD-10 code  (e.g. 'A000')
+  - 'input'   → clinical description  (e.g. 'Cholera due to Vibrio cholerae...')
+  - 'type'    → 'desc_to_code'
+  - 'format'  → task format string
+
+Previous code used row.get('code') / row.get('description') which would have
+returned empty strings on every row.
+"""
 import sys
 from backend.core.database import get_db
 from backend.rag.embedder import embed
-from backend.rag.chunker import chunk_text
 
 
 def load_from_dataset(limit: int = 500):
-    """
-    Load ICD-10 code/description pairs from HuggingFace dataset.
-    Uses wangyichen25/ICD-10-CM_Code-Description_Pairs.
-    """
     try:
         from datasets import load_dataset
-        ds = load_dataset("wangyichen25/ICD-10-CM_Code-Description_Pairs", split=f"train[:{limit}]")
+        ds = load_dataset(
+            "wangyichen25/ICD-10-CM_Code-Description_Pairs",
+            split=f"train[:{limit}]",
+        )
     except Exception as e:
         print(f"Dataset load failed: {e}")
         return
@@ -24,9 +34,13 @@ def load_from_dataset(limit: int = 500):
 
     loaded = 0
     for row in ds:
-        code = row.get("code") or row.get("Code", "")
-        desc = row.get("description") or row.get("Description", "")
+        # Verified column names from schema: output=code, input=description
+        code = (row.get("output") or "").strip()
+        desc = (row.get("input") or "").strip()
         if not code or not desc:
+            continue
+        # Skip rows where 'type' is not desc_to_code (some rows are code_to_desc)
+        if row.get("type") not in ("desc_to_code", None):
             continue
         text = f"{code}: {desc}"
         embedding = embed(text)
