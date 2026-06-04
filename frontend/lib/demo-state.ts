@@ -1,81 +1,8 @@
-'use client'
-/**
- * Cross-portal demo state.
- * Navigator writes here after running; all other portals read from here.
- * Uses localStorage + a custom event so same-tab portals update instantly.
- */
+// All portals now read live data from the backend API after authentication.
+// This file is kept solely to supply the sample clinical note in the Navigator form.
+// The DemoEncounter type, writeDemoEncounter, readDemoEncounter, and useDemoEncounter
+// have been removed — portal content is no longer driven by localStorage.
 
-import { useEffect, useState } from 'react'
-
-const KEY = 'synthure_demo_encounter'
-const EVENT = 'synthure_demo_updated'
-
-export interface DemoCondition {
-  term: string
-  plain: string
-  icd10: string
-}
-
-export interface DemoMedication {
-  name: string
-  purpose: string
-  instructions: string
-}
-
-export interface DemoEncounter {
-  timestamp: string
-  patientName: string
-  patientAge: number
-  patientDOB: string
-  conditions: DemoCondition[]
-  medications: DemoMedication[]
-  claimId: string
-  claimStatus: 'staged' | 'submitted' | 'adjudicated'
-  claimAmount: number
-  cptCode: string
-  icd10Codes: string[]
-  denialProbability: number
-  urgency: 'urgent' | 'soon' | 'routine'
-  summary: string
-  followup: string
-  priorAuthFiled: boolean
-  educationSent: boolean
-  specialty: string
-}
-
-export function writeDemoEncounter(enc: DemoEncounter) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(KEY, JSON.stringify(enc))
-  window.dispatchEvent(new Event(EVENT))
-}
-
-export function readDemoEncounter(): DemoEncounter | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = localStorage.getItem(KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
-/** React hook — re-renders whenever Navigator writes a new encounter. */
-export function useDemoEncounter() {
-  const [enc, setEnc] = useState<DemoEncounter | null>(null)
-
-  useEffect(() => {
-    setEnc(readDemoEncounter())
-    const refresh = () => setEnc(readDemoEncounter())
-    window.addEventListener(EVENT, refresh)
-    window.addEventListener('storage', refresh)
-    return () => {
-      window.removeEventListener(EVENT, refresh)
-      window.removeEventListener('storage', refresh)
-    }
-  }, [])
-
-  return enc
-}
-
-// ── Sample clinical note shown by the "Load example" button ──────────────────
 export const SAMPLE_NOTE = `Patient: Maria Santos, 58F, DOB: 1966-03-12
 MRN: 00847291 | Insurance: BlueCross PPO | PCP: Dr. Sarah Chen
 
@@ -101,17 +28,15 @@ Imaging:
 Chest radiography revealed patchy right basilar airspace opacification consistent with lobar consolidation.
 
 Assessment & Plan:
-1. Community-acquired pneumonia (J18.9) — right lower lobe. Risk-stratified as moderate severity given diabetic status. Outpatient treatment appropriate; PSI Class II.
+1. Community-acquired pneumonia (J18.9) — right lower lobe. Moderate severity.
    → Amoxicillin-clavulanate 875mg PO BID × 7 days
-   → Return precautions: worsening dyspnea, SpO2 < 93%, fever persisting > 72h
 
-2. Type 2 diabetes mellitus (E11.9) — suboptimally controlled. Infection likely driving transient hyperglycemia.
+2. Type 2 diabetes mellitus (E11.9) — suboptimally controlled.
    → Continue metformin 1000mg BID. Monitor glucose q6h during illness.
-   → Endocrinology referral placed for A1C optimization.
 
 3. Essential hypertension (I10) — continue lisinopril 10mg QD.
 
-Follow-up: 7–10 days with repeat chest radiograph to confirm clearing. Call if fever does not resolve within 48–72 hours or breathing worsens.
+Follow-up: 7–10 days with repeat chest radiograph.
 
 CPT: 99214 (Office visit, moderate complexity)
 ICD-10: J18.9, E11.9, I10`

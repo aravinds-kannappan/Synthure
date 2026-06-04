@@ -1,123 +1,128 @@
 'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useDemoEncounter } from '@/lib/demo-state'
-import { StatusBadge } from '@/components/shared/StatusBadge'
+import { api } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
 import { AIChip } from '@/components/shared/AIChip'
-import { TrendingUp, AlertTriangle, Clock, CheckCircle, DollarSign } from 'lucide-react'
+import { Users, FileText, Activity, AlertCircle, ChevronRight, TrendingUp } from 'lucide-react'
+
+type Overview  = Record<string, unknown>
+type Physician = Record<string, unknown>
 
 export default function HospitalDashboard() {
-  const enc = useDemoEncounter()
+  const { user, ready } = useAuth()
+  const [overview,    setOverview]    = useState<Overview | null>(null)
+  const [physicians,  setPhysicians]  = useState<Physician[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState('')
 
-  const metrics = [
-    { label: 'Claims This Month', value: enc ? '1' : '0', href: '/hospital/rcm/claims', delta: enc ? '+1 today' : null, color: 'teal' },
-    { label: 'Open Denials', value: '0', href: '/hospital/rcm/denials', delta: null, color: 'teal' },
-    { label: 'AR > 90 Days', value: '$0', href: '/hospital/rcm/ar-aging', delta: null, color: 'teal' },
-    { label: 'Pending Prior Auths', value: enc?.priorAuthFiled ? '0' : '1', href: '/hospital/rcm/claims', delta: enc?.priorAuthFiled ? 'Auto-filed' : null, color: enc?.priorAuthFiled ? 'teal' : 'amber' },
-  ]
+  useEffect(() => {
+    if (!ready || !user?.token) { setLoading(false); return }
+    const t = user.token
+    Promise.all([
+      api.hospitalOverview(t),
+      api.hospitalPhysicians(t),
+    ])
+      .then(([ov, phys]) => {
+        setOverview(ov)
+        setPhysicians((phys as { physicians: Physician[] }).physicians || [])
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [ready, user])
+
+  const topConditions = (overview?.top_conditions as { code: string; count: number }[]) || []
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-8 max-w-5xl">
       <div className="flex items-center gap-3 mb-8">
-        <h1 className="text-2xl font-light text-slate-100">Revenue Cycle Overview</h1>
-        {enc && <span className="text-xs text-slate-500 ml-auto">Last encounter: {new Date(enc.timestamp).toLocaleTimeString()}</span>}
+        <h1 className="text-2xl font-light text-slate-100">Hospital Overview</h1>
+        <AIChip label="Live data" size="md" />
       </div>
 
-      {/* Metric cards */}
+      {error && (
+        <div className="flex items-center gap-2 text-red-400 text-sm mb-6">
+          <AlertCircle className="w-4 h-4" />{error}
+        </div>
+      )}
+
+      {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        {metrics.map((m) => (
-          <Link key={m.label} href={m.href}
-            className="bg-[#0d1525] border border-slate-800 hover:border-slate-700 rounded-xl p-5 transition-colors">
-            <p className="text-xs text-slate-500 mb-2">{m.label}</p>
-            <p className="text-3xl font-light text-slate-100 mb-1">{m.value}</p>
-            {m.delta && <p className={`text-xs text-${m.color}-400`}>{m.delta}</p>}
-          </Link>
+        {[
+          { label: 'Patients',      value: overview?.patients,        icon: Users,      color: 'indigo' },
+          { label: 'Clinical Notes', value: overview?.clinical_notes, icon: FileText,   color: 'teal'   },
+          { label: 'Physicians',    value: overview?.physicians,       icon: Activity,   color: 'violet' },
+          { label: 'High Risk',     value: overview?.high_readmission_count, icon: AlertCircle, color: 'amber' },
+        ].map(card => (
+          <div key={card.label} className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <card.icon className={`w-4 h-4 text-${card.color}-400`} />
+              <p className="text-xs text-slate-500">{card.label}</p>
+            </div>
+            <p className="text-3xl font-light text-slate-100">
+              {loading ? '…' : String(card.value ?? 0)}
+            </p>
+          </div>
         ))}
       </div>
 
-      {/* Recent claim */}
-      {enc && (
-        <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6 mb-6">
-          <div className="flex items-center gap-2 mb-5">
-            <DollarSign className="w-4 h-4 text-teal-400" />
-            <h2 className="text-sm font-medium text-slate-300">Recent Claim</h2>
-            <AIChip />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-500 font-mono mb-1">{enc.claimId}</p>
-              <p className="text-base font-medium text-slate-100">{enc.patientName}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{enc.specialty} · CPT {enc.cptCode}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xl font-light text-slate-100">${enc.claimAmount.toFixed(2)}</p>
-              <StatusBadge status="submitted" />
-            </div>
-          </div>
-
-          {/* ICD-10 codes */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {enc.conditions.map((c, i) => (
-              <span key={i} className="text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-1 rounded font-mono">{c.icd10}</span>
-            ))}
-          </div>
-
-          {/* Denial risk */}
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${enc.denialProbability < 0.4 ? 'bg-teal-500' : enc.denialProbability < 0.65 ? 'bg-amber-500' : 'bg-red-500'}`}
-                style={{ width: `${Math.round(enc.denialProbability * 100)}%` }}
-              />
-            </div>
-            <span className="text-xs text-slate-500">Denial risk: <span className={enc.denialProbability < 0.4 ? 'text-teal-400' : 'text-amber-400'}>{Math.round(enc.denialProbability * 100)}%</span></span>
-          </div>
-        </div>
-      )}
-
-      {/* Tier 1 Actions */}
-      {enc && (
-        <div className="bg-[#0d1525] border border-teal-500/20 rounded-xl p-6 mb-6">
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        {/* Readmission risk */}
+        <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
           <div className="flex items-center gap-2 mb-4">
-            <CheckCircle className="w-4 h-4 text-teal-400" />
-            <h2 className="text-sm font-medium text-slate-300">Autonomous Actions Completed</h2>
+            <TrendingUp className="w-4 h-4 text-amber-400" />
+            <h2 className="text-sm font-medium text-slate-300">Avg Readmission Risk</h2>
             <AIChip />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: 'Prior auth filed', done: enc.priorAuthFiled, icon: CheckCircle },
-              { label: 'Claim staged for submission', done: true, icon: CheckCircle },
-              { label: 'Patient education SMS sent', done: enc.educationSent, icon: CheckCircle },
-              { label: 'Follow-up reminder scheduled', done: true, icon: CheckCircle },
-            ].map((a) => (
-              <div key={a.label} className="flex items-center gap-2 text-sm text-slate-300">
-                <a.icon className={`w-4 h-4 flex-shrink-0 ${a.done ? 'text-teal-400' : 'text-slate-600'}`} />
-                {a.label}
-              </div>
-            ))}
-          </div>
+          <p className="text-4xl font-light text-white mb-1">
+            {loading ? '…' : `${((overview?.avg_readmission_risk as number ?? 0) * 100).toFixed(1)}%`}
+          </p>
+          <p className="text-xs text-slate-500">across all patients with AI-processed notes</p>
         </div>
-      )}
 
-      {/* AR Aging placeholder */}
-      <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-5">
-          <TrendingUp className="w-4 h-4 text-slate-400" />
-          <h2 className="text-sm font-medium text-slate-300">AR Aging Buckets</h2>
-        </div>
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { label: '0–30 days', value: enc ? `$${enc.claimAmount.toFixed(2)}` : '$0', pct: enc ? 100 : 0, color: 'teal' },
-            { label: '31–60 days', value: '$0', pct: 0, color: 'amber' },
-            { label: '61–90 days', value: '$0', pct: 0, color: 'rose' },
-            { label: '90+ days', value: '$0', pct: 0, color: 'red' },
-          ].map((b) => (
-            <div key={b.label} className="bg-[#0a1020] rounded-xl p-4 border border-slate-800">
-              <p className="text-xs text-slate-500 mb-2">{b.label}</p>
-              <p className="text-lg font-light text-slate-100 mb-2">{b.value}</p>
-              <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                <div className={`h-full bg-${b.color}-500/60 rounded-full`} style={{ width: `${b.pct}%` }} />
-              </div>
+        {/* Top conditions */}
+        <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
+          <h2 className="text-sm font-medium text-slate-300 mb-4">Top Conditions</h2>
+          {topConditions.length > 0 ? (
+            <div className="space-y-2">
+              {topConditions.map((c, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-teal-400">{c.code}</span>
+                  <span className="text-xs text-slate-400">{c.count} patient{c.count !== 1 ? 's' : ''}</span>
+                </div>
+              ))}
             </div>
+          ) : (
+            <p className="text-xs text-slate-600">No conditions recorded yet.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Physicians table */}
+      <div className="bg-[#0d1525] border border-slate-800 rounded-xl">
+        <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
+          <Activity className="w-4 h-4 text-indigo-400" />
+          <h2 className="text-sm font-medium text-slate-300">Physicians</h2>
+        </div>
+        {physicians.length === 0 && !loading && (
+          <div className="px-6 py-8 text-center text-slate-600 text-sm">No physicians in this hospital yet.</div>
+        )}
+        <div className="divide-y divide-slate-800">
+          {physicians.map((p, i) => (
+            <Link
+              key={i}
+              href={`/hospital/crm?physician_id=${p.physician_id as string}`}
+              className="flex items-center justify-between px-6 py-4 hover:bg-slate-800/30 transition-colors"
+            >
+              <div>
+                <p className="text-sm text-slate-100">{p.name as string}</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {p.patient_count as number} patient{(p.patient_count as number) !== 1 ? 's' : ''} · 
+                  {p.note_count as number} note{(p.note_count as number) !== 1 ? 's' : ''}
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-600" />
+            </Link>
           ))}
         </div>
       </div>

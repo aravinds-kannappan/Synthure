@@ -1,150 +1,85 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
 import { AIChip } from '@/components/shared/AIChip'
-import { writeDemoEncounter, SAMPLE_NOTE, type DemoEncounter } from '@/lib/demo-state'
-import { Compass, Send, Clock, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react'
+import { SAMPLE_NOTE } from '@/lib/demo-state'
+import { Compass, Send, Clock, CheckCircle, AlertTriangle, Sparkles, User } from 'lucide-react'
 
-interface NavigatorResult {
+type Patient = { id: string; first_name: string; last_name: string }
+
+interface JargonData {
+  summary?:    string
+  conditions?: { term: string; plain: string; source_doc_id: string }[]
+  medications?: { name: string; purpose: string; instructions: string }[]
+  followup?:   string
+  urgency?:    string
+  readmission_risk?: { score: number; level: string; driving_codes: string[] }
+}
+
+interface PipelineResult {
   pipelines?: {
     jargon?: {
-      data?: {
-        summary?: string
-        conditions?: { term: string; plain: string; source_doc_id: string }[]
-        medications?: { name: string; purpose: string; instructions: string }[]
-        followup?: string
-        urgency?: string
-      }
+      data?: JargonData
       entity_confidence?: number
       source?: string
       pipeline_trace?: { stage: string; duration_ms: number; confidence?: number }[]
     }
+    insurance?: {
+      recommendations?: { plan: string; match_score: number; reason: string }[]
+      ai_insight?: { ai_insight: string; key_consideration: string; warning?: string }
+    }
   }
-}
-
-// ── Demo-mode pipeline simulation (no backend needed) ─────────────────────────
-function buildDemoResult(notes: string): NavigatorResult {
-  const lower = notes.toLowerCase()
-  const hasPneumonia = lower.includes('pneumon') || lower.includes('consolidat') || lower.includes('crackle') || lower.includes('airspace')
-  const hasHTN       = lower.includes('hypertens') || lower.includes('htn') || lower.includes('lisinopril')
-  const hasDiabetes  = lower.includes('diabet') || lower.includes('a1c') || lower.includes('metformin') || lower.includes('glucose')
-  const hasCardiac   = lower.includes('cardiac') || lower.includes('tachycardi') || lower.includes('heart failure')
-  const hasInflamm   = lower.includes('crp') || lower.includes('esr') || lower.includes('leukocyt') || lower.includes('inflamm')
-
-  const conditions: { term: string; plain: string; source_doc_id: string }[] = []
-  const medications: { name: string; purpose: string; instructions: string }[] = []
-
-  if (hasPneumonia) {
-    conditions.push({ term: 'Community-acquired pneumonia (J18.9)', plain: 'Your lungs have an infection causing the air sacs to fill with fluid. The patchy shadow on your chest X-ray confirms inflammation in the lower right part of your lung.', source_doc_id: 'icd10_J18_9' })
-    medications.push({ name: 'Amoxicillin-clavulanate 875mg', purpose: 'Antibiotic to clear the bacterial lung infection', instructions: 'Take twice daily with food for 7 days. Do not skip doses even if you feel better early.' })
-  }
-  if (hasHTN || hasCardiac) {
-    conditions.push({ term: 'Essential hypertension (I10)', plain: 'Your heart is working harder than it should to pump blood. Over time this can strain your heart and blood vessels.', source_doc_id: 'icd10_I10' })
-    medications.push({ name: 'Lisinopril 10mg', purpose: 'Relaxes blood vessels so your heart doesn\'t work as hard', instructions: 'Take once every morning with or without food. Do not stop without talking to your doctor.' })
-  }
-  if (hasDiabetes) {
-    conditions.push({ term: 'Type 2 Diabetes Mellitus (E11.9)', plain: 'Your body isn\'t using insulin efficiently, causing blood sugar to run higher than normal. Your A1C shows your 3-month average blood sugar.', source_doc_id: 'icd10_E11_9' })
-    medications.push({ name: 'Metformin 1000mg', purpose: 'Helps your body respond better to insulin and lowers blood sugar', instructions: 'Take twice daily with meals to reduce stomach upset. Monitor glucose closely during illness.' })
-  }
-  if (hasInflamm && conditions.length === 0) {
-    conditions.push({ term: 'Acute inflammatory process', plain: 'Your blood tests show elevated inflammation markers — your immune system is actively fighting something.', source_doc_id: 'general_knowledge' })
-  }
-  if (conditions.length === 0) {
-    conditions.push({ term: 'Clinical findings documented', plain: 'Your doctor has documented the findings from your visit and will review next steps with you.', source_doc_id: 'general_knowledge' })
-  }
-
-  const urgency = hasPneumonia || hasCardiac ? 'soon' : 'routine'
-  const followup = hasPneumonia
-    ? 'Return in 7–10 days for repeat chest X-ray to confirm clearing. Call immediately if fever rises above 39°C, breathing worsens, or you develop chest pain.'
-    : hasHTN ? 'Follow up in 4 weeks. Get fasting bloodwork before that visit.' : 'Follow up as directed by your care team.'
-
-  return {
-    pipelines: {
-      jargon: {
-        data: { summary: `Your visit covered ${conditions.length} condition${conditions.length > 1 ? 's' : ''}. ${urgency === 'soon' ? 'Follow-up is needed within the next 1–2 weeks.' : 'Routine monitoring and medication management are in place.'}`, conditions, medications, followup, urgency },
-        entity_confidence: 0.94,
-        source: 'demo-pipeline',
-        pipeline_trace: [
-          { stage: 'quality_gate', duration_ms: 11, confidence: 0.97 },
-          { stage: 'entity_extraction', duration_ms: 312, confidence: 0.94 },
-          { stage: 'rag_retrieval', duration_ms: 78, confidence: 0.91 },
-          { stage: 'denial_ml', duration_ms: 19, confidence: 0.82 },
-          { stage: 'generation', duration_ms: 834, confidence: 0.96 },
-          { stage: 'citation_validation', duration_ms: 4, confidence: 1.00 },
-        ],
-      },
-    },
-  }
-}
-
-// Write encounter to shared demo state so all portals update
-function persistEncounter(notes: string, result: NavigatorResult) {
-  const jData = result.pipelines?.jargon?.data
-  if (!jData) return
-  const icd10Codes = (jData.conditions ?? []).map((c) => c.source_doc_id.replace('icd10_', '').replace(/_/g, '.'))
-  const hasPneumonia = notes.toLowerCase().includes('pneumon') || notes.toLowerCase().includes('j18')
-  const enc: DemoEncounter = {
-    timestamp: new Date().toISOString(),
-    patientName: 'Maria Santos',
-    patientAge: 58,
-    patientDOB: '1966-03-12',
-    conditions: (jData.conditions ?? []).map((c) => ({
-      term: c.term,
-      plain: c.plain,
-      icd10: c.source_doc_id.replace('icd10_', '').replace(/_/g, '.').toUpperCase(),
-    })),
-    medications: jData.medications ?? [],
-    claimId: `CLM-${Date.now().toString().slice(-6)}-MSAN`,
-    claimStatus: 'staged',
-    claimAmount: 385.00,
-    cptCode: '99214',
-    icd10Codes: icd10Codes.length ? icd10Codes : ['J18.9'],
-    denialProbability: 0.34,
-    urgency: (jData.urgency as 'urgent' | 'soon' | 'routine') ?? 'routine',
-    summary: jData.summary ?? '',
-    followup: jData.followup ?? '',
-    priorAuthFiled: true,
-    educationSent: true,
-    specialty: hasPneumonia ? 'Pulmonology / General Medicine' : 'General Medicine',
-  }
-  writeDemoEncounter(enc)
+  note_id?: string
+  patient_id?: string
 }
 
 function UrgencyBadge({ level }: { level: string }) {
-  const map: Record<string, { label: string; cls: string }> = {
-    urgent:  { label: 'Urgent',  cls: 'bg-red-500/10 text-red-400 border-red-500/30' },
-    soon:    { label: 'Soon',    cls: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
-    routine: { label: 'Routine', cls: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
+  const map: Record<string, { cls: string }> = {
+    urgent:  { cls: 'bg-red-500/10 text-red-400 border-red-500/30' },
+    soon:    { cls: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+    routine: { cls: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
   }
-  const { label, cls } = map[level] ?? map.routine
-  return <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${cls}`}><Clock className="w-3 h-3" />{label}</span>
+  const { cls } = map[level] ?? map.routine
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${cls}`}>
+      <Clock className="w-3 h-3" />{level}
+    </span>
+  )
 }
 
 export default function NavigatorPage() {
-  const [notes, setNotes]     = useState('')
-  const [loading, setLoading] = useState(false)
-  const [result, setResult]   = useState<NavigatorResult | null>(null)
-  const [error, setError]     = useState('')
-  const [synced, setSynced]   = useState(false)
+  const { user, ready } = useAuth()
+  const searchParams = useSearchParams()
+  const preselectedPatientId = searchParams.get('patient_id') ?? ''
+
+  const [patients,   setPatients]   = useState<Patient[]>([])
+  const [patientId,  setPatientId]  = useState(preselectedPatientId)
+  const [notes,      setNotes]      = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [result,     setResult]     = useState<PipelineResult | null>(null)
+  const [error,      setError]      = useState('')
+
+  // Load patient list
+  useEffect(() => {
+    if (!ready || !user?.token) return
+    api.listPatients(user.token)
+      .then(r => setPatients(
+        (r.patients as Patient[]).filter(p => p.id && p.first_name)
+      ))
+      .catch(() => {/* non-fatal */})
+  }, [ready, user])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true); setError(''); setResult(null); setSynced(false)
-    try {
-      let raw: Record<string, unknown> = {}
-      try { raw = JSON.parse(localStorage.getItem('synthure_user') || '{}') } catch {}
-      const user = raw as Record<string, unknown>
+    if (!user?.token) { setError('Not authenticated'); return }
+    if (!patientId)   { setError('Select a patient first'); return }
 
-      let out: NavigatorResult
-      if (user?.demo) {
-        await new Promise((r) => setTimeout(r, 1400))
-        out = buildDemoResult(notes)
-      } else {
-        out = await api.navigator({ notes }, user?.token as string) as NavigatorResult
-      }
+    setLoading(true); setError(''); setResult(null)
+    try {
+      const out = await api.navigator({ notes, patient_id: patientId }, user.token) as PipelineResult
       setResult(out)
-      persistEncounter(notes, out)
-      setSynced(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Pipeline error')
     } finally {
@@ -155,6 +90,7 @@ export default function NavigatorPage() {
   const jargon = result?.pipelines?.jargon
   const jData  = jargon?.data
   const trace  = jargon?.pipeline_trace ?? []
+  const ins    = result?.pipelines?.insurance
 
   return (
     <div className="p-8 max-w-5xl">
@@ -164,41 +100,66 @@ export default function NavigatorPage() {
         <AIChip label="Multi-agent" size="md" />
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-slate-500">Clinical note</span>
-          <button
-            type="button"
-            onClick={() => setNotes(SAMPLE_NOTE)}
-            className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors border border-indigo-500/20 bg-indigo-500/5 px-3 py-1 rounded-lg"
+      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+        {/* Patient selector */}
+        <div>
+          <label className="text-xs text-slate-500 block mb-1.5 flex items-center gap-1.5">
+            <User className="w-3 h-3" /> Patient <span className="text-red-400">*</span>
+          </label>
+          <select
+            value={patientId}
+            onChange={e => setPatientId(e.target.value)}
+            required
+            className="w-full bg-[#0d1525] border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
           >
-            <Sparkles className="w-3 h-3" />
-            Load example
-          </button>
+            <option value="">Select patient…</option>
+            {patients.map(p => (
+              <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>
+            ))}
+          </select>
         </div>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={9}
-          className="w-full bg-[#0d1525] border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 font-mono focus:outline-none focus:border-indigo-500 resize-none"
-          placeholder="Paste clinical note here — or click 'Load example' above."
-          required
-        />
+
+        {/* Clinical note */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-slate-500">Clinical note</span>
+            <button
+              type="button"
+              onClick={() => setNotes(SAMPLE_NOTE)}
+              className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors border border-indigo-500/20 bg-indigo-500/5 px-3 py-1 rounded-lg"
+            >
+              <Sparkles className="w-3 h-3" /> Load example
+            </button>
+          </div>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            rows={9}
+            className="w-full bg-[#0d1525] border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 font-mono focus:outline-none focus:border-indigo-500 resize-none"
+            placeholder="Paste clinical note here — or click ‘Load example’ above."
+            required
+          />
+        </div>
+
         {error && (
-          <div className="mt-2 flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />{error}
           </div>
         )}
-        <div className="flex items-center gap-3 mt-3">
-          <button type="submit" disabled={loading || !notes.trim()}
-            className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-colors">
+
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={loading || !notes.trim() || !patientId}
+            className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-colors"
+          >
             <Send className="w-4 h-4" />
             {loading ? 'Running agents…' : 'Run Navigator'}
           </button>
-          {synced && (
-            <span className="flex items-center gap-1.5 text-xs text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1.5 rounded-lg animate-pulse">
+          {result?.note_id && (
+            <span className="flex items-center gap-1.5 text-xs text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1.5 rounded-lg">
               <CheckCircle className="w-3.5 h-3.5" />
-              All portals updated
+              Saved — note {result.note_id.slice(0, 8)}…
             </span>
           )}
         </div>
@@ -206,6 +167,7 @@ export default function NavigatorPage() {
 
       {result && jData && (
         <div className="grid grid-cols-3 gap-6">
+          {/* Left: main results */}
           <div className="col-span-2 space-y-4">
             <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-3">
@@ -214,11 +176,24 @@ export default function NavigatorPage() {
                 {jData.urgency && <UrgencyBadge level={jData.urgency} />}
               </div>
               <p className="text-sm text-slate-300 leading-relaxed">{jData.summary}</p>
+              {jData.readmission_risk && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className={`text-xs px-2.5 py-1 rounded-full border ${
+                    jData.readmission_risk.level === 'high'     ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                    jData.readmission_risk.level === 'moderate' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                    'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                  }`}>
+                    30-day readmission risk: {jData.readmission_risk.level} ({(jData.readmission_risk.score * 100).toFixed(0)}%)
+                  </span>
+                </div>
+              )}
             </div>
 
             {!!jData.conditions?.length && (
               <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4"><h2 className="text-sm font-medium text-slate-300">Conditions Explained</h2><AIChip /></div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-sm font-medium text-slate-300">Conditions Explained</h2><AIChip />
+                </div>
                 <div className="space-y-4">
                   {jData.conditions.map((c, i) => (
                     <div key={i} className="border-l-2 border-teal-500/40 pl-4">
@@ -232,7 +207,9 @@ export default function NavigatorPage() {
 
             {!!jData.medications?.length && (
               <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4"><h2 className="text-sm font-medium text-slate-300">Medications</h2><AIChip /></div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-sm font-medium text-slate-300">Medications</h2><AIChip />
+                </div>
                 <div className="space-y-3">
                   {jData.medications.map((m, i) => (
                     <div key={i} className="bg-[#0a1020] rounded-lg p-4 border border-slate-800">
@@ -251,8 +228,34 @@ export default function NavigatorPage() {
                 <p className="text-sm text-slate-300 leading-relaxed">{jData.followup}</p>
               </div>
             )}
+
+            {/* Insurance match */}
+            {ins?.recommendations && ins.recommendations.length > 0 && (
+              <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-sm font-medium text-slate-300">Insurance Match</h2><AIChip />
+                </div>
+                <div className="space-y-3">
+                  {ins.recommendations.slice(0, 3).map((r, i) => (
+                    <div key={i} className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm text-slate-200">{r.plan}</p>
+                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{r.reason}</p>
+                      </div>
+                      <span className="text-sm font-mono text-teal-400 flex-shrink-0">{r.match_score}%</span>
+                    </div>
+                  ))}
+                </div>
+                {ins.ai_insight && (
+                  <div className="mt-4 pt-4 border-t border-slate-800">
+                    <p className="text-xs text-slate-400 leading-relaxed">{ins.ai_insight.ai_insight}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
+          {/* Right: agent trace */}
           <div className="space-y-4">
             <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
               <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">Agent Trace</h2>
@@ -267,7 +270,10 @@ export default function NavigatorPage() {
                       </div>
                       {step.confidence !== undefined && (
                         <div className="mt-1 h-0.5 bg-slate-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-teal-500/60 rounded-full" style={{ width: `${Math.round(step.confidence * 100)}%` }} />
+                          <div
+                            className="h-full bg-teal-500/60 rounded-full"
+                            style={{ width: `${Math.round(step.confidence * 100)}%` }}
+                          />
                         </div>
                       )}
                     </div>
@@ -284,9 +290,15 @@ export default function NavigatorPage() {
             </div>
 
             <div className="bg-[#0d1525] border border-teal-500/20 rounded-xl p-5">
-              <h2 className="text-xs font-medium text-teal-400 uppercase tracking-wider mb-3">Tier 1 Actions Queued</h2>
+              <h2 className="text-xs font-medium text-teal-400 uppercase tracking-wider mb-3">Persisted</h2>
               <div className="space-y-2">
-                {['Prior auth filed', 'Claim staged ($385)', 'Patient education sent', 'Follow-up reminder set'].map((action) => (
+                {[
+                  'Note saved to patient record',
+                  'Conditions updated',
+                  'Medications updated',
+                  'Care event logged',
+                  result?.pipelines?.insurance ? 'Insurance match stored' : null,
+                ].filter(Boolean).map(action => (
                   <div key={action} className="flex items-center gap-2 text-xs text-slate-300">
                     <CheckCircle className="w-3 h-3 text-teal-400 flex-shrink-0" />{action}
                   </div>

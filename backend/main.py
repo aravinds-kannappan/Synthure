@@ -10,7 +10,7 @@ from backend.core.database import init_db
 # Auth
 from backend.api import auth as auth_module
 
-# Features
+# Features (standalone)
 from backend.api.features import jargon as jargon_module
 from backend.api.features import insurance as insurance_module
 
@@ -29,27 +29,26 @@ from backend.api.hospital import analytics as hospital_analytics
 
 # Physician
 from backend.api.physician import navigator as navigator_module
+from backend.api.physician import patients as physician_patients_module
 
-# Patient portal
+# Patient Portal
 from backend.api.patient import portal as patient_portal
 
-# Employer analytics
+# Employer Analytics
 from backend.api.employer import analytics as employer_analytics
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-
-    # Seed insurance plan knowledge base into RAG corpus on startup
+    # Seed insurance plan knowledge base
     try:
         from backend.ml.insurance_rag import seed_insurance_corpus
         count = seed_insurance_corpus()
         if count > 0:
-            print(f"[startup] Seeded {count} insurance plan documents into RAG corpus")
+            print(f"[startup] Seeded {count} insurance plan docs into RAG corpus")
     except Exception as exc:
         print(f"[startup] Insurance corpus seed skipped: {exc}")
-
     yield
 
 
@@ -76,25 +75,26 @@ app.include_router(jargon_module.router, prefix="/api/features", tags=["features
 app.include_router(insurance_module.router, prefix="/api/features", tags=["features"])
 
 # ── Hospital CRM
-app.include_router(crm_patients.router, prefix="/api/hospital/crm", tags=["hospital-crm"])
-app.include_router(crm_providers.router, prefix="/api/hospital/crm", tags=["hospital-crm"])
-app.include_router(crm_payers.router, prefix="/api/hospital/crm", tags=["hospital-crm"])
-app.include_router(crm_documents.router, prefix="/api/hospital/crm", tags=["hospital-crm"])
+app.include_router(crm_patients.router,       prefix="/api/hospital/crm", tags=["hospital-crm"])
+app.include_router(crm_providers.router,      prefix="/api/hospital/crm", tags=["hospital-crm"])
+app.include_router(crm_payers.router,         prefix="/api/hospital/crm", tags=["hospital-crm"])
+app.include_router(crm_documents.router,      prefix="/api/hospital/crm", tags=["hospital-crm"])
 app.include_router(crm_communications.router, prefix="/api/hospital/crm", tags=["hospital-crm"])
 
 # ── Hospital RCM
 app.include_router(claims_module.router, prefix="/api/hospital/rcm", tags=["rcm"])
 
-# ── Hospital Analytics (new)
+# ── Hospital Analytics
 app.include_router(hospital_analytics.router, prefix="/api/hospital/analytics", tags=["hospital-analytics"])
 
 # ── Physician
-app.include_router(navigator_module.router, prefix="/api/physician", tags=["physician"])
+app.include_router(navigator_module.router,         prefix="/api/physician", tags=["physician"])
+app.include_router(physician_patients_module.router, prefix="/api/physician", tags=["physician"])
 
-# ── Patient Portal (new)
+# ── Patient Portal
 app.include_router(patient_portal.router, prefix="/api/patient", tags=["patient"])
 
-# ── Employer Analytics (new)
+# ── Employer Analytics
 app.include_router(employer_analytics.router, prefix="/api/employer", tags=["employer"])
 
 
@@ -111,7 +111,6 @@ async def health():
             corpus_source = "pgvector"
     except Exception:
         pass
-
     if corpus_size == 0:
         try:
             from backend.rag.knowledge_base import CORPUS
@@ -119,7 +118,6 @@ async def health():
             corpus_source = "seed"
         except Exception:
             pass
-
     return {
         "status": "ok",
         "ai_enabled": bool(settings.anthropic_api_key),

@@ -1,40 +1,139 @@
 'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Compass, ArrowRight } from 'lucide-react'
+import { api } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
+import { AIChip } from '@/components/shared/AIChip'
+import { Compass, Users, FileText, ArrowRight, AlertCircle, Clock } from 'lucide-react'
+
+type Patient = Record<string, unknown>
+
+const URGENCY_COLOR: Record<string, string> = {
+  urgent:  'text-red-400 bg-red-500/10 border-red-500/20',
+  soon:    'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  routine: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+}
 
 export default function PhysicianDashboard() {
+  const { user, ready } = useAuth()
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [loading,  setLoading]  = useState(true)
+  const [error,    setError]    = useState('')
+
+  useEffect(() => {
+    if (!ready || !user?.token) { setLoading(false); return }
+    api.getMyPatients(user.token)
+      .then(r => setPatients(r.patients))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [ready, user])
+
+  const totalNotes = patients.reduce((s, p) => s + ((p.note_count as number) || 0), 0)
+  const highRisk   = patients.filter(p => (p.readmission_risk as { level?: string })?.level === 'high').length
+
   return (
-    <div className="p-8 max-w-4xl">
-      <h1 className="text-2xl font-light text-slate-100 mb-2">Good morning, Doctor</h1>
-      <p className="text-slate-400 text-sm mb-8">Enter a clinical note to trigger all pipelines simultaneously.</p>
-
-      <Link
-        href="/physician/navigator"
-        className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/30 hover:border-indigo-500/50 rounded-2xl p-6 mb-6 transition-colors group"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center">
-            <Compass className="w-6 h-6 text-indigo-400" />
-          </div>
-          <div>
-            <p className="font-medium text-slate-100">Navigator</p>
-            <p className="text-sm text-slate-400">One note → prior auth + claim + education + referral</p>
-          </div>
+    <div className="p-8 max-w-5xl">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-light text-slate-100">Good morning, {user?.name ?? 'Doctor'}</h1>
+          <p className="text-slate-400 text-sm mt-1">Select a patient to run the Navigator, or review recent results below.</p>
         </div>
-        <ArrowRight className="w-5 h-5 text-indigo-400 group-hover:translate-x-1 transition-transform" />
-      </Link>
+        <Link
+          href="/physician/navigator"
+          className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white font-medium py-2.5 px-5 rounded-lg text-sm transition-colors"
+        >
+          <Compass className="w-4 h-4" /> Navigator
+        </Link>
+      </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { label: 'Pending One-tap', value: '0', color: 'amber' },
-          { label: 'Prior Auths', value: '0', color: 'teal' },
-          { label: 'Patients', value: '0', color: 'indigo' },
-        ].map((card) => (
+          { label: 'My Patients',    value: loading ? '…' : String(patients.length), icon: Users,     color: 'indigo' },
+          { label: 'Total Notes',    value: loading ? '…' : String(totalNotes),       icon: FileText,  color: 'teal'   },
+          { label: 'High Risk',      value: loading ? '…' : String(highRisk),         icon: AlertCircle, color: 'amber' },
+        ].map(card => (
           <div key={card.label} className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
-            <p className="text-xs text-slate-500 mb-1">{card.label}</p>
+            <div className="flex items-center gap-2 mb-3">
+              <card.icon className={`w-4 h-4 text-${card.color}-400`} />
+              <p className="text-xs text-slate-500">{card.label}</p>
+            </div>
             <p className="text-3xl font-light text-slate-100">{card.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Patient list */}
+      <div className="bg-[#0d1525] border border-slate-800 rounded-xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-indigo-400" />
+            <h2 className="text-sm font-medium text-slate-300">My Patients</h2>
+          </div>
+          <AIChip label="AI-enriched" />
+        </div>
+
+        {error && (
+          <div className="px-6 py-4 flex items-center gap-2 text-red-400 text-sm">
+            <AlertCircle className="w-4 h-4" />{error}
+          </div>
+        )}
+
+        {!loading && patients.length === 0 && !error && (
+          <div className="px-6 py-10 text-center text-slate-600 text-sm">
+            No patients assigned yet. Submit a clinical note via Navigator to assign a patient.
+          </div>
+        )}
+
+        <div className="divide-y divide-slate-800">
+          {patients.map((p, i) => {
+            const rr  = p.readmission_risk as { level?: string; score?: number } | null
+            const urg = (p.urgency as string) || 'routine'
+            return (
+              <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-slate-800/30 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-sm font-medium text-slate-100">
+                      {p.first_name as string} {p.last_name as string}
+                    </p>
+                    {urg && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${URGENCY_COLOR[urg] ?? URGENCY_COLOR.routine}`}>
+                        {urg}
+                      </span>
+                    )}
+                  </div>
+                  {p.latest_summary && (
+                    <p className="text-xs text-slate-500 truncate max-w-lg">{p.latest_summary as string}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    {p.latest_visit && (
+                      <span className="text-xs text-slate-600 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {new Date(p.latest_visit as string).toLocaleDateString()}
+                      </span>
+                    )}
+                    {rr && (
+                      <span className={`text-xs ${
+                        rr.level === 'high'     ? 'text-red-400' :
+                        rr.level === 'moderate' ? 'text-amber-400' :
+                        'text-teal-400'
+                      }`}>
+                        Readmission: {rr.level} ({((rr.score ?? 0) * 100).toFixed(0)}%)
+                      </span>
+                    )}
+                    <span className="text-xs text-slate-600">{p.note_count as number} note{(p.note_count as number) !== 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+                <Link
+                  href={`/physician/navigator?patient_id=${p.id as string}`}
+                  className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 bg-indigo-500/5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                >
+                  <Compass className="w-3 h-3" /> New note
+                </Link>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
