@@ -4,10 +4,18 @@ import { api } from '@/lib/api'
 import { AIChip } from '@/components/shared/AIChip'
 import { Compass, Send } from 'lucide-react'
 
+interface NavigatorResult {
+  pipelines?: {
+    jargon?: unknown
+    insurance?: unknown
+    [key: string]: unknown
+  }
+}
+
 export default function NavigatorPage() {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<Record<string, unknown> | null>(null)
+  const [result, setResult] = useState<NavigatorResult | null>(null)
   const [error, setError] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -16,7 +24,7 @@ export default function NavigatorPage() {
     setError('')
     try {
       const user = JSON.parse(localStorage.getItem('synthure_user') || '{}')
-      const out = await api.navigator({ notes }, user.token) as Record<string, unknown>
+      const out = await api.navigator({ notes }, user.token) as NavigatorResult
       setResult(out)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Pipeline error')
@@ -55,25 +63,25 @@ export default function NavigatorPage() {
 
       {result && (
         <div className="space-y-4">
-          {(result.pipelines as Record<string, unknown>)?.jargon && (
+          {result.pipelines?.jargon && (
             <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-sm font-medium text-slate-300">Jargon Decoder</h2>
                 <AIChip />
               </div>
               <pre className="text-xs text-slate-400 overflow-auto">
-                {JSON.stringify((result.pipelines as Record<string, unknown>).jargon, null, 2)}
+                {JSON.stringify(result.pipelines.jargon, null, 2)}
               </pre>
             </div>
           )}
-          {(result.pipelines as Record<string, unknown>)?.insurance && (
+          {result.pipelines?.insurance && (
             <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-sm font-medium text-slate-300">Insurance Matcher</h2>
                 <AIChip />
               </div>
               <pre className="text-xs text-slate-400 overflow-auto">
-                {JSON.stringify((result.pipelines as Record<string, unknown>).insurance, null, 2)}
+                {JSON.stringify(result.pipelines.insurance, null, 2)}
               </pre>
             </div>
           )}
