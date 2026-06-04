@@ -3,11 +3,9 @@ import { useEffect, useState } from 'react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { AIChip } from '@/components/shared/AIChip'
-import { FileText, ShieldCheck, TrendingUp, AlertCircle, Clock } from 'lucide-react'
+import { FileText, ShieldCheck, AlertCircle, Clock } from 'lucide-react'
 
 type Note = Record<string, unknown>
-type JargonData = Record<string, unknown>
-type ReadmissionRisk = { score: number; level: string; driving_codes: string[] }
 
 function Empty() {
   return (
@@ -29,7 +27,7 @@ export default function PatientClaims() {
     if (!ready || !user?.token) { setLoading(false); return }
     api.getMyNotes(user.token)
       .then(r => setNotes(r.notes || []))
-      .catch(e => setError(e.message))
+      .catch(e => setError((e as Error).message))
       .finally(() => setLoading(false))
   }, [ready, user])
 
@@ -49,7 +47,7 @@ export default function PatientClaims() {
         <AIChip label="AI-analysed" size="md" />
       </div>
 
-      {error && (
+      {!!error && (
         <div className="flex items-center gap-2 text-red-400 text-sm mb-6">
           <AlertCircle className="w-4 h-4" />{error}
         </div>
@@ -58,9 +56,10 @@ export default function PatientClaims() {
       {notes.length === 0 ? <Empty /> : (
         <div className="space-y-4">
           {notes.map((note, i) => {
-            const jData = (note.ai_summary ? note : null)
-            const urgency = (note.urgency as string) || 'routine'
-            const visitDate = new Date(note.created_at as string).toLocaleDateString('en-US', {
+            const urgency     = (note.urgency as string) || 'routine'
+            const physicianName = note.physician_name as string | undefined
+            const aiSummary     = note.ai_summary as string | undefined
+            const visitDate   = new Date(note.created_at as string).toLocaleDateString('en-US', {
               month: 'long', day: 'numeric', year: 'numeric',
             })
 
@@ -68,12 +67,14 @@ export default function PatientClaims() {
               <div key={i} className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-xs text-slate-500 font-mono mb-1">{(note.id as string).slice(0, 8).toUpperCase()}…</p>
+                    <p className="text-xs text-slate-500 font-mono mb-1">
+                      {(note.id as string).slice(0, 8).toUpperCase()}…
+                    </p>
                     <p className="text-base font-medium text-slate-100">
                       Visit on {visitDate}
                     </p>
-                    {note.physician_name && (
-                      <p className="text-xs text-slate-500 mt-0.5">Dr. {note.physician_name as string}</p>
+                    {!!physicianName && (
+                      <p className="text-xs text-slate-500 mt-0.5">Dr. {physicianName}</p>
                     )}
                   </div>
                   <span className={`text-xs px-2.5 py-1 rounded-full border ${
@@ -83,14 +84,14 @@ export default function PatientClaims() {
                   }`}>{urgency}</span>
                 </div>
 
-                {note.ai_summary && (
+                {!!aiSummary && (
                   <div className="border-t border-slate-800 pt-4 mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <ShieldCheck className="w-4 h-4 text-teal-400" />
                       <p className="text-xs font-medium text-slate-400">AI Visit Summary</p>
                       <AIChip />
                     </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">{note.ai_summary as string}</p>
+                    <p className="text-sm text-slate-300 leading-relaxed">{aiSummary}</p>
                   </div>
                 )}
 
