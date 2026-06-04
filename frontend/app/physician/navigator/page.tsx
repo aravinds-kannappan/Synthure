@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -49,24 +49,25 @@ function UrgencyBadge({ level }: { level: string }) {
   )
 }
 
-export default function NavigatorPage() {
+// ── Inner component — uses useSearchParams, must be inside <Suspense> ────────
+
+function NavigatorInner() {
   const { user, ready } = useAuth()
   const searchParams = useSearchParams()
   const preselectedPatientId = searchParams.get('patient_id') ?? ''
 
-  const [patients,   setPatients]   = useState<Patient[]>([])
-  const [patientId,  setPatientId]  = useState(preselectedPatientId)
-  const [notes,      setNotes]      = useState('')
-  const [loading,    setLoading]    = useState(false)
-  const [result,     setResult]     = useState<PipelineResult | null>(null)
-  const [error,      setError]      = useState('')
+  const [patients,  setPatients]  = useState<Patient[]>([])
+  const [patientId, setPatientId] = useState(preselectedPatientId)
+  const [notes,     setNotes]     = useState('')
+  const [loading,   setLoading]   = useState(false)
+  const [result,    setResult]    = useState<PipelineResult | null>(null)
+  const [error,     setError]     = useState('')
 
-  // Load patient list
   useEffect(() => {
     if (!ready || !user?.token) return
     api.listPatients(user.token)
       .then(r => setPatients(
-        (r.patients as Patient[]).filter(p => p.id && p.first_name)
+        (r.patients as unknown as Patient[]).filter(p => p.id && p.first_name)
       ))
       .catch(() => {/* non-fatal */})
   }, [ready, user])
@@ -103,8 +104,10 @@ export default function NavigatorPage() {
       <form onSubmit={handleSubmit} className="mb-8 space-y-4">
         {/* Patient selector */}
         <div>
-          <label className="text-xs text-slate-500 block mb-1.5 flex items-center gap-1.5">
-            <User className="w-3 h-3" /> Patient <span className="text-red-400">*</span>
+          <label className="text-xs text-slate-500 block mb-1.5">
+            <span className="flex items-center gap-1.5">
+              <User className="w-3 h-3" /> Patient <span className="text-red-400">*</span>
+            </span>
           </label>
           <select
             value={patientId}
@@ -136,12 +139,12 @@ export default function NavigatorPage() {
             onChange={e => setNotes(e.target.value)}
             rows={9}
             className="w-full bg-[#0d1525] border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 font-mono focus:outline-none focus:border-indigo-500 resize-none"
-            placeholder="Paste clinical note here — or click ‘Load example’ above."
+            placeholder="Paste clinical note here — or click 'Load example' above."
             required
           />
         </div>
 
-        {error && (
+        {!!error && (
           <div className="flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />{error}
           </div>
@@ -156,7 +159,7 @@ export default function NavigatorPage() {
             <Send className="w-4 h-4" />
             {loading ? 'Running agents…' : 'Run Navigator'}
           </button>
-          {result?.note_id && (
+          {!!result?.note_id && (
             <span className="flex items-center gap-1.5 text-xs text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1.5 rounded-lg">
               <CheckCircle className="w-3.5 h-3.5" />
               Saved — note {result.note_id.slice(0, 8)}…
@@ -173,10 +176,10 @@ export default function NavigatorPage() {
               <div className="flex items-center gap-2 mb-3">
                 <h2 className="text-sm font-medium text-slate-300">Visit Summary</h2>
                 <AIChip />
-                {jData.urgency && <UrgencyBadge level={jData.urgency} />}
+                {!!jData.urgency && <UrgencyBadge level={jData.urgency} />}
               </div>
               <p className="text-sm text-slate-300 leading-relaxed">{jData.summary}</p>
-              {jData.readmission_risk && (
+              {!!jData.readmission_risk && (
                 <div className="mt-3 flex items-center gap-2">
                   <span className={`text-xs px-2.5 py-1 rounded-full border ${
                     jData.readmission_risk.level === 'high'     ? 'bg-red-500/10 text-red-400 border-red-500/20' :
@@ -222,7 +225,7 @@ export default function NavigatorPage() {
               </div>
             )}
 
-            {jData.followup && (
+            {!!jData.followup && (
               <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-5">
                 <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Follow-Up</h2>
                 <p className="text-sm text-slate-300 leading-relaxed">{jData.followup}</p>
@@ -230,7 +233,7 @@ export default function NavigatorPage() {
             )}
 
             {/* Insurance match */}
-            {ins?.recommendations && ins.recommendations.length > 0 && (
+            {!!ins?.recommendations?.length && (
               <div className="bg-[#0d1525] border border-slate-800 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <h2 className="text-sm font-medium text-slate-300">Insurance Match</h2><AIChip />
@@ -246,7 +249,7 @@ export default function NavigatorPage() {
                     </div>
                   ))}
                 </div>
-                {ins.ai_insight && (
+                {!!ins.ai_insight && (
                   <div className="mt-4 pt-4 border-t border-slate-800">
                     <p className="text-xs text-slate-400 leading-relaxed">{ins.ai_insight.ai_insight}</p>
                   </div>
@@ -309,5 +312,21 @@ export default function NavigatorPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// ── Page export — Suspense required by Next.js App Router when useSearchParams
+// is used anywhere in the component tree ─────────────────────────────────────
+
+export default function NavigatorPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8 flex items-center gap-3 text-slate-400 text-sm">
+        <div className="animate-spin w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full" />
+        Loading Navigator…
+      </div>
+    }>
+      <NavigatorInner />
+    </Suspense>
   )
 }
