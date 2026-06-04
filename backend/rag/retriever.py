@@ -1,15 +1,15 @@
 """
-BM25 retrieval engine — pure Python, no external ML dependencies.
-Indexes the medical knowledge base and retrieves top-k relevant documents.
+Semantic retrieval via Supabase pgvector (all-MiniLM-L6-v2, 384-dim).
+Falls back to BM25 over the seed corpus when the DB is unavailable.
 """
+
+from __future__ import annotations
 
 import math
 import re
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Optional
-
-from backend.rag.knowledge_base import CORPUS, get_document
 
 
 @dataclass
@@ -17,132 +17,158 @@ class RetrievedDoc:
     id: str
     doc_type: str
     title: str
-    content: str    # formatted context block for LLM injection
-    relevance: float  # normalized BM25 score 0–1
+    content: str
+    relevance: float
 
+
+# ── Embedding model (lazy-loaded to avoid cold-start cost) ────────────────────
+
+_embed_model = None
+
+
+def _get_embed_model():
+    global _embed_model
+    if _embed_model is None:
+        from sentence_transformers import SentenceTransformer
+        _embed_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    return _embed_model
+
+
+def _embed(text: str) -> list[float]:
+    return _get_embed_model().encode(text, normalize_embeddings=True).tolist()
+
+
+# ── pgvector semantic retrieval ───────────────────────────────────────────────
+
+def _pgvector_retrieve(
+    query: str,
+    top_k: int,
+    source: Optional[str],
+    doc_type: Optional[str],
+) -> list[RetrievedDoc]:
+    from backend.core.database import get_db
+    db = get_db()
+    if db is None:
+        return []
+    try:
+        embedding = _embed(query)
+        result = db.rpc(
+            "match_rag_documents",
+            {
+                "query_embedding": embedding,
+                "match_count": top_k,
+                "filter_source": source,
+                "filter_doc_type": doc_type,
+            },
+        ).execute()
+        return [
+            RetrievedDoc(
+                id=str(row["id"]),
+                doc_type=row["doc_type"],
+                title=row.get("title") or "",
+                content=row["content"],
+                relevance=round(float(row["similarity"]), 3),
+            )
+            for row in (result.data or [])
+        ]
+    except Exception:
+        return []
+
+
+# ── BM25 fallback (offline / no DB) ──────────────────────────────────────────
 
 def _tokenize(text: str) -> list[str]:
-    """Lowercase + split on non-alphanumeric. Includes ICD/CPT codes as tokens."""
     return re.findall(r"[a-z0-9]+", text.lower())
 
 
-def _format_for_context(doc: dict) -> str:
-    """Format a KB document as a numbered context block for LLM injection."""
-    lines = [f"[{doc['id']}] {doc['title']}"]
-    skip = {"id", "type", "title", "_text", "keywords"}
-    for k, v in doc.items():
-        if k in skip:
-            continue
-        if isinstance(v, str) and v:
-            lines.append(f"  {k.replace('_', ' ')}: {v}")
-        elif isinstance(v, list) and v:
-            lines.append(f"  {k.replace('_', ' ')}: {', '.join(str(x) for x in v)}")
-    return "\n".join(lines)
+def _bm25_retrieve(
+    query: str,
+    top_k: int,
+    doc_type: Optional[str],
+) -> list[RetrievedDoc]:
+    from backend.rag.knowledge_base import CORPUS
 
+    docs = [d for d in CORPUS if doc_type is None or d.get("type") == doc_type]
+    if not docs:
+        return []
 
-class BM25Retriever:
-    """
-    Okapi BM25 retrieval over the medical knowledge base corpus.
+    tokenized = [_tokenize(d["_text"]) for d in docs]
+    N = len(docs)
+    avgdl = sum(len(t) for t in tokenized) / max(N, 1)
 
-    BM25 score for document D and query Q:
-        score(D,Q) = Σ IDF(t) * (tf * (k1+1)) / (tf + k1*(1 - b + b*|D|/avgdl))
-    where:
-        IDF(t) = log((N - df(t) + 0.5) / (df(t) + 0.5) + 1)
-    """
+    df: dict[str, int] = defaultdict(int)
+    for tokens in tokenized:
+        for term in set(tokens):
+            df[term] += 1
 
-    def __init__(self, documents: list[dict], k1: float = 1.5, b: float = 0.75):
-        self.docs = documents
-        self.k1 = k1
-        self.b = b
-        self._build_index()
+    idf = {
+        term: math.log((N - freq + 0.5) / (freq + 0.5) + 1)
+        for term, freq in df.items()
+    }
 
-    def _build_index(self) -> None:
-        self.tokenized = [_tokenize(d["_text"]) for d in self.docs]
-        lengths = [len(t) for t in self.tokenized]
-        self.avgdl = sum(lengths) / len(lengths) if lengths else 1.0
-        self.N = len(self.docs)
+    k1, b = 1.5, 0.75
+    query_tokens = _tokenize(query)
 
-        df: dict[str, int] = defaultdict(int)
-        for tokens in self.tokenized:
-            for term in set(tokens):
-                df[term] += 1
-
-        self.idf: dict[str, float] = {
-            term: math.log((self.N - freq + 0.5) / (freq + 0.5) + 1)
-            for term, freq in df.items()
-        }
-
-    def _score(self, query_tokens: list[str], doc_idx: int) -> float:
-        tokens = self.tokenized[doc_idx]
-        doc_len = len(tokens)
+    def bm25_score(idx: int) -> float:
+        tokens = tokenized[idx]
         tf: dict[str, int] = defaultdict(int)
         for t in tokens:
             tf[t] += 1
-
-        score = 0.0
+        s = 0.0
         for t in query_tokens:
-            if t not in self.idf:
+            if t not in idf:
                 continue
             f = tf[t]
-            score += (
-                self.idf[t]
-                * (f * (self.k1 + 1))
-                / (f + self.k1 * (1.0 - self.b + self.b * doc_len / self.avgdl))
-            )
-        return score
+            s += idf[t] * (f * (k1 + 1)) / (f + k1 * (1 - b + b * len(tokens) / avgdl))
+        return s
+
+    scored = sorted(range(N), key=bm25_score, reverse=True)[:top_k]
+    top = [(i, bm25_score(i)) for i in scored if bm25_score(i) > 0]
+    if not top:
+        return []
+
+    max_s = top[0][1]
+    return [
+        RetrievedDoc(
+            id=docs[i]["id"],
+            doc_type=docs[i]["type"],
+            title=docs[i].get("title", docs[i].get("code", "")),
+            content=docs[i].get("description", docs[i].get("content", "")),
+            relevance=round(s / max_s, 3),
+        )
+        for i, s in top
+    ]
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
+
+def retrieve(
+    query: str,
+    top_k: int = 5,
+    source: Optional[str] = None,
+    doc_type: Optional[str] = None,
+) -> list[RetrievedDoc]:
+    """
+    Retrieve top_k documents semantically relevant to query.
+    Uses pgvector when Supabase is connected, BM25 seed corpus otherwise.
+    """
+    docs = _pgvector_retrieve(query, top_k, source, doc_type)
+    if docs:
+        return docs
+    return _bm25_retrieve(query, top_k, doc_type)
+
+
+class BM25Retriever:
+    """Backwards-compatible wrapper — routes to pgvector with BM25 fallback."""
 
     def retrieve(
         self,
         query: str,
-        top_k: int = 4,
+        top_k: int = 5,
         doc_type: Optional[str] = None,
     ) -> list[RetrievedDoc]:
-        """
-        Retrieve top_k documents for the query.
-        Optionally filter to a specific doc_type: "medical_code", "denial_pattern", "insurance_policy".
-        """
-        query_tokens = _tokenize(query)
-        if not query_tokens:
-            return []
-
-        candidate_indices = (
-            range(len(self.docs))
-            if doc_type is None
-            else [i for i, d in enumerate(self.docs) if d.get("type") == doc_type]
-        )
-
-        scored = [(i, self._score(query_tokens, i)) for i in candidate_indices]
-        scored.sort(key=lambda x: -x[1])
-
-        top = [(i, s) for i, s in scored[:top_k] if s > 0]
-        if not top:
-            return []
-
-        max_score = top[0][1]
-
-        return [
-            RetrievedDoc(
-                id=self.docs[i]["id"],
-                doc_type=self.docs[i]["type"],
-                title=self.docs[i]["title"],
-                content=_format_for_context(self.docs[i]),
-                relevance=round(score / max_score, 3),
-            )
-            for i, score in top
-        ]
-
-
-# Module-level singleton — built once on import
-_retriever: Optional[BM25Retriever] = None
+        return retrieve(query, top_k=top_k, doc_type=doc_type)
 
 
 def get_retriever() -> BM25Retriever:
-    global _retriever
-    if _retriever is None:
-        _retriever = BM25Retriever(CORPUS)
-    return _retriever
-
-
-def retrieve(query: str, top_k: int = 4, doc_type: Optional[str] = None) -> list[RetrievedDoc]:
-    """Convenience function for module-level retrieval."""
-    return get_retriever().retrieve(query, top_k=top_k, doc_type=doc_type)
+    return BM25Retriever()
