@@ -57,7 +57,7 @@ export default function ResearchPage() {
             <Link href="/research" className="text-white">Research</Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
           </div>
-          <Link href="/login" className="text-sm font-semibold bg-teal-500 hover:bg-teal-400 text-[#030711] px-4 py-2 rounded-lg transition-colors">
+          <Link href="/demo" className="text-sm font-semibold bg-teal-500 hover:bg-teal-400 text-[#030711] px-4 py-2 rounded-lg transition-colors">
             Try demo →
           </Link>
         </div>
@@ -184,10 +184,10 @@ export default function ResearchPage() {
         <div className="mt-16 pt-10 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <div className="text-sm font-semibold text-white mb-1">Explore the platform</div>
-            <div className="text-xs text-slate-500">All four portals available in demo mode — no account needed</div>
+            <div className="text-xs text-slate-500">Type any clinical note and watch the agents work — no account needed</div>
           </div>
           <div className="flex gap-3">
-            <Link href="/login" className="bg-teal-500 hover:bg-teal-400 text-[#030711] font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
+            <Link href="/demo" className="bg-teal-500 hover:bg-teal-400 text-[#030711] font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
               Try demo
             </Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer"

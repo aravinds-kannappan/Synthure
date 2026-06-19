@@ -9,18 +9,31 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Synthure design system
-        navy:    { DEFAULT: '#04091a', surface: '#0d1525', elevated: '#162035' },
-        teal:    { DEFAULT: '#00e5c3', muted: '#00b89e' },
-        indigo:  { DEFAULT: '#818cf8', muted: '#6366f1' },
-        amber:   { DEFAULT: '#fbbf24' },
+        navy: { DEFAULT: '#05070f', surface: '#0b1220', elevated: '#121b2e' },
+        teal: { DEFAULT: '#2dd4bf', muted: '#14b8a6' },
+        indigo: { DEFAULT: '#818cf8', muted: '#6366f1' },
+        amber: { DEFAULT: '#fbbf24' },
         success: { DEFAULT: '#34d399' },
-        error:   { DEFAULT: '#f87171' },
-        violet:  { DEFAULT: '#a78bfa' },
+        error: { DEFAULT: '#f87171' },
+        violet: { DEFAULT: '#a78bfa' },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 2.5s linear infinite',
+        float: 'float 6s ease-in-out infinite',
       },
     },
   },
