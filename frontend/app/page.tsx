@@ -10,7 +10,7 @@ import { STAKEHOLDERS, STAKEHOLDER_ORDER } from '@/lib/synthure'
 const STATS = [
   { n: '1', label: 'note in' },
   { n: '10', label: 'specialized agents' },
-  { n: '4', label: 'tailored reports' },
+  { n: '4', label: 'tailored portals' },
   { n: '~6s', label: 'end to end' },
 ]
 
@@ -51,8 +51,8 @@ export default function Landing() {
             <span className="gradient-text">Four intelligent reports.</span>
           </h1>
           <p className="mt-7 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Synthure is a team of AI agents that read a single clinical note and write tailored,
-            verified reports for everyone it touches: the patient, the physician, the hospital,
+            Synthure is a team of AI agents that read a single clinical note and open a tailored,
+            verified portal for everyone it touches: the patient, the physician, the hospital,
             and the employer. Watch them work in real time.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">

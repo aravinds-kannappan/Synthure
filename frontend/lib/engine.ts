@@ -11,6 +11,15 @@ import type {
   Verification,
   Synthesis,
 } from './synthure'
+import {
+  ICD_LABELS,
+  PLAIN_DX,
+  MED_INFO,
+  CPT_LABELS,
+  fmt$,
+  icdKey,
+  estimateCoverage,
+} from './knowledge'
 
 // ── Hyphen / dash sanitizer ─────────────────────────────────────────────────
 // The product copy and every generated report must contain no hyphens or dashes.
@@ -33,70 +42,6 @@ export function dehyphen<T>(value: T): T {
   return value
 }
 
-const fmt$ = (n: number) => '$' + Math.round(n).toLocaleString('en-US')
-
-// ── Knowledge dictionaries (recognition is a bonus, never required) ──────────
-const ICD_LABELS: Record<string, string> = {
-  I10: 'Essential (primary) hypertension',
-  E782: 'Mixed hyperlipidemia',
-  E119: 'Type 2 diabetes mellitus without complications',
-  I214: 'Non ST elevation myocardial infarction (NSTEMI)',
-  M1711: 'Unilateral primary osteoarthritis, right knee',
-  J449: 'Chronic obstructive pulmonary disease',
-  N189: 'Chronic kidney disease, unspecified',
-  F329: 'Major depressive disorder, single episode',
-  E785: 'Hyperlipidemia, unspecified',
-}
-const PLAIN_DX: Record<string, string> = {
-  I10: 'high blood pressure. When it stays high, your heart and blood vessels work harder, which over time can affect your heart, kidneys, and eyes.',
-  E782: 'high levels of cholesterol and other fats in your blood. Over time these can build up inside your arteries.',
-  E785: 'high cholesterol, meaning there is more fat in your blood than is healthy.',
-  E119: 'type 2 diabetes, which means your blood sugar runs higher than normal. Keeping it in range protects your eyes, kidneys, nerves, and heart.',
-  I214: 'a heart attack caused by reduced blood flow to part of your heart muscle. It needs prompt treatment and close follow up.',
-  M1711: 'wear and tear arthritis in your right knee, where the cushioning cartilage has worn down and is causing pain and stiffness.',
-  J449: 'a long term lung condition that makes it harder to breathe and move air in and out of your lungs.',
-  N189: 'reduced kidney function. Your care team will watch your labs to keep your kidneys as healthy as possible.',
-  F329: 'depression. It is a common and treatable medical condition, not a personal weakness.',
-}
-const MED_INFO: Record<string, { use: string; how: string }> = {
-  lisinopril: { use: 'lowers your blood pressure and helps protect your kidneys', how: 'usually taken once a day. Let your team know if you get a dry cough or feel dizzy.' },
-  atorvastatin: { use: 'lowers your cholesterol', how: 'often taken at night. Report any unusual muscle aches.' },
-  simvastatin: { use: 'lowers your cholesterol', how: 'usually taken in the evening. Report any muscle aches.' },
-  metformin: { use: 'lowers your blood sugar in type 2 diabetes', how: 'taken with meals. Mild stomach upset early on usually settles.' },
-  insulin: { use: 'controls your blood sugar directly', how: 'dosing and timing matter. Follow your team’s instructions and watch for low blood sugar.' },
-  aspirin: { use: 'thins your blood to lower the chance of clots', how: 'taken as directed. Tell your team about unusual bruising or bleeding.' },
-  clopidogrel: { use: 'helps prevent blood clots', how: 'taken daily. Do not stop without talking to your cardiologist.' },
-  heparin: { use: 'prevents blood clots', how: 'given in the hospital and monitored with blood tests.' },
-  metoprolol: { use: 'slows your heart rate and lowers blood pressure', how: 'taken as directed. Do not stop suddenly.' },
-  amlodipine: { use: 'relaxes your blood vessels to lower blood pressure', how: 'taken once a day. Mild ankle swelling can occur.' },
-  losartan: { use: 'lowers blood pressure and protects your kidneys', how: 'taken once a day.' },
-  hydrochlorothiazide: { use: 'a water pill that lowers blood pressure', how: 'taken in the morning so it does not affect your sleep.' },
-  furosemide: { use: 'a water pill that removes extra fluid', how: 'taken as directed. Track your weight as your team advises.' },
-  warfarin: { use: 'thins your blood to prevent clots', how: 'needs regular blood tests and a steady diet of leafy greens.' },
-  gabapentin: { use: 'helps with nerve related pain', how: 'increased slowly. May cause drowsiness at first.' },
-  omeprazole: { use: 'reduces stomach acid', how: 'taken before a meal.' },
-  albuterol: { use: 'opens your airways to help you breathe', how: 'used as a rescue inhaler when you feel short of breath.' },
-  prednisone: { use: 'reduces inflammation', how: 'taken exactly as scheduled and tapered, never stopped abruptly.' },
-}
-const CPT_LABELS: Record<string, string> = {
-  '80061': 'Lipid panel',
-  '93458': 'Cardiac catheterization with coronary angiography',
-  '27447': 'Total knee arthroplasty',
-  '80048': 'Basic metabolic panel',
-  '93000': 'Electrocardiogram, complete',
-  '99214': 'Office visit, established patient, moderate complexity',
-  '99213': 'Office visit, established patient, low complexity',
-}
-const CPT_PRICE: Record<string, number> = {
-  '80061': 95,
-  '93458': 3400,
-  '27447': 34000,
-  '80048': 60,
-  '93000': 120,
-  '99214': 185,
-  '99213': 130,
-}
-
 const MEDS = Object.keys(MED_INFO)
 const SYMPTOMS = [
   'chest pain', 'chest pressure', 'headache', 'headaches', 'shortness of breath', 'diaphoresis',
@@ -117,34 +62,21 @@ function uniq<T>(arr: T[], key: (t: T) => string): T[] {
   })
 }
 
-export function extract(note: string): ExtractionResult {
-  const text = note || ''
-  const lower = text.toLowerCase()
-  const entities: Entity[] = []
+// ── Code validation ─────────────────────────────────────────────────────────
+const ICD_RE = /^[A-TV-Z]\d{2}(?:\.\d{1,4})?$/i
+const CPT_RE = /^\d{5}$/
+export const isIcd = (c: string) => ICD_RE.test(c.trim())
+export const isCpt = (c: string) => CPT_RE.test(c.trim())
 
-  const icd10: { code: string; label: string }[] = []
-  for (const m of text.matchAll(/\b([A-TV-Z]\d{2}(?:\.\d{1,4})?)\b/g)) {
-    const code = m[1].toUpperCase()
-    const key = code.replace('.', '')
-    icd10.push({ code, label: ICD_LABELS[key] || 'ICD 10 diagnosis code' })
-    entities.push({ text: code, type: 'CODE' })
-  }
-
-  const cpt: { code: string; label: string }[] = []
-  for (const m of text.matchAll(/\b(\d{5})\b/g)) {
-    const code = m[1]
-    cpt.push({ code, label: CPT_LABELS[code] || 'CPT procedure code' })
-    entities.push({ text: code, type: 'PROCEDURE' })
-  }
-
-  for (const med of MEDS) if (lower.includes(med)) entities.push({ text: med, type: 'MEDICATION' })
-  for (const s of SYMPTOMS) if (lower.includes(s)) entities.push({ text: s, type: 'SIGN_SYMPTOM' })
-  for (const [needle, label] of LABS) if (lower.includes(needle)) entities.push({ text: label, type: 'LAB_VALUE' })
-
-  const cleanEntities = uniq(entities, (e) => `${e.type}:${e.text.toLowerCase()}`)
-  const codeDx = uniq(icd10, (c) => c.code)
-  const codeCpt = uniq(cpt, (c) => c.code)
-
+// ── Heuristic risk scoring (shared by the regex and Claude NER paths) ─────────
+// Honest note: these are hand tuned heuristics over the note text, not a trained
+// model. They are deterministic and clearly labelled as estimates in the UI.
+export function scoreRisk(
+  note: string,
+  icd10: { code: string }[],
+  cpt: { code: string }[],
+): { denialRisk: number; readmissionRisk: number } {
+  const lower = (note || '').toLowerCase()
   const has = (...needles: string[]) => needles.some((n) => lower.includes(n))
   let denial = 18
   if (has('out of network', 'out-of-network', 'oon')) denial += 26
@@ -153,8 +85,8 @@ export function extract(note: string): ExtractionResult {
   if (has('experimental', 'investigational', 'off label')) denial += 20
   if (has('arthroplasty', 'surgery', 'surgical', 'cath', 'catheterization')) denial += 12
   if (has('admit', 'admitted', 'emergency', 'inpatient')) denial += 10
-  if (codeCpt.length === 0) denial += 6
-  denial = Math.max(6, Math.min(94, denial + Math.min(codeDx.length * 2, 8)))
+  if (cpt.length === 0) denial += 6
+  denial = Math.max(6, Math.min(94, denial + Math.min(icd10.length * 2, 8)))
 
   let readmit = 12
   if (has('nstemi', 'stemi', 'myocardial', 'heart failure', 'chf')) readmit += 28
@@ -162,23 +94,81 @@ export function extract(note: string): ExtractionResult {
   if (has('copd', 'pneumonia')) readmit += 16
   if (has('ckd', 'kidney', 'dialysis')) readmit += 14
   if (has('admit', 'admitted', 'inpatient')) readmit += 12
-  readmit += Math.min(codeDx.length * 3, 12)
-  readmit = Math.max(5, Math.min(92, readmit))
+  readmit += Math.min(icd10.length * 3, 12)
+  return { denialRisk: denial, readmissionRisk: Math.max(5, Math.min(92, readmit)) }
+}
 
-  const confidence = Math.min(0.97, 0.82 + cleanEntities.length * 0.012)
+// Assemble a validated ExtractionResult from raw entity lists. Used by both the
+// offline regex extractor and the Claude NER path, so codes are validated and
+// risk is scored the same way regardless of source.
+export function assembleExtraction(
+  note: string,
+  parts: {
+    icd10: { code: string; label: string }[]
+    cpt: { code: string; label: string }[]
+    medications: string[]
+    symptoms: string[]
+    labs: string[]
+  },
+): ExtractionResult {
+  const icd10 = uniq(
+    parts.icd10
+      .filter((c) => isIcd(c.code))
+      .map((c) => ({ code: c.code.toUpperCase(), label: c.label || ICD_LABELS[icdKey(c.code)] || 'ICD 10 diagnosis code' })),
+    (c) => c.code,
+  )
+  const cpt = uniq(
+    parts.cpt
+      .filter((c) => isCpt(c.code))
+      .map((c) => ({ code: c.code.trim(), label: c.label || CPT_LABELS[c.code.trim()] || 'CPT procedure code' })),
+    (c) => c.code,
+  )
+  const entities = uniq(
+    [
+      ...icd10.map((c) => ({ text: c.code, type: 'CODE' })),
+      ...cpt.map((c) => ({ text: c.code, type: 'PROCEDURE' })),
+      ...parts.medications.map((t) => ({ text: t.toLowerCase().trim(), type: 'MEDICATION' })),
+      ...parts.symptoms.map((t) => ({ text: t.toLowerCase().trim(), type: 'SIGN_SYMPTOM' })),
+      ...parts.labs.map((t) => ({ text: t.trim(), type: 'LAB_VALUE' })),
+    ].filter((e) => e.text) as Entity[],
+    (e) => `${e.type}:${e.text.toLowerCase()}`,
+  )
+  const { denialRisk, readmissionRisk } = scoreRisk(note, icd10, cpt)
+  const confidence = Math.min(0.97, 0.82 + entities.length * 0.012)
+  return { entities, icd10, cpt, denialRisk, readmissionRisk, confidence: Number(confidence.toFixed(2)) }
+}
 
-  return {
-    entities: cleanEntities,
-    icd10: codeDx,
-    cpt: codeCpt,
-    denialRisk: denial,
-    readmissionRisk: readmit,
-    confidence: Number(confidence.toFixed(2)),
+export function extract(note: string): ExtractionResult {
+  const text = note || ''
+  const lower = text.toLowerCase()
+
+  const icd10: { code: string; label: string }[] = []
+  for (const m of text.matchAll(/\b([A-TV-Z]\d{2}(?:\.\d{1,4})?)\b/g)) {
+    const code = m[1].toUpperCase()
+    icd10.push({ code, label: ICD_LABELS[code.replace('.', '')] || 'ICD 10 diagnosis code' })
   }
+
+  // A bare 5 digit number is treated as a CPT code only when it is a known code
+  // or the surrounding text marks it as one (e.g. "CPT 80061"). This stops the
+  // extractor from billing any stray number that happens to have five digits.
+  const cpt: { code: string; label: string }[] = []
+  for (const m of text.matchAll(/\b(\d{5})\b/g)) {
+    const code = m[1]
+    const idx = m.index ?? 0
+    const ctx = text.slice(Math.max(0, idx - 12), idx).toLowerCase()
+    if (CPT_LABELS[code] || /\b(cpt|hcpcs|procedure|code)\b/.test(ctx))
+      cpt.push({ code, label: CPT_LABELS[code] || 'CPT procedure code' })
+  }
+
+  const medications = MEDS.filter((med) => lower.includes(med))
+  const symptoms = SYMPTOMS.filter((s) => lower.includes(s))
+  const labs = LABS.filter(([needle]) => lower.includes(needle)).map(([, label]) => label)
+
+  return assembleExtraction(text, { icd10, cpt, medications, symptoms, labs })
 }
 
 // ── Helpers over the extraction ─────────────────────────────────────────────
-const keyOf = (code: string) => code.replace('.', '').toUpperCase()
+const keyOf = (code: string) => icdKey(code)
 const meds = (ex: ExtractionResult) => ex.entities.filter((e) => e.type === 'MEDICATION').map((e) => e.text)
 const labs = (ex: ExtractionResult) => ex.entities.filter((e) => e.type === 'LAB_VALUE').map((e) => e.text)
 const symptoms = (ex: ExtractionResult) => ex.entities.filter((e) => e.type === 'SIGN_SYMPTOM').map((e) => e.text)
@@ -199,29 +189,6 @@ function procPhrase(ex: ExtractionResult): string {
 }
 const toneOf = (r: number): 'good' | 'warn' | 'bad' => (r >= 55 ? 'bad' : r >= 35 ? 'warn' : 'good')
 
-// Illustrative coverage estimate for the patient cost allocation section.
-function coverage(ex: ExtractionResult) {
-  const lines: string[] = []
-  let allowed = 0
-  let patient = 0
-  const coins = 0.2 // plan pays 80% after deductible (illustrative commercial PPO)
-  for (const c of ex.cpt) {
-    const price = CPT_PRICE[c.code] ?? 150
-    allowed += price
-    const you = Math.round(price * coins)
-    patient += you
-    const label = CPT_LABELS[c.code] || `service ${c.code}`
-    lines.push(`${label}: estimated allowed amount ${fmt$(price)}. A typical plan pays about 80% after your deductible, leaving roughly ${fmt$(you)} to you.`)
-  }
-  const medCount = meds(ex).length
-  if (medCount) {
-    lines.push(`${medCount} prescription${medCount > 1 ? 's' : ''}: generics like these usually sit in the lowest copay tier, often $5 to $15 each per month.`)
-    patient += medCount * 10
-  }
-  if (!lines.length) lines.push('This encounter is mostly an office visit, which is typically covered with a standard copay.')
-  return { lines, allowed, patientLow: Math.round(patient * 0.6), patientHigh: Math.round(patient * 1.4) }
-}
-
 // ── Detailed, note-derived fallback reports ─────────────────────────────────
 export function fallbackReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
   const report = buildReport(s, ex)
@@ -235,7 +202,7 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
   const route = ex.denialRisk > 60 ? 'frontier' : 'standard'
 
   if (s === 'patient') {
-    const cov = coverage(ex)
+    const cov = estimateCoverage(ex)
     const dxBullets = (ex.icd10.length ? ex.icd10 : [{ code: '', label: '' }]).map((c) => {
       const plain = PLAIN_DX[keyOf(c.code)]
       const name = c.label && c.label !== 'ICD 10 diagnosis code' ? c.label : 'A condition noted by your clinician'

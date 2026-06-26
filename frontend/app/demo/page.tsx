@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-react'
 import Nav from '@/components/Nav'
-import ReportView from '@/components/ReportView'
+import PortalShell from '@/components/portals/PortalShell'
 import { useSynthesis, type AgentStatus } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
 
@@ -62,7 +62,7 @@ export default function DemoPage() {
   const [note, setNote] = useState('')
   const { state, start, reset } = useSynthesis()
   const running = state.phase === 'running'
-  const showReports = state.phase === 'complete' || Object.keys(state.reports).length > 0
+  const hasExtraction = !!state.extraction
 
   const activeAgent = useMemo(
     () => PIPELINE.find((a) => a.id === state.activeId) ?? null,
@@ -93,7 +93,7 @@ export default function DemoPage() {
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white">Synthesis Console</h1>
           <p className="text-slate-400 mt-2">
-            Paste any clinical note. Watch the agents read it, write four tailored reports, verify them, and tie them together.
+            Paste any clinical note. Watch the agents read it, then step into the four portals it produces, one tailored to each reader.
           </p>
         </div>
 
@@ -210,24 +210,38 @@ export default function DemoPage() {
                       <div className="text-[10px] text-slate-500">NER conf.</div>
                     </div>
                   </div>
+                  <p className="mt-3 text-[10px] leading-relaxed text-slate-600">
+                    Denial and readmission are heuristic estimates, not a trained model.
+                  </p>
                 </motion.div>
               )}
 
-              {state.live === false && state.phase === 'complete' && (
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Running on the offline Synthure engine (note-derived). Set <span className="font-mono text-slate-500">ANTHROPIC_API_KEY</span> to generate reports live with Claude.
-                </p>
-              )}
+              {state.phase === 'complete' &&
+                (state.live ? (
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Live: Claude read the note to extract entities and wrote the four reports. Codes were validated; risk scores are heuristic.
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Offline Synthure engine: a rules based extractor (regex plus a medication dictionary), not a trained model. Set <span className="font-mono text-slate-500">ANTHROPIC_API_KEY</span> for live Claude extraction and writing.
+                  </p>
+                ))}
             </div>
 
-            {/* Reports / placeholder */}
+            {/* Portals / placeholder */}
             <div>
-              {showReports ? (
-                <ReportView reports={state.reports} verification={state.verification} synthesis={state.synthesis} />
+              {hasExtraction && state.extraction ? (
+                <PortalShell
+                  extraction={state.extraction}
+                  reports={state.reports}
+                  verification={state.verification}
+                  synthesis={state.synthesis}
+                  complete={state.phase === 'complete'}
+                />
               ) : (
                 <div className="rounded-2xl border border-white/[0.07] bg-white/[0.015] p-12 text-center">
                   <Loader2 className="h-6 w-6 animate-spin text-slate-500 mx-auto mb-3" />
-                  <p className="text-slate-500 text-sm">Reading the note and assembling the agent team…</p>
+                  <p className="text-slate-500 text-sm">Reading the note and opening the four portals…</p>
                 </div>
               )}
             </div>

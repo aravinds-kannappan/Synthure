@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import {
   extract,
+  assembleExtraction,
   dehyphen,
   fallbackReport,
   fallbackVerification,
@@ -33,6 +34,76 @@ function exContext(note: string, ex: ExtractionResult): string {
     `- Signs/symptoms: ${ex.entities.filter((e) => e.type === 'SIGN_SYMPTOM').map((e) => e.text).join(', ') || 'none'}`,
     `- Denial risk: ${ex.denialRisk}%  ·  Readmission risk: ${ex.readmissionRisk}%  ·  NER confidence: ${ex.confidence}`,
   ].join('\n')
+}
+
+// ── Biomedical NER agent (real, when a key is present) ───────────────────────
+const NER_TOOL: Anthropic.Tool = {
+  name: 'extract_entities',
+  description: 'Extract clinical entities from the note and map them to standard codes.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      diagnoses: {
+        type: 'array',
+        description: 'Every diagnosis or problem, including ones written in plain language or as abbreviations, each mapped to its standard ICD 10 code.',
+        items: {
+          type: 'object',
+          properties: {
+            code: { type: 'string', description: 'Standard ICD 10 code, e.g. I10 or E11.9' },
+            label: { type: 'string', description: 'Human readable diagnosis name' },
+          },
+          required: ['code', 'label'],
+        },
+      },
+      procedures: {
+        type: 'array',
+        description: 'Procedures, tests, or services ordered, mapped to a CPT code when known.',
+        items: {
+          type: 'object',
+          properties: {
+            code: { type: 'string', description: 'Five digit CPT code' },
+            label: { type: 'string' },
+          },
+          required: ['code', 'label'],
+        },
+      },
+      medications: { type: 'array', items: { type: 'string' }, description: 'Generic medication names' },
+      symptoms: { type: 'array', items: { type: 'string' }, description: 'Signs and symptoms' },
+      labs: { type: 'array', items: { type: 'string' }, description: 'Lab tests or vitals mentioned, e.g. A1C, LDL, Blood pressure' },
+    },
+    required: ['diagnoses', 'procedures', 'medications', 'symptoms', 'labs'],
+  },
+}
+
+async function claudeExtract(client: Anthropic, note: string): Promise<ExtractionResult> {
+  const msg = await client.messages.create({
+    model: HAIKU,
+    max_tokens: 1500,
+    tools: [NER_TOOL],
+    tool_choice: { type: 'tool', name: 'extract_entities' },
+    system:
+      'You are a biomedical NER agent. Read the clinical note and extract its entities. Map every diagnosis to its standard ICD 10 code, including diagnoses written in plain language (for example "high blood pressure" maps to I10) or as abbreviations (for example "HTN" maps to I10, and "type 2 diabetes" or "DM2" maps to E11.9). Map procedures to their CPT code when you know it. Only return real, valid codes; if you are unsure of a code, omit that entry rather than inventing it, and never return a number that is not actually a code. Write every label with no hyphens and no dashes.',
+    messages: [{ role: 'user', content: `CLINICAL NOTE:\n${note}` }],
+  })
+  const block = msg.content.find((b) => b.type === 'tool_use')
+  if (!block || block.type !== 'tool_use') throw new Error('no tool_use from NER')
+  const inp = block.input as {
+    diagnoses?: { code: string; label: string }[]
+    procedures?: { code: string; label: string }[]
+    medications?: string[]
+    symptoms?: string[]
+    labs?: string[]
+  }
+  // assembleExtraction validates every code, so any invented or malformed code is dropped.
+  return dehyphen(
+    assembleExtraction(note, {
+      icd10: inp.diagnoses ?? [],
+      cpt: inp.procedures ?? [],
+      medications: inp.medications ?? [],
+      symptoms: inp.symptoms ?? [],
+      labs: inp.labs ?? [],
+    }),
+  )
 }
 
 const REPORT_TOOL: Anthropic.Tool = {
@@ -217,7 +288,6 @@ export async function POST(req: Request) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   const client = apiKey ? new Anthropic({ apiKey }) : null
-  const ex = extract(note)
 
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
@@ -226,6 +296,16 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`))
 
       try {
+        // Biomedical NER: real Claude extraction when a key is present, with the
+        // deterministic regex extractor as the always available fallback.
+        let ex = extract(note)
+        if (client) {
+          try {
+            ex = await claudeExtract(client, note)
+          } catch {
+            /* fall back to the regex extraction already in ex */
+          }
+        }
         send({ type: 'extracted', extraction: ex })
 
         // Four writer agents — run in parallel, stream each report as it lands.

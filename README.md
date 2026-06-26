@@ -26,6 +26,28 @@ Type or paste any clinical note (short or long) into the Synthesis Console. Then
 
 Everything is grounded in the note you typed. There are no fixed patients and no canned output — the same engine handles a one-line note or a multi-page chart.
 
+### Four portals, one note
+
+The four reports are not shown as lookalike tabs. Each opens as a **distinct portal** that looks and behaves like the real software that reader would use:
+
+- **Patient portal** — a friendly, light consumer health app with plain-language diagnosis cards, medication cards, a cost estimator, a next-steps checklist, and a "when to seek care" panel.
+- **Clinician console** — a dense EHR-style workspace with acceptable ICD 10 / CPT code chips, a one-tap prior-authorization packet, documentation prompts, and live denial / readmission gauges.
+- **Revenue cycle dashboard** — a claim-status pipeline, line items, expected reimbursement, denial drivers, and HRRP exposure.
+- **Benefits analytics** — an aggregated, anonymized population view with a cohort spend sparkline, network-utilization donut, and compliance posture.
+
+A portal switcher lets you "log into" each one and the whole frame re-skins. A **guided tour** auto-plays through all four, and a **Compare all four** view shows them side by side. Switching is instant — the run is cached, so no agent re-runs.
+
+### One interconnected encounter, not four silos
+
+The four portals share a single mutable **encounter** (`lib/encounter.ts`), so an action in one ripples through the others in real time:
+
+- The clinician **approves the prior-authorization packet** → denial risk drops, the claim advances to "ready to submit", the patient portal shows the procedure as covered, and the employer cohort trend bends.
+- The clinician **toggles a code or procedure out of the claim** → the patient cost estimate, the revenue allowed amount and expected reimbursement, and the employer cohort all recompute.
+- The patient **applies for financial assistance** → their out-of-pocket estimate drops and a screening task lands in revenue cycle.
+- Revenue cycle **submits the claim** → the patient's billing status updates.
+
+Every portal also has a **cross-portal inbox**: each one can message any other, and a shared activity feed plus notification badges and a "ripple" toast show the interconnection as it happens. It runs entirely client-side off the shared store, so it works with or without an API key.
+
 ## The agent pipeline
 
 ```
@@ -49,8 +71,9 @@ Clinical Note
 
 The live demo runs entirely on **Next.js route handlers**. The four writer agents run in parallel and stream back over Server-Sent Events, so the UI reveals each agent's work the moment it finishes.
 
-- **With an `ANTHROPIC_API_KEY`**, the four writers, the verifier, and the orchestrator are real Claude calls (Haiku for the writers, Sonnet for verification and orchestration), using forced `tool_use` schemas so output is structured and grounded.
-- **Without a key**, an offline note-derived engine produces the same structured reports from the extracted entities, so the demo always works. Every report is sanitized to contain no hyphens or dashes.
+- **With an `ANTHROPIC_API_KEY`**, a Claude NER agent reads the note and maps diagnoses to ICD 10 / CPT codes, including ones written in plain language or as abbreviations (for example "high blood pressure" maps to `I10`). The four writers, the verifier, and the orchestrator are then real Claude calls (Haiku for NER and the writers, Sonnet for verification and orchestration), using forced `tool_use` schemas so output is structured and grounded. Every code is format validated before it is used.
+- **Without a key**, an offline rules based extractor (a regex for codes plus a medication dictionary) and the note derived engine produce the same structured reports, so the demo always works. This offline extractor is exact when a note already contains valid codes and exactly spelled drug names, but it does not recognize diagnoses written only in prose; that is what the Claude NER path is for. Every report is sanitized to contain no hyphens or dashes.
+- **In both modes**, the denial and readmission risk scores are deterministic heuristics over the note text, clearly labelled as estimates in the UI, not the trained models described in the paper.
 
 ## Project structure
 
@@ -65,12 +88,15 @@ synthure/
 │   │   ├── globals.css               Theme + utilities
 │   │   └── api/synthesize/route.ts   Streaming multi-agent endpoint (SSE)
 │   ├── components/
+│   │   ├── portals/                 Four role-specific portals + shell, switcher, guided tour, widgets
 │   │   ├── HowItWorks.tsx            Scroll-scrubbed cinematic pipeline animation
-│   │   ├── ReportView.tsx           Interactive tabbed report viewer
+│   │   ├── ReportView.tsx           "Compare all four" tabbed report viewer
 │   │   └── Nav.tsx                   Top navigation + logo
 │   └── lib/
 │       ├── synthure.ts              Shared types, stakeholder config, agent pipeline, sample notes
+│       ├── knowledge.ts             Shared clinical dictionaries + illustrative cost estimation
 │       ├── engine.ts                Note-derived extraction + detailed report synthesis + sanitizer
+│       ├── encounter.ts             Shared encounter state, live recompute, cross-portal event reducer
 │       └── useSynthesis.ts          Client hook: consumes the SSE stream, drives the animation
 │
 ├── synthure_paper.pdf                NeurIPS-style research paper (12 pages)
@@ -119,5 +145,7 @@ The architecture, five-stage pipeline, ML models, and evaluation are documented 
 | RAG retrieval MRR@5 | 0.91 |
 | Insurance plan match accuracy | 91.3% |
 | Fabricated clinical facts | 0 |
+
+> These metrics evaluate the full **research implementation** in `backend/` (HuggingFace biomedical NER, a GradientBoosting denial model, and a pgvector RAG over 1.43M ICD 10 codes). They are **not** produced by the shipped web demo, which uses the lighter extraction described above (a Claude NER pass when a key is set, or a rules based extractor offline) and heuristic risk scores. The demo does not reproduce these numbers.
 
 **📄 [Full research paper](synthure_paper.pdf)** · 12 pages · 6 figures · 14 references
