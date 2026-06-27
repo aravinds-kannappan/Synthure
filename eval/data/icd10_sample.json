@@ -1,0 +1,3002 @@
+[
+{
+"code": "Z47.9",
+"description": "Orthopaedic follow-up care, unspecified",
+"symptoms": "Pain at the surgical site or affected joint, Swelling or inflammation, Limited range of motion, Muscle weakness, Gait abnormalities, Joint stiffness, Instability"
+},
+{
+"code": "Q03.0",
+"description": "Malformations of aqueduct of Sylvius",
+"symptoms": "Macrocephaly, Bulging fontanelle, Sunset sign (downward deviation of the eyes), Developmental delay, Increased intracranial pressure, Irritability, Vomiting"
+},
+{
+"code": "F42.2",
+"description": "Mixed obsessional thoughts and acts",
+"symptoms": "Intrusive thoughts, Repetitive behaviors, Anxiety, Distress, Avoidance of triggers, Significant impairment in daily functioning, Compulsions performed to reduce anxiety"
+},
+{
+"code": "V52.0",
+"description": "Occupant of pick-up truck or van injured in collision with two- or three-wheeled motor vehicle: Driver injured in nontraffic accident",
+"symptoms": "Head trauma, Cervicalgia, Thoracic pain, Limb fractures, Abdominal contusions, Loss of consciousness, Soft tissue injuries"
+},
+{
+"code": "P58.1",
+"description": "Neonatal jaundice due to bleeding",
+"symptoms": "Yellowish discoloration of the skin (jaundice), Yellowish discoloration of the sclera (icterus), Elevated bilirubin levels in blood (hyperbilirubinemia), Poor feeding, Lethargy, Dark urine, Pale stools"
+},
+{
+"code": "F10.0",
+"description": "Mental and behavioural disorders due to use of alcohol: Acute intoxication",
+"symptoms": "Slurred speech, Impaired coordination, Unsteady gait, Attention deficit, Disinhibition, Euphoria, Nystagmus"
+},
+{
+"code": "M54.9",
+"description": "Dorsalgia, unspecified",
+"symptoms": "Localized back pain, Muscle stiffness, Limited range of motion, Tenderness to palpation, Postural changes, Radiating pain (possible, but not specified), Muscle spasms"
+},
+{
+"code": "A41.0",
+"description": "Sepsis due to Staphylococcus aureus",
+"symptoms": "Fever, Hypothermia, Tachycardia, Tachypnea, Hypotension, Altered mental status, Chills, Sweats, Organ dysfunction"
+},
+{
+"code": "Q51.2",
+"description": "Other doubling of uterus",
+"symptoms": "Dysmenorrhea, Dyspareunia, Abnormal uterine bleeding, Infertility, Increased risk of ectopic pregnancy, Increased risk of spontaneous abortion, Pelvic pain"
+},
+{
+"code": "H44.6",
+"description": "Retained (old) intraocular foreign body, magnetic",
+"symptoms": "Blurred vision, Eye pain, Photophobia, Intraocular inflammation (uveitis), Siderosis bulbi (iron deposition in ocular tissues), Cataract formation, Glaucoma"
+},
+{
+"code": "H16.4",
+"description": "Corneal neovascularization",
+"symptoms": "Blurred vision, Photophobia, Eye redness, Foreign body sensation, Tearing, Corneal opacity, Pain"
+},
+{
+"code": "F19.3",
+"description": "Mental and behavioural disorders due to multiple drug use and use of other psychoactive substances: Withdrawal state",
+"symptoms": "Anxiety, Tremors, Diaphoresis, Nausea, Vomiting, Insomnia, Agitation"
+},
+{
+"code": "V09.1",
+"description": "Pedestrian injured in unspecified nontraffic accident",
+"symptoms": "Lacerations, Contusions, Fractures, Sprains, Strains, Head trauma, Internal bleeding"
+},
+{
+"code": "P03.0",
+"description": "Fetus and newborn affected by breech delivery and extraction",
+"symptoms": "Birth asphyxia, Traumatic injury, Cerebral hemorrhage, Fractures (e.g., clavicle), Brachial plexus injury, Hypotonia, Respiratory distress"
+},
+{
+"code": "A48.3",
+"description": "Toxic shock syndrome",
+"symptoms": "High fever, Hypotension, Sunburn-like rash, Confusion, Multiple organ system involvement, Shock"
+},
+{
+"code": "I44.6",
+"description": "Other and unspecified fascicular block",
+"symptoms": "Syncope, Presyncope, Dizziness, Palpitations, Fatigue, Dyspnea on exertion, Bradycardia"
+},
+{
+"code": "Y54.4",
+"description": "Loop [high-ceiling] diuretics",
+"symptoms": "Hypokalemia, Hyponatremia, Hypomagnesemia, Dehydration, Hypotension, Metabolic alkalosis, Ototoxicity"
+},
+{
+"code": "H05.0",
+"description": "Acute inflammation of orbit",
+"symptoms": "Proptosis, Erythema of the eyelids, Chemosis, Diplopia, Ocular pain, Restricted eye movement, Vision impairment"
+},
+{
+"code": "C41.9",
+"description": "Malignant neoplasm: Bone and articular cartilage, unspecified",
+"symptoms": "Bone pain, Swelling around the affected area, Pathological fracture, Limited range of motion, Fatigue, Unexplained weight loss, Anemia"
+},
+{
+"code": "D10.9",
+"description": "Benign neoplasm: Pharynx, unspecified",
+"symptoms": "Dysphagia, Sore throat, Globus sensation, Voice changes (hoarseness), Persistent cough, Neck swelling, Ear pain (otalgia)"
+},
+{
+"code": "S49",
+"description": "Other and unspecified injuries of shoulder and upper arm",
+"symptoms": "Pain in the shoulder or upper arm, Swelling around the shoulder or upper arm, Bruising of the shoulder or upper arm, Limited range of motion in the shoulder joint, Tenderness to palpation in the affected area, Muscle spasm in the shoulder or upper arm, Weakness in the arm or hand"
+},
+{
+"code": "T52.9",
+"description": "Toxic effect: Organic solvent, unspecified",
+"symptoms": "Headache, Nausea, Vomiting, Dizziness, Central nervous system depression, Respiratory distress, Altered level of consciousness"
+},
+{
+"code": "O06.2",
+"description": "Unspecified abortion: Incomplete, complicated by embolism",
+"symptoms": "Vaginal bleeding, Abdominal pain, Fever, Passage of tissue, Hypotension, Tachycardia, Dyspnea"
+},
+{
+"code": "I09",
+"description": "Other rheumatic heart diseases",
+"symptoms": "Dyspnea, Fatigue, Chest pain, Palpitations, Peripheral edema, Heart murmur, Syncope"
+},
+{
+"code": "W19",
+"description": "Unspecified fall",
+"symptoms": "Pain, Bruising, Swelling, Abrasion, Laceration, Concussion, Fracture"
+},
+{
+"code": "Q10.4",
+"description": "Absence and agenesis of lacrimal apparatus",
+"symptoms": "Chronic dry eye, Corneal abrasions, Conjunctivitis, Photophobia, Decreased tear production, Foreign body sensation in the eye, Increased risk of ocular infections"
+},
+{
+"code": "V41.4",
+"description": "Car occupant injured in collision with pedal cycle: Person injured while boarding or alighting",
+"symptoms": "Soft tissue injury, Fractures (e.g., of the limbs, ribs), Head trauma (e.g., concussion, lacerations), Spinal injuries (e.g., whiplash), Abrasion, Contusion, Internal bleeding"
+},
+{
+"code": "N06.2",
+"description": "Isolated proteinuria with specified morphological lesion: Diffuse membranous glomerulonephritis",
+"symptoms": "Proteinuria, Edema, Fatigue, Foamy urine, Hyperlipidemia, Thromboembolism, Ascites"
+},
+{
+"code": "T09.8",
+"description": "Other specified injuries of trunk, level unspecified",
+"symptoms": "Localized pain in the trunk, Swelling or edema at the injury site, Bruising or ecchymosis, Muscle spasm or guarding, Limited range of motion, Tenderness to palpation, Possible nerve impingement symptoms (numbness, tingling)"
+},
+{
+"code": "Y47.0",
+"description": "Barbiturates, not elsewhere classified",
+"symptoms": "Respiratory depression, Hypotension, Bradycardia, Central nervous system depression, Decreased level of consciousness, Ataxia, Slurred speech"
+},
+{
+"code": "I05.0",
+"description": "Mitral stenosis",
+"symptoms": "Dyspnea, Orthopnea, Paroxysmal nocturnal dyspnea, Hemoptysis, Fatigue, Palpitations, Chest pain"
+},
+{
+"code": "B41.9",
+"description": "Paracoccidioidomycosis, unspecified",
+"symptoms": "Pulmonary symptoms (cough, shortness of breath), Skin lesions (ulcerative or nodular), Weight loss, Fatigue, Lymphadenopathy, Hepatosplenomegaly, Subcutaneous nodules"
+},
+{
+"code": "E10.9",
+"description": "Insulin-dependent diabetes mellitus: Without complications",
+"symptoms": "Polyuria, Polydipsia, Polyphagia, Unexplained weight loss, Fatigue, Blurred vision, Slow-healing sores"
+},
+{
+"code": "P10.4",
+"description": "Tentorial tear due to birth injury",
+"symptoms": "Seizures, Lethargy, Apnea, Bulging fontanelle, Irritability, Hypotonia, Abnormal Moro reflex"
+},
+{
+"code": "V48.7",
+"description": "Car occupant injured in noncollision transport accident: Person on outside of vehicle injured in traffic accident",
+"symptoms": "Soft tissue injury, Fractures, Head trauma, Abrasion, Laceration, Hemorrhage, Spinal cord injury"
+},
+{
+"code": "T30",
+"description": "Burn and corrosion, body region unspecified",
+"symptoms": "Erythema, Blisters, Edema, Pain, Eschar formation, Dehydration, Hypovolemic Shock"
+},
+{
+"code": "P25.1",
+"description": "Pneumothorax originating in the perinatal period",
+"symptoms": "Tachypnea, Grunting respirations, Cyanosis, Intercostal retractions, Nasal flaring, Asymmetrical chest expansion, Decreased breath sounds on the affected side"
+},
+{
+"code": "K23.8",
+"description": "Disorders of oesophagus in other diseases classified elsewhere",
+"symptoms": "Dysphagia, Odynophagia, Regurgitation, Chest pain, Weight loss, Heartburn, Esophageal stricture"
+},
+{
+"code": "G36.1",
+"description": "Acute and subacute haemorrhagic leukoencephalitis [Hurst]",
+"symptoms": "Rapid neurological decline, Seizures, Coma, Focal neurological deficits (e.g., hemiparesis, aphasia), Vision loss, Headache, Fever"
+},
+{
+"code": "L72.8",
+"description": "Other follicular cysts of skin and subcutaneous tissue",
+"symptoms": "Small, round nodule under the skin, Possible skin-colored or slightly erythematous appearance, Slow growth over time, Potential for secondary infection (pain, redness, swelling), Discharge of keratinous material if ruptured, Tenderness upon palpation, Occasional pruritus"
+},
+{
+"code": "N70",
+"description": "Salpingitis and oophoritis",
+"symptoms": "Pelvic pain, Fever, Vaginal discharge, Abdominal tenderness, Dyspareunia (painful sexual intercourse), Irregular menstruation, Nausea and vomiting"
+},
+{
+"code": "P60",
+"description": "Disseminated intravascular coagulation of fetus and newborn",
+"symptoms": "Petechiae, Purpura, Bleeding from puncture sites, Gastrointestinal bleeding, Respiratory distress, Thrombocytopenia, Prolonged prothrombin time"
+},
+{
+"code": "T98.0",
+"description": "Sequelae of effects of foreign body entering through natural orifice",
+"symptoms": "Chronic pain, Recurrent infections, Inflammation, Scar tissue formation, Obstruction or stenosis, Sensory impairment, Fistula formation"
+},
+{
+"code": "J20",
+"description": "Acute bronchitis",
+"symptoms": "Cough, Sputum production, Wheezing, Shortness of breath, Chest discomfort, Fatigue, Low-grade fever"
+},
+{
+"code": "Q77.3",
+"description": "Chondrodysplasia punctata",
+"symptoms": "Stippled epiphyses (punctate calcifications near joints), Short stature, Skeletal asymmetry, Rhizomelic shortening (shortening of the proximal limbs), Cataracts, Skin abnormalities (ichthyosis, cutis marmorata), Developmental delay"
+},
+{
+"code": "L29.9",
+"description": "Pruritus, unspecified",
+"symptoms": "Skin irritation, Scratching, Excoriation, Lichenification, Erythema, Burning sensation, Dry skin"
+},
+{
+"code": "A67.1",
+"description": "Intermediate lesions of pinta",
+"symptoms": "Erythematous skin lesions, Hyperkeratotic patches, Annular lesion formation, Cutaneous depigmentation, Itching or burning sensation"
+},
+{
+"code": "B89",
+"description": "Unspecified parasitic disease",
+"symptoms": "Fatigue, Abdominal pain, Diarrhea, Weight loss, Nausea, Vomiting, Generalized weakness"
+},
+{
+"code": "V26.3",
+"description": "Motorcycle rider injured in collision with other nonmotor vehicle: Person injured while boarding or alighting",
+"symptoms": "Head trauma, spinal cord injury, fractures, abrasions, lacerations, internal bleeding, soft tissue damage"
+},
+{
+"code": "M72.8",
+"description": "Other fibroblastic disorders",
+"symptoms": "Localized pain, Joint stiffness, Tenderness to palpation, Soft tissue swelling, Decreased range of motion, Nodule formation, Contractures"
+},
+{
+"code": "V74.1",
+"description": "Bus occupant injured in collision with heavy transport vehicle or bus: Passenger injured in nontraffic accident",
+"symptoms": "Headache, Nausea, Abdominal pain, Limb fractures, Spinal injury, Concussion, Soft tissue contusions"
+},
+{
+"code": "G73",
+"description": "Disorders of myoneural junction and muscle in diseases classified elsewhere",
+"symptoms": "Muscle weakness, Muscle fatigue, Muscle atrophy, Myalgia, Dysphagia, Dysarthria, Ptosis"
+},
+{
+"code": "Z61.8",
+"description": "Other negative life events in childhood",
+"symptoms": "Anxiety, Depression, Behavioral problems, Sleep disturbances, Difficulty concentrating, Emotional distress, Social withdrawal"
+},
+{
+"code": "Q25.1",
+"description": "Coarctation of aorta",
+"symptoms": "Elevated blood pressure in the arms, Diminished or delayed femoral pulses, Lower blood pressure in the legs, Intermittent claudication, Headaches, Epistaxis, Cardiomegaly"
+},
+{
+"code": "Y63",
+"description": "Failure in dosage during surgical and medical care",
+"symptoms": "Subtherapeutic drug levels, Toxic drug levels, Adverse drug reaction, Lack of therapeutic effect, Unexpected side effects, Worsening of underlying condition, New-onset symptoms related to dosage error"
+},
+{
+"code": "H94.8",
+"description": "Other specified disorders of ear in diseases classified elsewhere",
+"symptoms": "Tinnitus, Hearing loss, Ear pain (otalgia), Vertigo, Aural fullness, Otorrhea (ear discharge), Hyperacusis"
+},
+{
+"code": "T91.3",
+"description": "Sequelae of injury of spinal cord",
+"symptoms": "Chronic pain, Muscle weakness, Spasticity, Sensory deficits, Bowel dysfunction, Bladder dysfunction, Impaired mobility"
+},
+{
+"code": "D81.1",
+"description": "Severe combined immunodeficiency [SCID] with low T- and B-cell numbers",
+"symptoms": "Recurrent severe infections, Failure to thrive, Chronic diarrhea, Pneumonia, Septicemia, Oral candidiasis (thrush), Skin rashes"
+},
+{
+"code": "E88.2",
+"description": "Lipomatosis, not elsewhere classified",
+"symptoms": "Asymptomatic subcutaneous masses, Soft, doughy texture of affected areas, Increased adipose tissue deposition, Possible nerve compression leading to pain or paresthesia, Cosmetic disfigurement, Slow, progressive growth of lipomas, Limited range of motion in affected areas due to mass effect"
+},
+{
+"code": "S92.1",
+"description": "Fracture of talus",
+"symptoms": "Severe foot pain, Inability to bear weight, Swelling of the foot and ankle, Bruising around the ankle and foot, Tenderness to palpation over the talus, Deformity of the foot, Limited range of motion in the ankle"
+},
+{
+"code": "O33.7",
+"description": "Maternal care for disproportion due to other fetal deformities",
+"symptoms": "Prolonged labor, Arrest of labor, Cephalopelvic disproportion (CPD), Fetal distress, Increased risk of cesarean section, Shoulder dystocia, Postpartum hemorrhage"
+},
+{
+"code": "C82.3",
+"description": "Follicular lymphoma grade IIIa",
+"symptoms": "Painless lymphadenopathy, Splenomegaly, Hepatomegaly, Fatigue, Night sweats, Unexplained weight loss, Pruritus"
+},
+{
+"code": "C23",
+"description": "Malignant neoplasm of gallbladder",
+"symptoms": "Abdominal pain, typically in the upper right quadrant, Jaundice (yellowing of the skin and eyes), Nausea and vomiting, Weight loss, Loss of appetite (anorexia), Palpable abdominal mass, Elevated liver enzymes"
+},
+{
+"code": "I23.1",
+"description": "Atrial septal defect as current complication following acute myocardial infarction",
+"symptoms": "Dyspnea, Fatigue, Palpitations, Edema, Heart murmur, Cyanosis, Arrhythmia"
+},
+{
+"code": "B67.8",
+"description": "Echinococcosis, unspecified, of liver",
+"symptoms": "Hepatomegaly, Abdominal pain, Nausea, Vomiting, Jaundice, Elevated liver enzymes, Palpable abdominal mass"
+},
+{
+"code": "O29.0",
+"description": "Pulmonary complications of anaesthesia during pregnancy",
+"symptoms": "Hypoxemia, Pulmonary edema, Aspiration pneumonitis, Bronchospasm, Respiratory failure, Pneumonia, Hypercapnia"
+},
+{
+"code": "Y61.1",
+"description": "During infusion or transfusion",
+"symptoms": "Febrile nonhemolytic transfusion reaction, Allergic reaction, Transfusion-related acute lung injury (TRALI), Transfusion-associated circulatory overload (TACO), Bacteremia, Hypotension, Hyperthermia"
+},
+{
+"code": "I71.3",
+"description": "Abdominal aortic aneurysm, ruptured",
+"symptoms": "Severe abdominal pain, Hypotension, Tachycardia, Pulsatile abdominal mass, Loss of consciousness, Back pain, Shock"
+},
+{
+"code": "R25.8",
+"description": "Other and unspecified abnormal involuntary movements",
+"symptoms": "Muscle spasms, Tics, Athetosis, Dystonia, Myoclonus, Chorea, Restlessness"
+},
+{
+"code": "B66",
+"description": "Other fluke infections",
+"symptoms": "Abdominal pain, Diarrhea, Fatigue, Eosinophilia, Hepatomegaly, Splenomegaly, Fever"
+},
+{
+"code": "G25.5",
+"description": "Other chorea",
+"symptoms": "Involuntary muscle movements, Jerky movements of extremities, Facial grimacing, Trunk instability, Speech difficulties, Swallowing difficulties, Impaired coordination"
+},
+{
+"code": "X26",
+"description": "Contact with venomous marine animals and plants",
+"symptoms": "localized pain, pruritus, erythema, edema, urticaria, nausea, muscle cramps"
+},
+{
+"code": "P92.8",
+"description": "Other feeding problems of newborn",
+"symptoms": "Poor weight gain, Regurgitation, Choking during feeding, Lethargy, Irritability, Dehydration, Weak suckling reflex"
+},
+{
+"code": "P36.5",
+"description": "Sepsis of newborn due to anaerobes",
+"symptoms": "Fever or hypothermia, Lethargy, Poor feeding, Tachycardia, Tachypnea, Apnea, Hypotension"
+},
+{
+"code": "S25.8",
+"description": "Injury of other blood vessels of thorax",
+"symptoms": "Chest pain, Dyspnea, Hypotension, Tachycardia, Hemothorax, Pulse deficit in upper extremities, Swelling at injury site"
+},
+{
+"code": "O35",
+"description": "Maternal care for known or suspected fetal abnormality and damage",
+"symptoms": "Anxiety, Elevated maternal blood pressure, Fetal growth restriction, Polyhydramnios or oligohydramnios, Abnormal fetal heart rate patterns, Positive screening tests for fetal anomalies, Premature labor"
+},
+{
+"code": "T74.8",
+"description": "Other maltreatment syndromes",
+"symptoms": "Failure to thrive, Developmental delay, Emotional withdrawal, Unexplained injuries, Poor hygiene, Malnutrition, Behavioral problems"
+},
+{
+"code": "C91.7",
+"description": "Other lymphoid leukaemia",
+"symptoms": "Fatigue, Weight loss, Fever, Night sweats, Lymphadenopathy, Splenomegaly, Hepatomegaly"
+},
+{
+"code": "I78.0",
+"description": "Hereditary haemorrhagic telangiectasia",
+"symptoms": "Epistaxis (recurrent nosebleeds), Telangiectases on skin (e.g., face, lips, fingers), Telangiectases in the mucous membranes (e.g., nasal passages), Gastrointestinal bleeding, Iron deficiency anemia, Pulmonary arteriovenous malformations (AVMs) leading to dyspnea or stroke, Hepatic arteriovenous malformations (AVMs) leading to liver dysfunction"
+},
+{
+"code": "O72.1",
+"description": "Other immediate postpartum haemorrhage",
+"symptoms": "Excessive vaginal bleeding, Dizziness, Tachycardia, Hypotension, Pallor, Weakness, Uterine atony"
+},
+{
+"code": "T82.7",
+"description": "Infection and inflammatory reaction due to other cardiac and vascular devices, implants and grafts",
+"symptoms": "Localized pain at the implantation site, Erythema around the device insertion point, Purulent drainage from the wound, Fever, Elevated white blood cell count (leukocytosis), Warmth around the device implantation site, Formation of a pseudoaneurysm"
+},
+{
+"code": "C67.8",
+"description": "Malignant neoplasm: Overlapping lesion of bladder",
+"symptoms": "Hematuria (blood in urine), Dysuria (painful urination), Urinary frequency, Urgency to urinate, Pelvic pain, Weight loss, Fatigue"
+},
+{
+"code": "N29.0",
+"description": "Late syphilis of kidney",
+"symptoms": "Proteinuria, Nephrotic syndrome, Hypertension, Renal insufficiency, Edema, Hematuria, Elevated serum creatinine"
+},
+{
+"code": "V67.5",
+"description": "Occupant of heavy transport vehicle injured in collision with fixed or stationary object: Driver injured in traffic accident",
+"symptoms": "Head trauma, Thoracic pain, Abdominal tenderness, Limb fractures, Spinal cord injury, Loss of consciousness, Internal hemorrhage"
+},
+{
+"code": "Q92.8",
+"description": "Other specified trisomies and partial trisomies of autosomes",
+"symptoms": "Intellectual disability, Growth retardation, Craniofacial anomalies, Cardiac defects, Musculoskeletal abnormalities, Developmental delay, Hypotonia"
+},
+{
+"code": "K65",
+"description": "Peritonitis",
+"symptoms": "Severe abdominal pain, Abdominal tenderness, Fever, Nausea, Vomiting, Abdominal distension, Rigidity of abdominal muscles"
+},
+{
+"code": "A26.7",
+"description": "Erysipelothrix sepsis",
+"symptoms": "Fever, Chills, Rapid heart rate, Elevated respiratory rate, Fatigue, Confusion, Local skin infection signs (erythema, warmth, swelling)"
+},
+{
+"code": "F81.8",
+"description": "Other developmental disorders of scholastic skills",
+"symptoms": "Difficulties in acquiring scholastic skills, Impaired academic performance, Frustration and avoidance of academic tasks, Difficulties in organization and planning, Attention deficits, Memory difficulties, Social difficulties related to academic struggles"
+},
+{
+"code": "Q64.7",
+"description": "Other congenital malformations of bladder and urethra",
+"symptoms": "Urinary incontinence, Urinary retention, Recurrent urinary tract infections, Hydronephrosis, Vesicoureteral reflux, Abdominal distension, Failure to thrive"
+},
+{
+"code": "Q25",
+"description": "Congenital malformations of great arteries",
+"symptoms": "Cyanosis, murmur, dyspnea, poor feeding, failure to thrive, cardiomegaly, congestive heart failure"
+},
+{
+"code": "V35.7",
+"description": "Occupant of three-wheeled motor vehicle injured in collision with railway train or railway vehicle: Person on outside of vehicle injured in traffic accident",
+"symptoms": "Fractures, Lacerations, Contusions, Traumatic brain injury, Spinal cord injury, Internal hemorrhage, Amputation"
+},
+{
+"code": "Z84.3",
+"description": "Family history of consanguinity",
+"symptoms": "Increased risk of autosomal recessive disorders in offspring, Potential for higher incidence of congenital anomalies, Elevated probability of intellectual disability in descendants, Possible presence of rare genetic diseases within the family lineage, Consanguinity documented in the family pedigree, Family awareness or concern regarding potential genetic risks, Need for genetic counseling and testing for family members"
+},
+{
+"code": "J94.1",
+"description": "Fibrothorax",
+"symptoms": "Dyspnea, Chest pain, Reduced breath sounds, Pleural thickening on imaging, Restrictive lung function, Decreased chest wall expansion, Chronic cough"
+},
+{
+"code": "G46.5",
+"description": "Pure motor lacunar syndrome",
+"symptoms": "Hemiparesis, Dysarthria, Facial weakness, Clumsiness, Incoordination, Gait disturbances, Muscle weakness"
+},
+{
+"code": "N11.1",
+"description": "Chronic obstructive pyelonephritis",
+"symptoms": "Flank pain, Fatigue, Fever, Dysuria, Frequency, Nocturia, Hypertension"
+},
+{
+"code": "I40.1",
+"description": "Isolated myocarditis",
+"symptoms": "Chest pain, Shortness of breath (dyspnea), Fatigue, Palpitations, Arrhythmia, Edema, Syncope"
+},
+{
+"code": "R46.8",
+"description": "Other symptoms and signs involving appearance and behaviour",
+"symptoms": "Unusual gait, Neglect of personal hygiene, Inappropriate dress, Social withdrawal, Increased irritability, Apathy, Restlessness"
+},
+{
+"code": "N43.3",
+"description": "Hydrocele, unspecified",
+"symptoms": "Scrotal swelling, Sensation of heaviness in the scrotum, Discomfort or mild pain in the scrotum, Palpable fluid-filled sac around the testicle, Transillumination of the scrotal mass, Enlargement of the affected hemiscrotum, Erythema"
+},
+{
+"code": "H49.2",
+"description": "Sixth [abducent] nerve palsy",
+"symptoms": "Diplopia (double vision), Horizontal diplopia (double vision worse at distance), Esotropia (inward deviation of the eye), Limited abduction of the affected eye (difficulty moving the eye outward), Compensatory head turn towards the side of the affected eye, Blurred vision, Headache"
+},
+{
+"code": "X59.0",
+"description": "Exposure to unspecified factor causing fracture",
+"symptoms": "localized pain, swelling, bruising, deformity, crepitus, limited range of motion, tenderness to palpation"
+},
+{
+"code": "F14.7",
+"description": "Mental and behavioural disorders due to use of cocaine: Residual and late-onset psychotic disorder",
+"symptoms": "Persistent hallucinations, Delusional thinking, Disorganized speech, Impaired cognitive function, Social withdrawal, Flat affect, Anhedonia"
+},
+{
+"code": "Q55.5",
+"description": "Congenital absence and aplasia of penis",
+"symptoms": "Absence of penile tissue, Rudimentary penile development, Ambiguous genitalia, Urethral opening located elsewhere (hypospadias or perineal), Difficulty with urination, Infertility (potential), Hormonal imbalances (potential)"
+},
+{
+"code": "V56.7",
+"description": "Occupant of pick-up truck or van injured in collision with other nonmotor vehicle: Person on outside of vehicle injured in traffic accident",
+"symptoms": "Abrasion, Laceration, Fracture, Hemorrhage, Concussion, Spinal cord injury, Soft tissue contusion"
+},
+{
+"code": "S46.8",
+"description": "Injury of other muscles and tendons at shoulder and upper arm level",
+"symptoms": "Shoulder pain, Upper arm pain, Limited range of motion in the shoulder, Muscle weakness in the affected arm, Swelling around the shoulder or upper arm, Tenderness to palpation in the affected area, Bruising around the shoulder or upper arm"
+},
+{
+"code": "N18.2",
+"description": "Chronic kidney disease, stage 2",
+"symptoms": "Elevated blood pressure, Proteinuria, Slightly reduced glomerular filtration rate (GFR), Increased serum creatinine, Increased blood urea nitrogen (BUN), Fatigue, Nocturia"
+},
+{
+"code": "I49.2",
+"description": "Junctional premature depolarization",
+"symptoms": "Palpitations, Irregular heartbeat, Chest discomfort, Lightheadedness, Fatigue, Syncope, Anxiety"
+},
+{
+"code": "T17.8",
+"description": "Foreign body in other and multiple parts of respiratory tract",
+"symptoms": "Coughing, Choking, Wheezing, Dyspnea (difficulty breathing), Stridor (high-pitched breathing sound), Cyanosis (bluish discoloration of the skin due to lack of oxygen), Voice changes (hoarseness)"
+},
+{
+"code": "Y59.0",
+"description": "Viral vaccines",
+"symptoms": "Fever, injection site pain, injection site swelling, malaise, headache, rash, allergic reaction"
+},
+{
+"code": "D55.8",
+"description": "Other anaemias due to enzyme disorders",
+"symptoms": "Fatigue, Pallor, Jaundice, Dark urine, Splenomegaly, Tachycardia, Shortness of breath"
+},
+{
+"code": "A18",
+"description": "Tuberculosis of other organs",
+"symptoms": "Weight loss, Night sweats, Fever, Fatigue, Localized pain (depending on the affected organ), Loss of appetite, Weakness"
+},
+{
+"code": "C04.8",
+"description": "Malignant neoplasm: Overlapping lesion of floor of mouth",
+"symptoms": "Persistent ulceration of the floor of the mouth, Pain in the mouth, Difficulty swallowing (dysphagia), Speech changes or difficulty speaking (dysarthria), Weight loss, Swelling or lump in the floor of the mouth, Referred pain to the ear"
+},
+{
+"code": "H40.1",
+"description": "Primary open-angle glaucoma",
+"symptoms": "Gradual loss of peripheral vision, Tunnel vision in advanced stages, Optic nerve cupping, Elevated intraocular pressure, Asymptomatic in early stages, Visual field defects, Headache or eye pain (less common)"
+},
+{
+"code": "N02.5",
+"description": "Recurrent and persistent haematuria: Diffuse mesangiocapillary glomerulonephritis",
+"symptoms": "Gross hematuria, Proteinuria, Hypertension, Edema, Decreased glomerular filtration rate, Fatigue, Elevated serum creatinine"
+},
+{
+"code": "Z59.9",
+"description": "Problem related to housing and economic circumstances, unspecified",
+"symptoms": "Food insecurity, Lack of stable housing, Utility shutoffs, Inability to afford medications, Delayed medical care due to cost, Increased stress and anxiety, Poor sanitation"
+},
+{
+"code": "P14.3",
+"description": "Other brachial plexus birth injuries",
+"symptoms": "Paralysis of the arm, Weakness in the arm and hand, Sensory deficits in the affected limb, Asymmetric Moro reflex, Horner's syndrome (ptosis, miosis, anhidrosis), Claw hand deformity, Limited range of motion in the affected arm"
+},
+{
+"code": "L11.8",
+"description": "Other specified acantholytic disorders",
+"symptoms": "Skin blistering, Erosions of the skin, Crusting of skin lesions, Pruritus, Painful skin, Fragile skin, Mucosal involvement (oral, nasal, or genital)"
+},
+{
+"code": "G55.1",
+"description": "Nerve root and plexus compressions in intervertebral disc disorders",
+"symptoms": "Radicular pain, Paresthesia, Muscle weakness, Sensory loss, Diminished reflexes, Atrophy, Spinal rigidity"
+},
+{
+"code": "H53.5",
+"description": "Colour vision deficiencies",
+"symptoms": "Difficulty distinguishing between colors (e.g., red and green), Reduced ability to perceive color saturation, Inability to identify specific colors, Confusion of colors in certain lighting conditions, Problems with color-based tasks (e.g., matching clothes), Variable severity of color perception deficits, Photophobia (in some acquired cases)"
+},
+{
+"code": "A04.1",
+"description": "Enterotoxigenic Escherichia coli infection",
+"symptoms": "Watery diarrhea, Abdominal cramps, Nausea, Vomiting, Low-grade fever, Dehydration, Loss of appetite"
+},
+{
+"code": "Q14.3",
+"description": "Congenital malformation of choroid",
+"symptoms": "Choroidal coloboma, Vision impairment, Photophobia, Nystagmus, Retinal pigment epithelium abnormalities, Myopia, Strabismus"
+},
+{
+"code": "M11.8",
+"description": "Other specified crystal arthropathies",
+"symptoms": "Joint pain, Joint swelling, Joint redness, Limited range of motion, Warmth around the affected joint, Presence of crystals in synovial fluid, Acute inflammatory episodes"
+},
+{
+"code": "V45.3",
+"description": "Car occupant injured in collision with railway train or railway vehicle: Unspecified car occupant injured in nontraffic accident",
+"symptoms": "Head trauma, spinal cord injury, fractures, internal bleeding, soft tissue damage, loss of consciousness, psychological trauma"
+},
+{
+"code": "V17.1",
+"description": "Pedal cyclist injured in collision with fixed or stationary object: Passenger injured in nontraffic accident",
+"symptoms": "Fractures, abrasions, lacerations, concussion, internal bleeding, spinal cord injury, traumatic brain injury"
+},
+{
+"code": "A56.3",
+"description": "Chlamydial infection of anus and rectum",
+"symptoms": "Anal pain, Rectal itching, Rectal discharge, Tenesmus, Rectal bleeding"
+},
+{
+"code": "Z02.8",
+"description": "Other examinations for administrative purposes",
+"symptoms": "Normal physical examination findings, Normal vital signs, Documentation of administrative purpose of examination, Absence of acute medical complaints, Completion of required forms or documentation, Assessment of functional status (if required), Collection of necessary samples (e.g., urine, blood) if required for administrative purpose"
+},
+{
+"code": "A95.9",
+"description": "Yellow fever, unspecified",
+"symptoms": "High fever, Jaundice, Nausea and vomiting, Abdominal pain, Bleeding tendencies, Fatigue, Muscle aches"
+},
+{
+"code": "V70.6",
+"description": "Bus occupant injured in collision with pedestrian or animal: Passenger injured in traffic accident",
+"symptoms": "Head trauma, cervicalgia, Thoracic spine injury, lumbar spine injury, extremity fractures, soft tissue contusions, internal organ injury"
+},
+{
+"code": "F60.4",
+"description": "Histrionic personality disorder",
+"symptoms": "Constant seeking of attention, Excessively dramatic emotional expression, Suggestibility, Shallow and rapidly shifting emotions, Inappropriate seductiveness or provocativeness, Belief that relationships are more intimate than they actually are, Sensitivity to criticism or disapproval"
+},
+{
+"code": "M80.0",
+"description": "Postmenopausal osteoporosis with pathological fracture",
+"symptoms": "Back pain, Spinal compression fracture, Hip fracture, Decreased height over time, Kyphosis, Bone tenderness, Limited mobility"
+},
+{
+"code": "C74",
+"description": "Malignant neoplasm of adrenal gland",
+"symptoms": "Abdominal pain, Weight loss, Hypertension, Hyperglycemia, Hirsutism, Muscle weakness, Cushingoid features"
+},
+{
+"code": "Y34",
+"description": "Unspecified event, undetermined intent",
+"symptoms": "Physical trauma (nature unspecified), Psychological distress, Anxiety, Depression, Difficulty concentrating, Sleep disturbances, Memory impairment"
+},
+{
+"code": "V86.9",
+"description": "Unspecified occupant of all-terrain or other off-road motor vehicle injured in nontraffic accident",
+"symptoms": "Abrasion, Laceration, Contusion, Fracture, Sprain, Internal Hemorrhage, Concussion"
+},
+{
+"code": "P28.5",
+"description": "Respiratory failure of newborn",
+"symptoms": "Cyanosis, Tachypnea, Grunting, Nasal flaring, Retractions, Apnea, Hypoxemia"
+},
+{
+"code": "L89.3",
+"description": "Stage IV decubitus ulcer",
+"symptoms": "Full-thickness skin loss, Exposed bone, Exposed tendon, Exposed muscle, Sinus tracts, Undermining, Eschar"
+},
+{
+"code": "Z93.0",
+"description": "Tracheostomy status",
+"symptoms": "Altered voice, Increased mucus production, Risk of aspiration, Potential for tracheal stenosis, Requirement for tracheostomy tube care, Increased susceptibility to respiratory infections, Skin irritation around stoma"
+},
+{
+"code": "V22.4",
+"description": "Motorcycle rider injured in collision with two- or three-wheeled motor vehicle: Driver injured in traffic accident",
+"symptoms": "Head trauma, Extremity fractures, Abrasion, Laceration, Internal hemorrhage, Spinal cord injury, Loss of consciousness"
+},
+{
+"code": "C22.9",
+"description": "Malignant neoplasm: Liver, unspecified",
+"symptoms": "Abdominal pain, Jaundice, Unexplained weight loss, Hepatomegaly, Ascites, Fatigue, Nausea"
+},
+{
+"code": "E28.8",
+"description": "Other ovarian dysfunction",
+"symptoms": "Irregular menstrual cycles, Oligomenorrhea (infrequent menstruation), Amenorrhea (absence of menstruation), Hirsutism (excessive hair growth), Acne, Infertility, Pelvic pain"
+},
+{
+"code": "H66.0",
+"description": "Acute suppurative otitis media",
+"symptoms": "Otalgia, Otorrhea (purulent discharge), Hearing loss, Fever, Irritability, Aural fullness, Tympanic membrane erythema and bulging"
+},
+{
+"code": "G24",
+"description": "Dystonia",
+"symptoms": "Involuntary muscle contractions, Sustained abnormal postures, Repetitive movements, Tremor, Muscle spasms, Pain, Difficulty swallowing (dysphagia)"
+},
+{
+"code": "C86.4",
+"description": "Blastic NK-cell lymphoma",
+"symptoms": "Skin lesions (nodules, plaques, or tumors), Lymphadenopathy (enlarged lymph nodes), Hepatosplenomegaly (enlarged liver and spleen), Cytopenias (anemia, thrombocytopenia, leukopenia), Fever, Weight loss, Fatigue"
+},
+{
+"code": "D73.9",
+"description": "Disease of spleen, unspecified",
+"symptoms": "Splenomegaly, Abdominal pain, Fatigue, Anemia, Thrombocytopenia, Leukopenia, Increased susceptibility to infection"
+},
+{
+"code": "O65.2",
+"description": "Obstructed labour due to pelvic inlet contraction",
+"symptoms": "Prolonged first stage of labor, Arrest of fetal descent, Cephalopelvic disproportion, Excessive maternal fatigue, Uterine hyperstimulation, Fetal distress, Rupture of membranes with no descent"
+},
+{
+"code": "T31.9",
+"description": "Burns involving 90% or more of body surface",
+"symptoms": "Hypovolemic shock, Electrolyte imbalance, Edema, Proteinuria, Hypermetabolism, Increased risk of infection, Eschar formation"
+},
+{
+"code": "S60.9",
+"description": "Superficial injury of wrist and hand, unspecified",
+"symptoms": "Skin abrasion, Mild edema, Localized pain, Erythema, Superficial contusion, Minimal functional impairment, Minor bleeding"
+},
+{
+"code": "T95.4",
+"description": "Sequelae of burn and corrosion classifiable only according to extent of body surface involved",
+"symptoms": "Scarring, Contractures, Chronic pain, Pruritus, Disfigurement, Limited range of motion, Hypertrophic scar formation"
+},
+{
+"code": "H34.2",
+"description": "Other retinal artery occlusions",
+"symptoms": "Sudden vision loss, Visual field defect, Pale retina on fundoscopic examination, Retinal edema, Attenuation of retinal arterioles, Cherry-red spot (in some cases), Afferent pupillary defect"
+},
+{
+"code": "V79.5",
+"description": "Passenger injured in collision with other and unspecified motor vehicles in traffic accident",
+"symptoms": "Headache, Neck pain, Back pain, Abdominal pain, Limb pain, Loss of consciousness, Nausea"
+},
+{
+"code": "M89.3",
+"description": "Hypertrophy of bone",
+"symptoms": "Bone pain, Swelling around the affected bone, Limited range of motion, Deformity of the affected bone, Increased bone density on imaging, Nerve compression symptoms (e.g., numbness, tingling), Pathological fractures"
+},
+{
+"code": "K83.2",
+"description": "Perforation of bile duct",
+"symptoms": "Abdominal pain, Fever, Jaundice, Nausea, Vomiting, Elevated bilirubin levels, Leukocytosis"
+},
+{
+"code": "P37",
+"description": "Other congenital infectious and parasitic diseases",
+"symptoms": "Hepatosplenomegaly, Jaundice, Thrombocytopenia, Intrauterine growth restriction, Microcephaly, Pneumonia, Skin lesions"
+},
+{
+"code": "R60.9",
+"description": "Oedema, unspecified",
+"symptoms": "Swelling of affected area, Skin discoloration (redness or pallor), Skin tightness, Pitting edema (indentation remains after pressure), Limited range of motion in affected joints, Weight gain, Dyspnea if pulmonary edema is present"
+},
+{
+"code": "I34.2",
+"description": "Nonrheumatic mitral (valve) stenosis",
+"symptoms": "Dyspnea on exertion, Orthopnea, Paroxysmal nocturnal dyspnea, Fatigue, Palpitations, Hemoptysis, Lower extremity edema"
+},
+{
+"code": "N27",
+"description": "Small kidney of unknown cause",
+"symptoms": "Hypertension, Proteinuria, Decreased glomerular filtration rate, Elevated serum creatinine, Anemia, Polyuria, Nocturia"
+},
+{
+"code": "T67",
+"description": "Effects of heat and light",
+"symptoms": "Hyperpyrexia, Dehydration, Electrolyte imbalance, Skin erythema, Heat cramps, Heat exhaustion, Photosensitivity"
+},
+{
+"code": "Y76.2",
+"description": "Obstetric and gynaecological devices associated with adverse incidents: Prosthetic and other implants, materials and accessory devices",
+"symptoms": "Pelvic pain, Vaginal bleeding, Infection, Device malfunction, Inflammation, Tissue erosion, Fistula formation"
+},
+{
+"code": "I66.0",
+"description": "Occlusion and stenosis of middle cerebral artery",
+"symptoms": "Contralateral hemiparesis (weakness on one side of the body), Contralateral hemisensory loss (sensory loss on one side of the body), Aphasia (language impairment, especially with left hemisphere involvement), Neglect syndrome (inattention to one side of space, typically with right hemisphere lesions), Homonymous hemianopia (visual field defect affecting the same half of the visual field in both eyes), Altered level of consciousness, Headache"
+},
+{
+"code": "C79.8",
+"description": "Secondary malignant neoplasm of other specified sites",
+"symptoms": "Pain at the secondary site, Unexplained weight loss, Fatigue, Enlarged lymph nodes near the secondary site, Organ dysfunction related to secondary site involvement, Neurological deficits if in the brain, Pathologic fracture if in bone"
+},
+{
+"code": "N37.0",
+"description": "Urethritis in diseases classified elsewhere",
+"symptoms": "Dysuria, Urethral discharge, Urethral pruritus, Urethral erythema, Urinary frequency, Urinary urgency, Pelvic pain"
+},
+{
+"code": "E73.9",
+"description": "Lactose intolerance, unspecified",
+"symptoms": "Abdominal bloating, Abdominal cramps, Diarrhea, Increased flatulence, Nausea, Borborygmi (stomach rumbling), Abdominal pain"
+},
+{
+"code": "Q72",
+"description": "Reduction defects of lower limb",
+"symptoms": "Aplasia of femur, Hypoplasia of tibia, Absence of fibula, Shortening of lower limb, Foot deformities (e.g., clubfoot), Gait abnormalities, Limb length discrepancy"
+},
+{
+"code": "T86.0",
+"description": "Bone-marrow transplant rejection",
+"symptoms": "Pancytopenia, Skin rash, Elevated bilirubin, Hepatosplenomegaly, Diarrhea, Abdominal pain, Weight loss"
+},
+{
+"code": "O80.9",
+"description": "Single spontaneous delivery, unspecified",
+"symptoms": "Uterine contractions, Rupture of amniotic membranes, Cervical dilation, Expulsion of fetus, Expulsion of placenta, Perineal pain, Postpartum bleeding (lochia)"
+},
+{
+"code": "S85.2",
+"description": "Injury of peroneal artery",
+"symptoms": "localized pain at the site of injury, hematoma formation, diminished or absent pedal pulse, coolness of the affected limb, pallor or cyanosis distal to the injury, delayed capillary refill, potential for compartment syndrome"
+},
+{
+"code": "T88",
+"description": "Other complications of surgical and medical care, not elsewhere classified",
+"symptoms": "Postoperative infection, Adverse drug reaction, Surgical wound dehiscence, Persistent postoperative pain, Accidental puncture or laceration during a procedure, Foreign body accidentally left in surgical site following a procedure, Postprocedural hemorrhage"
+},
+{
+"code": "C95.0",
+"description": "Acute leukaemia of unspecified cell type",
+"symptoms": "Fatigue, Pallor, Fever, Bruising, Petechiae, Bone pain, Hepatosplenomegaly"
+},
+{
+"code": "O24.4",
+"description": "Diabetes mellitus arising in pregnancy",
+"symptoms": "Polyuria, Polydipsia, Polyphagia, Gestational hypertension, Glycosuria, Elevated blood glucose levels (fasting and postprandial), Increased fetal macrosomia risk"
+},
+{
+"code": "Q60.0",
+"description": "Renal agenesis, unilateral",
+"symptoms": "Oligohydramnios (during pregnancy), Facial dysmorphism (Potter sequence if severe oligohydramnios occurs in utero), Pulmonary hypoplasia (due to oligohydramnios), Hypertension (potentially later in life), Compensatory hypertrophy of the remaining kidney, Urinary tract infections (increased risk), Proteinuria"
+},
+{
+"code": "J98",
+"description": "Other respiratory disorders",
+"symptoms": "Dyspnea, Cough, Chest pain, Wheezing, Hypoxia, Abnormal respiratory rate, Cyanosis"
+},
+{
+"code": "Z80.4",
+"description": "Family history of malignant neoplasm of genital organs",
+"symptoms": "Anxiety, Increased screening frequency, Concern about personal cancer risk, Prophylactic measures consideration, Genetic counseling referral, Increased awareness of potential symptoms, Family communication regarding health history"
+},
+{
+"code": "V31.0",
+"description": "Occupant of three-wheeled motor vehicle injured in collision with pedal cycle: Driver injured in nontraffic accident",
+"symptoms": "Head trauma, Extremity fractures, Soft tissue contusions, Abdominal pain, Thoracic injuries, Spinal cord injury, Loss of consciousness"
+},
+{
+"code": "V63.2",
+"description": "Occupant of heavy transport vehicle injured in collision with car, pick-up truck or van: Person on outside of vehicle injured in nontraffic accident",
+"symptoms": "Fractures, Lacerations, Contusions, Traumatic brain injury (TBI), Spinal cord injury, Internal bleeding, Soft tissue damage"
+},
+{
+"code": "F73.0",
+"description": "Profound mental retardation: With the statement of no, or minimal, impairment of behaviour",
+"symptoms": "Significantly subaverage intellectual functioning, Deficits in adaptive behavior, Limited communication skills, Impaired motor skills, Dependence on others for daily care, Global developmental delay, Cognitive impairment"
+},
+{
+"code": "Q32.2",
+"description": "Congenital bronchomalacia",
+"symptoms": "Stridor, Wheezing, Recurrent respiratory infections, Barking cough, Cyanosis during feeding or crying, Apnea, Difficulty breathing"
+},
+{
+"code": "A22.0",
+"description": "Cutaneous anthrax",
+"symptoms": "Pruritic papules, Vesicles, Ulcer formation, Black eschar, Edema, Fever, Lymphadenopathy"
+},
+{
+"code": "O62",
+"description": "Abnormalities of forces of labour",
+"symptoms": "Prolonged first stage of labor, Arrested active phase of labor, Uterine tachysystole, Hypotonic uterine contractions, Ineffective maternal pushing, Fetal distress, Increased risk of postpartum hemorrhage"
+},
+{
+"code": "N80.9",
+"description": "Endometriosis, unspecified",
+"symptoms": "Chronic pelvic pain, Dysmenorrhea (painful menstruation), Dyspareunia (painful sexual intercourse), Infertility, Dyschezia (painful bowel movements), Fatigue, Nausea"
+},
+{
+"code": "X71",
+"description": "Intentional self-harm by drowning and submersion",
+"symptoms": "Loss of consciousness, Respiratory arrest, Cyanosis, Pulmonary edema, Cardiac arrest, Hypothermia, Cerebral hypoxia"
+},
+{
+"code": "R85.2",
+"description": "Abnormal findings in specimens from digestive organs and abdominal cavity: Abnormal level of other drugs, medicaments and biological substances",
+"symptoms": "Abdominal pain, Nausea, Vomiting, Diarrhea, Constipation, Elevated liver enzymes, Abnormal serum drug levels"
+},
+{
+"code": "B95.0",
+"description": "Streptococcus, group A, as the cause of diseases classified to other chapters",
+"symptoms": "Fever, Localized inflammation at the primary site of infection (e.g., throat, skin), Pain and tenderness, Swelling of affected tissues, Erythema (redness) at the site of infection, Purulent discharge (if an abscess is present), Systemic symptoms such as malaise and fatigue"
+},
+{
+"code": "N76.6",
+"description": "Ulceration of vulva",
+"symptoms": "Vulvar pain, Open sores on vulva, Vulvar pruritus (itching), Dyspareunia (painful sexual intercourse), Vulvar edema (swelling), Vaginal discharge, Local inflammation"
+},
+{
+"code": "A79.1",
+"description": "Rickettsialpox due to Rickettsia akari",
+"symptoms": "Fever, Eschar at bite site, Maculopapular rash, Lymphadenopathy, Fatigue, Headache, Myalgias"
+},
+{
+"code": "G73.0",
+"description": "Myasthenic syndromes in endocrine diseases",
+"symptoms": "Muscle weakness, Fatigue, Ptosis, Diplopia, Dysphagia, Dysarthria, Respiratory insufficiency"
+},
+{
+"code": "K66.9",
+"description": "Disorder of peritoneum, unspecified",
+"symptoms": "Abdominal pain, Abdominal tenderness, Abdominal distension, Nausea, Vomiting, Fever, Ascites"
+},
+{
+"code": "Z89.7",
+"description": "Acquired absence of both lower limbs [any level, except toes alone]",
+"symptoms": "Gait disturbance, Phantom limb pain, Stump pain, Skin breakdown at the stump site, Muscle atrophy, Balance impairment, Decreased mobility"
+},
+{
+"code": "V38.3",
+"description": "Occupant of three-wheeled motor vehicle injured in noncollision transport accident: Unspecified occupant of three-wheeled motor vehicle injured in nontraffic accident",
+"symptoms": "Head trauma, Limb fractures, Spinal cord injury, Internal bleeding, Soft tissue damage, Concussion, Loss of consciousness"
+},
+{
+"code": "G21.2",
+"description": "Secondary parkinsonism due to other external agents",
+"symptoms": "Resting tremor, Muscle rigidity, Bradykinesia, Postural instability, Masked facies, Shuffling gait, Dysarthria"
+},
+{
+"code": "F61",
+"description": "Mixed and other personality disorders",
+"symptoms": "Emotional lability, Impulsivity, Difficulties in interpersonal relationships, Distorted self-image, Chronic feelings of emptiness, Recurrent suicidal behavior or self-mutilation, Inappropriate intense anger or difficulty controlling anger"
+},
+{
+"code": "Y46.4",
+"description": "Iminostilbenes",
+"symptoms": "Ataxia, Dizziness, Nystagmus, Diplopia, Nausea, Vomiting, Skin rash"
+},
+{
+"code": "N07.6",
+"description": "Hereditary nephropathy, not elsewhere classified: Dense deposit disease",
+"symptoms": "Proteinuria, Hematuria, Hypertension, Edema, Progressive kidney failure, Hypocomplementemia, Visual disturbances due to drusen formation in Bruch's membrane"
+},
+{
+"code": "V49.3",
+"description": "Car occupant [any] injured in unspecified nontraffic accident",
+"symptoms": "Headache, dizziness, nausea, back pain, abdominal pain, chest pain, abrasions"
+},
+{
+"code": "G02.0",
+"description": "Meningitis in viral diseases classified elsewhere",
+"symptoms": "Headache, Fever, Neck stiffness (nuchal rigidity), Photophobia (sensitivity to light), Lethargy, Nausea, Vomiting"
+},
+{
+"code": "A08.1",
+"description": "Acute gastroenteropathy due to Norwalk agent",
+"symptoms": "Nausea, vomiting, diarrhea, abdominal pain, fever, dehydration, fatigue"
+},
+{
+"code": "Q18.3",
+"description": "Webbing of neck",
+"symptoms": "Skin folds extending from the mastoid process to the shoulder, Restricted neck movement, Cosmetic disfigurement, Short neck appearance, Low hairline at the nape of the neck, Possible association with other congenital syndromes like Turner syndrome, Possible lymphatic obstruction"
+},
+{
+"code": "P11.0",
+"description": "Cerebral oedema due to birth injury",
+"symptoms": "Lethargy, Irritability, Poor feeding, Seizures, Bulging fontanelle, Increased head circumference, Respiratory distress"
+},
+{
+"code": "O07.6",
+"description": "Other and unspecified failed attempted abortion, complicated by delayed or excessive haemorrhage",
+"symptoms": "Excessive vaginal bleeding, Hypotension, Tachycardia, Abdominal pain, Uterine tenderness, Passage of blood clots, Anemia"
+},
+{
+"code": "H04.4",
+"description": "Chronic inflammation of lacrimal passages",
+"symptoms": "Epiphora (excessive tearing), Eye irritation, Redness of the eye, Swelling of the lacrimal sac area, Tenderness over the lacrimal sac, Chronic or recurrent conjunctivitis, Mucopurulent discharge from the puncta"
+},
+{
+"code": "F50.2",
+"description": "Bulimia nervosa",
+"symptoms": "Recurrent episodes of binge eating, Inappropriate compensatory behaviors (e.g., self-induced vomiting, misuse of laxatives, excessive exercise), Distorted body image, Fear of weight gain, Dental erosion, Electrolyte imbalance, Esophageal damage"
+},
+{
+"code": "V40.0",
+"description": "Car occupant injured in collision with pedestrian or animal: Driver injured in nontraffic accident",
+"symptoms": "Head trauma, Neck pain, Back pain, Extremity fractures, Soft tissue injuries, Loss of consciousness, Abdominal pain"
+},
+{
+"code": "Z55.9",
+"description": "Problem related to education and literacy, unspecified",
+"symptoms": "Difficulty reading, Difficulty writing, Poor comprehension, Low academic performance, Limited vocabulary, Frustration with learning, Avoidance of educational activities"
+},
+{
+"code": "C40.1",
+"description": "Malignant neoplasm: Short bones of upper limb",
+"symptoms": "Persistent bone pain, Palpable mass or swelling, Limited range of motion, Pathological fracture, Fatigue, Unexplained weight loss, Anemia"
+},
+{
+"code": "H04.8",
+"description": "Other disorders of lacrimal system",
+"symptoms": "Epiphora (excessive tearing), Dry eye syndrome (in some cases, paradoxical), Lacrimal gland swelling or tenderness, Chronic conjunctivitis, Dacryocystitis (inflammation of the lacrimal sac), Punctal stenosis (narrowing of tear duct openings), Foreign body sensation in the eye"
+},
+{
+"code": "T01.3",
+"description": "Open wounds involving multiple regions of lower limb(s)",
+"symptoms": "Hemorrhage, Skin lacerations, Muscle damage, Bone fracture, Edema, Ecchymosis, Loss of function"
+},
+{
+"code": "R41",
+"description": "Other symptoms and signs involving cognitive functions and awareness",
+"symptoms": "Disorientation, Memory impairment, Confusion, Difficulty concentrating, Altered level of consciousness, Impaired judgment, Lack of awareness of surroundings"
+},
+{
+"code": "R59.0",
+"description": "Localized enlarged lymph nodes",
+"symptoms": "Palpable lymph node enlargement, Tenderness upon palpation, Localized swelling, Erythema surrounding the affected node, Warmth over the affected area, Pain in the affected region, Limited range of motion if near a joint"
+},
+{
+"code": "H01",
+"description": "Other inflammation of eyelid",
+"symptoms": "Erythema of the eyelid, Edema of the eyelid, Pruritus of the eyelid, Scaling of the eyelid skin, Burning sensation of the eyelid, Increased tearing, Photophobia"
+},
+{
+"code": "T53.1",
+"description": "Toxic effect: Chloroform",
+"symptoms": "Central nervous system depression, respiratory depression, cardiac arrhythmia, liver damage, kidney damage, nausea, vomiting"
+},
+{
+"code": "D43.3",
+"description": "Neoplasm of uncertain or unknown behaviour: Cranial nerves",
+"symptoms": "Diplopia, Facial pain, Hearing loss, Dysphagia, Dysarthria, Vestibular dysfunction, Trigeminal neuralgia"
+},
+{
+"code": "S02.1",
+"description": "Fracture of base of skull",
+"symptoms": "Periorbital ecchymosis (Raccoon eyes), Retroauricular ecchymosis (Battle's sign), Cerebrospinal fluid (CSF) rhinorrhea, Cerebrospinal fluid (CSF) otorrhea, Hearing loss, Cranial nerve palsies, Headache"
+},
+{
+"code": "E52",
+"description": "Niacin deficiency [pellagra]",
+"symptoms": "Dermatitis characterized by a symmetrical rash in sun-exposed areas, Diarrhea, Dementia, including cognitive impairment and memory loss, Glossitis (inflammation of the tongue), Stomatitis (inflammation of the mouth), Depression, Anorexia"
+},
+{
+"code": "C49.2",
+"description": "Malignant neoplasm: Connective and soft tissue of lower limb, including hip",
+"symptoms": "Limb pain, palpable mass, swelling of the affected area, limited range of motion, skin changes (e.g., discoloration, ulceration), nerve compression symptoms (e.g., numbness, tingling), metastasis (e.g., lung nodules, bone pain)"
+},
+{
+"code": "Y46.8",
+"description": "Antispasticity drugs",
+"symptoms": "Hypotonia, Drowsiness, Dizziness, Nausea, Muscle weakness, Ataxia, Speech impairment"
+},
+{
+"code": "A02",
+"description": "Other salmonella infections",
+"symptoms": "Diarrhea, abdominal cramps, fever, nausea, vomiting, headache, muscle aches"
+},
+{
+"code": "B40.1",
+"description": "Chronic pulmonary blastomycosis",
+"symptoms": "Persistent cough, Shortness of breath, Chest pain, Weight loss, Night sweats, Fatigue, Hemoptysis"
+},
+{
+"code": "E11.1",
+"description": "Non-insulin-dependent diabetes mellitus: With ketoacidosis",
+"symptoms": "Hyperglycemia, Polyuria, Polydipsia, Acetone breath, Nausea, Vomiting, Abdominal pain"
+},
+{
+"code": "T40.5",
+"description": "Poisoning: Cocaine",
+"symptoms": "Tachycardia, Hypertension, Mydriasis, Agitation, Seizures, Hyperthermia, Cardiac arrhythmia"
+},
+{
+"code": "D17",
+"description": "Benign lipomatous neoplasm",
+"symptoms": "Soft, movable mass, Painless lump, Slow growth, Subcutaneous location, Encapsulated mass, Possible nerve compression, Cosmetic disfigurement"
+},
+{
+"code": "S43.7",
+"description": "Sprain and strain of other and unspecified parts of shoulder girdle",
+"symptoms": "Shoulder pain, Limited range of motion, Swelling around the shoulder, Tenderness to palpation, Muscle spasm, Bruising, Weakness in the affected arm"
+},
+{
+"code": "B08.4",
+"description": "Enteroviral vesicular stomatitis with exanthem",
+"symptoms": "Vesicular lesions in the mouth, Exanthem (rash) on the skin, Fever, Sore throat, Difficulty swallowing, Fatigue, Constitutional symptoms (e.g., malaise)"
+},
+{
+"code": "Z46.1",
+"description": "Fitting and adjustment of hearing aid",
+"symptoms": "Subjective report of improved hearing, Verification of audibility thresholds, Proper placement of hearing aid in ear canal, Assessment of sound quality and clarity, Patient education on hearing aid use and maintenance, Absence of pain or discomfort with hearing aid use, Optimal device settings based on audiometric results"
+},
+{
+"code": "P59.9",
+"description": "Neonatal jaundice, unspecified",
+"symptoms": "Yellowish discoloration of the skin, Yellowish discoloration of the sclera (whites of the eyes), Poor feeding, Lethargy, Drowsiness, High-pitched cry, Elevated bilirubin levels in blood tests"
+},
+{
+"code": "M07.3",
+"description": "Other psoriatic arthropathies",
+"symptoms": "Joint pain, Joint stiffness, Swollen digits (dactylitis), Psoriatic skin lesions (plaques), Nail changes (pitting, onycholysis), Enthesitis (inflammation at tendon/ligament insertion points), Reduced range of motion"
+},
+{
+"code": "F11.8",
+"description": "Mental and behavioural disorders due to use of opioids: Other mental and behavioural disorders",
+"symptoms": "Depression, Anxiety, Psychosis, Cognitive impairment, Sleep disturbances, Personality changes, Impaired judgment"
+},
+{
+"code": "A40.8",
+"description": "Other streptococcal sepsis",
+"symptoms": "Fever, Hypotension, Tachycardia, Tachypnea, Organ dysfunction, Confusion, Pain at infection site"
+},
+{
+"code": "J04.1",
+"description": "Acute tracheitis",
+"symptoms": "Cough, Sore throat, Dyspnea, Stridor, Fever, Hoarseness, Substernal chest pain"
+},
+{
+"code": "M14",
+"description": "Arthropathies in other diseases classified elsewhere",
+"symptoms": "Joint pain, Joint stiffness, Joint swelling, Decreased range of motion, Tenderness to palpation of affected joints, Joint deformity (in chronic cases), Inflammation of the affected joint(s)"
+},
+{
+"code": "T49.6",
+"description": "Poisoning: Otorhinolaryngological drugs and preparations",
+"symptoms": "Tinnitus, Vertigo, Hearing loss, Nasal congestion, Rhinorrhea, Throat irritation, Dysphonia"
+},
+{
+"code": "D59.4",
+"description": "Other nonautoimmune haemolytic anaemias",
+"symptoms": "Fatigue, Pallor, Jaundice, Dark urine (hemoglobinuria), Splenomegaly, Tachycardia, Shortness of breath"
+},
+{
+"code": "E50.7",
+"description": "Other ocular manifestations of vitamin A deficiency",
+"symptoms": "Xerophthalmia, Bitot's spots, Corneal ulceration, Keratomalacia, Night blindness (Nyctalopia), Conjunctival xerosis, Impaired dark adaptation"
+},
+{
+"code": "W54",
+"description": "Bitten or struck by dog",
+"symptoms": "Puncture wound, Laceration, Abrasion, Pain, Swelling, Erythema, Risk of infection"
+},
+{
+"code": "L55.1",
+"description": "Sunburn of second degree",
+"symptoms": "Erythema, Blistering, Edema, Pain, Pruritus, Skin peeling, Systemic symptoms (e.g., fever, chills) in severe cases"
+},
+{
+"code": "G11.8",
+"description": "Other hereditary ataxias",
+"symptoms": "Progressive gait instability, Dysarthria, Dysmetria, Nystagmus, Intention tremor, Muscle weakness, Cognitive impairment"
+},
+{
+"code": "I44",
+"description": "Atrioventricular and left bundle-branch block",
+"symptoms": "Syncope, Presyncope, Bradycardia, Dizziness, Fatigue, Chest pain, Shortness of breath"
+},
+{
+"code": "K04.1",
+"description": "Necrosis of pulp",
+"symptoms": "Tooth discoloration (grayish or brownish), Sensitivity to pressure, Pain upon percussion, Presence of a sinus tract in the oral mucosa, Absence of response to pulp sensitivity tests (e.g., electric pulp test, thermal tests), Radiographic evidence of periapical radiolucency (in advanced cases), Possible swelling of the surrounding gingiva"
+},
+{
+"code": "P02.8",
+"description": "Fetus and newborn affected by other abnormalities of membranes",
+"symptoms": "Amniotic band syndrome, Premature rupture of membranes (PROM), Oligohydramnios (low amniotic fluid), Polyhydramnios (excess amniotic fluid), Chorioamnionitis (intra-amniotic infection), Fetal growth restriction, Fetal hypoxia"
+},
+{
+"code": "K56.3",
+"description": "Gallstone ileus",
+"symptoms": "Abdominal distension, Nausea, Vomiting, Abdominal pain (cramping), Constipation, Dehydration, Hyperactive bowel sounds (early) or absent bowel sounds (late)"
+},
+{
+"code": "S04",
+"description": "Injury of cranial nerves",
+"symptoms": "Diplopia, Anosmia, Facial paralysis, Vertigo, Hearing loss, Dysphagia, Trigeminal neuralgia"
+},
+{
+"code": "J35.3",
+"description": "Hypertrophy of tonsils with hypertrophy of adenoids",
+"symptoms": "Mouth breathing, Snoring, Obstructive sleep apnea, Dysphagia, Hyponasal speech, Recurrent tonsillitis, Chronic rhinitis"
+},
+{
+"code": "K90",
+"description": "Intestinal malabsorption",
+"symptoms": "Chronic diarrhea, Steatorrhea (fatty stools), Weight loss, Abdominal distension, Anemia, Edema, Muscle weakness"
+},
+{
+"code": "Z25.1",
+"description": "Need for immunization against influenza",
+"symptoms": "Request for influenza vaccine administration, Documentation of prior influenza vaccination history, Assessment of patient's eligibility for influenza vaccine, Absence of active influenza infection, Counseling regarding benefits and risks of influenza vaccination, Verification of informed consent for vaccination, Scheduling of influenza vaccination appointment"
+},
+{
+"code": "V94.5",
+"description": "Other and unspecified water transport accidents: Canoe or kayak",
+"symptoms": "Hypothermia, Asphyxiation, Musculoskeletal injuries, Lacerations, Contusions, Concussion, Aspiration of water"
+},
+{
+"code": "Q61.8",
+"description": "Other cystic kidney diseases",
+"symptoms": "Abdominal pain, Hematuria (blood in urine), Hypertension (high blood pressure), Palpable abdominal mass, Urinary tract infections, Proteinuria (protein in urine), Nephrolithiasis (kidney stones)"
+},
+{
+"code": "F72.8",
+"description": "Severe mental retardation: Other impairments of behaviour",
+"symptoms": "Significantly limited intellectual functioning, Impaired adaptive behavior (e.g., communication, self-care), Severe deficits in cognitive skills (e.g., reasoning, problem-solving), Limited expressive and receptive language skills, Difficulty with social interaction and understanding social cues, Challenging behaviors (e.g., aggression, self-injury), Dependence on others for daily living activities"
+},
+{
+"code": "M36.1",
+"description": "Arthropathy in neoplastic disease",
+"symptoms": "Joint pain, Joint stiffness, Joint swelling, Reduced range of motion, Effusion within the affected joint, Synovitis, Tenderness upon palpation of the joint"
+},
+{
+"code": "J67.1",
+"description": "Bagassosis",
+"symptoms": "Dyspnea, Cough, Fever, Chills, Malaise, Bibasilar crackles, Weight loss"
+},
+{
+"code": "A23.8",
+"description": "Other brucellosis",
+"symptoms": "Undulating fever, Fatigue, Arthralgia (joint pain), Night sweats, Weight loss, Malaise, Loss of appetite"
+},
+{
+"code": "D33.7",
+"description": "Benign neoplasm: Other specified parts of central nervous system",
+"symptoms": "Headache, Seizures, Focal neurological deficits, Visual disturbances, Cognitive impairment, Papilledema, Nausea and vomiting"
+},
+{
+"code": "T23.5",
+"description": "Corrosion of first degree of wrist and hand",
+"symptoms": "Erythema, Pain at the affected site, Superficial epidermal damage, Mild edema, Blanching with pressure, Warmth to the touch, Itching or burning sensation"
+},
+{
+"code": "N88.2",
+"description": "Stricture and stenosis of cervix uteri",
+"symptoms": "Dysmenorrhea, Amenorrhea, Infertility, Dyspareunia, Hematometra, Pelvic pain, Cervical discharge"
+},
+{
+"code": "R29.4",
+"description": "Clicking hip",
+"symptoms": "Audible clicking sound in the hip joint during movement, Palpable snapping sensation in the hip joint, Pain in the hip or groin area, Limited range of motion in the hip, Feeling of instability in the hip joint, Weakness in the hip muscles, Tenderness around the hip joint"
+},
+{
+"code": "O81.1",
+"description": "Mid-cavity forceps delivery",
+"symptoms": "Maternal perineal laceration, Maternal vaginal wall injury, Fetal scalp bruising, Fetal cephalohematoma, Shoulder dystocia, Postpartum hemorrhage, Uterine rupture"
+},
+{
+"code": "S20.7",
+"description": "Multiple superficial injuries of thorax",
+"symptoms": "Skin abrasion, Contusion, Superficial laceration, Mild pain upon palpation, Localized edema, Erythema, Minor bleeding from skin"
+},
+{
+"code": "U80",
+"description": "Agent resistant to penicillin and related antibiotics",
+"symptoms": "Treatment failure with beta-lactam antibiotics, Persistent infection despite antibiotic therapy, Isolation of resistant bacteria from cultures, Elevated inflammatory markers (e.g., C-reactive protein, white blood cell count), Prolonged hospital stay, Increased morbidity, Potential for septicemia"
+},
+{
+"code": "G72.8",
+"description": "Other specified myopathies",
+"symptoms": "Muscle weakness, Muscle pain (myalgia), Muscle cramps, Elevated creatine kinase (CK) levels, Exercise intolerance, Fatigue, Muscle stiffness"
+},
+{
+"code": "K67.1",
+"description": "Gonococcal peritonitis",
+"symptoms": "Abdominal pain, Abdominal tenderness, Fever, Nausea, Vomiting, Abdominal distension, Tachycardia"
+},
+{
+"code": "K35.3",
+"description": "Acute appendicitis with localized peritonitis",
+"symptoms": "Right lower quadrant abdominal pain, Rebound tenderness, Fever, Nausea, Vomiting, Abdominal guarding, Leukocytosis"
+},
+{
+"code": "P61.8",
+"description": "Other specified perinatal haematological disorders",
+"symptoms": "Thrombocytopenia, Neutropenia, Anemia, Leukocytosis, Hepatosplenomegaly, Petechiae, Jaundice"
+},
+{
+"code": "N81.1",
+"description": "Cystocele",
+"symptoms": "Urinary frequency, Urinary urgency, Stress urinary incontinence, Sensation of pelvic pressure, Feeling of incomplete bladder emptying, Vaginal bulging, Recurrent urinary tract infections"
+},
+{
+"code": "Y79",
+"description": "Orthopaedic devices associated with adverse incidents",
+"symptoms": "Localized pain at the device site, Inflammation around the device, Device malfunction, Restricted range of motion, Instability of the joint or limb, Signs of infection (e.g., fever, redness, purulent drainage), Neurovascular compromise distal to the device"
+},
+{
+"code": "E61.5",
+"description": "Molybdenum deficiency",
+"symptoms": "Irritability, Lethargy, Seizures, Developmental delay, Lens dislocation, Elevated uric acid levels, Neurological abnormalities"
+},
+{
+"code": "B94.8",
+"description": "Sequelae of other specified infectious and parasitic diseases",
+"symptoms": "Chronic fatigue, Persistent pain, Neurological deficits, Organ dysfunction, Recurrent infections, Impaired cognitive function, Scarring"
+},
+{
+"code": "I82.3",
+"description": "Embolism and thrombosis of renal vein",
+"symptoms": "Flank pain, Hematuria, Proteinuria, Elevated serum creatinine, Oliguria, Hypertension, Deep vein thrombosis (possible)"
+},
+{
+"code": "O88.2",
+"description": "Obstetric blood-clot embolism",
+"symptoms": "Sudden onset dyspnea, Tachypnea, Tachycardia, Chest pain, Cough, Hemoptysis, Hypotension"
+},
+{
+"code": "D68.6",
+"description": "Other Thrombophilia",
+"symptoms": "Deep vein thrombosis (DVT), Pulmonary embolism (PE), Recurrent miscarriages, Superficial thrombophlebitis, Cerebral venous thrombosis, Arterial thrombosis, Unexplained thromboembolic events"
+},
+{
+"code": "C39",
+"description": "Malignant neoplasm of other and ill-defined sites in the respiratory system and intrathoracic organs",
+"symptoms": "Chronic cough, Dyspnea, Hemoptysis, Chest pain, Weight loss, Fatigue, Hoarseness"
+},
+{
+"code": "T78.4",
+"description": "Allergy, unspecified",
+"symptoms": "Pruritus, Urticaria, Angioedema, Dyspnea, Wheezing, Rhinorrhea, Nausea"
+},
+{
+"code": "E29.0",
+"description": "Testicular hyperfunction",
+"symptoms": "Precocious puberty (in children), Increased libido, Acne, Hirsutism (excessive hair growth), Aggressive behavior, Deepening of voice, Increased muscle mass"
+},
+{
+"code": "H67.8",
+"description": "Otitis media in other diseases classified elsewhere",
+"symptoms": "Ear pain (otalgia), Hearing loss, Ear discharge (otorrhea), Feeling of fullness in the ear, Tinnitus, Dizziness, Fever"
+},
+{
+"code": "O92.5",
+"description": "Suppressed lactation",
+"symptoms": "Absence of milk production, Breast engorgement, Breast pain, Feelings of frustration or anxiety, Infant weight loss or inadequate weight gain, Increased infant fussiness, Decreased number of wet diapers"
+},
+{
+"code": "S33.3",
+"description": "Dislocation of other and unspecified parts of lumbar spine and pelvis",
+"symptoms": "Severe lower back pain, Limited range of motion in the lumbar spine, Muscle spasm in the back, Tenderness to palpation in the affected area, Neurological deficits (e.g., numbness, tingling, weakness) in the lower extremities, Deformity of the lumbar spine or pelvis, Pain radiating to the buttocks or legs"
+},
+{
+"code": "D72.1",
+"description": "Eosinophilia",
+"symptoms": "Skin rash, Pruritus, Asthma, Fatigue, Myalgia, Gastrointestinal distress, Angioedema"
+},
+{
+"code": "B78.0",
+"description": "Intestinal strongyloidiasis",
+"symptoms": "Abdominal pain, Diarrhea, Nausea, Vomiting, Weight loss, Pruritus, Urticaria"
+},
+{
+"code": "R68.2",
+"description": "Dry mouth, unspecified",
+"symptoms": "Xerostomia, Thick, stringy saliva, Difficulty speaking, Difficulty swallowing, Sore throat, Hoarseness, Increased dental caries"
+},
+{
+"code": "O36.8",
+"description": "Maternal care for other specified fetal problems",
+"symptoms": "Fetal growth restriction detected during prenatal visits, Fetal cardiac arrhythmia observed via fetal heart rate monitoring, Polyhydramnios or oligohydramnios identified on ultrasound, Fetal anemia suspected based on Doppler studies, Fetal macrosomia requiring specialized management, Abnormal fetal presentation influencing delivery planning, Fetal hydrops necessitating further investigation"
+},
+{
+"code": "Y96",
+"description": "Work-related condition",
+"symptoms": "Stress, Anxiety, Fatigue, Musculoskeletal pain, Headaches, Sleep disturbances, Changes in appetite"
+},
+{
+"code": "T30.1",
+"description": "Burn of first degree, body region unspecified",
+"symptoms": "Erythema, Pain, Warmth, Mild edema, Superficial epidermal damage, Absence of blisters, Dry skin"
+},
+{
+"code": "C71.3",
+"description": "Malignant neoplasm: Parietal lobe",
+"symptoms": "Headache, Seizures, Sensory loss on one side of the body, Spatial disorientation, Difficulty with writing or calculations, Visual field defects, Weakness on one side of the body (hemiparesis)"
+},
+{
+"code": "S61.1",
+"description": "Open wound of finger(s) with damage to nail",
+"symptoms": "Laceration of finger tissue, Avulsion of nail plate, Subungual hematoma, Bleeding from the wound, Pain at the site of injury, Swelling of the finger, Risk of secondary infection"
+},
+{
+"code": "M25.5",
+"description": "Pain in joint",
+"symptoms": "Arthralgia, Joint tenderness, Limited range of motion, Joint stiffness, Crepitus, Warmth around the joint, Swelling"
+},
+{
+"code": "Q84.3",
+"description": "Anonychia",
+"symptoms": "Absence of fingernails, Absence of toenails, Deformed nail beds, Soft tissue abnormalities around nail area, Increased susceptibility to infection in nail area, Pain or discomfort in nail area, Difficulty with fine motor skills involving fingers"
+},
+{
+"code": "M81.8",
+"description": "Other osteoporosis",
+"symptoms": "Decreased bone mineral density, Increased risk of fractures, Back pain, Loss of height over time, Kyphosis (Dowager's hump), Postural changes, Bone pain"
+},
+{
+"code": "Z36.5",
+"description": "Antenatal screening for isoimmunization",
+"symptoms": "Elevated maternal antibody titers (e.g., anti-RhD), Detection of fetal Rh-positive blood cells in maternal circulation, Positive indirect Coombs test in the mother, Fetal anemia (detected via Doppler velocimetry or amniocentesis), Hydrops fetalis (in severe cases of fetal anemia), Increased amniotic fluid bilirubin levels (detected during amniocentesis), Maternal history of previous Rh-incompatible pregnancies or transfusions"
+},
+{
+"code": "V87.1",
+"description": "Person injured in collision between other motor vehicle and two- or three-wheeled motor vehicle (traffic)",
+"symptoms": "Head trauma, Fractures, Soft tissue injuries, Spinal cord injury, Internal bleeding, Concussion, Lacerations"
+},
+{
+"code": "Z92.8",
+"description": "Personal history of other medical treatment",
+"symptoms": "Patient reports past medical interventions, Documentation of previous treatment modalities in patient records, Possible presence of residual effects from prior treatments, Potential for interactions between past treatments and current conditions, Possible altered physiological responses due to previous interventions, Increased risk of complications during new treatments, Reports of adverse reactions or side effects from past therapies"
+},
+{
+"code": "P95",
+"description": "Fetal death of unspecified cause",
+"symptoms": "Absence of fetal movement, Absence of fetal heartbeat on auscultation, No fetal cardiac activity on ultrasound, Uterine growth ceases or decreases, Vaginal bleeding or spotting, Abdominal cramping or pain, Maternal perception of decreased fetal activity"
+},
+{
+"code": "R61.1",
+"description": "Generalized hyperhidrosis",
+"symptoms": "Excessive sweating all over the body, Visible dripping of sweat, Skin maceration, Dehydration, Electrolyte imbalance, Pruritus, Body odor"
+},
+{
+"code": "D29.0",
+"description": "Benign neoplasm: Penis",
+"symptoms": "Painless lump on the penis, Skin discoloration of the penis, Palpable mass on penile shaft, Change in penile skin texture, Swelling of the penis, Erythema of the penile skin, Urethral obstruction (rare)"
+},
+{
+"code": "I67.8",
+"description": "Other specified cerebrovascular diseases",
+"symptoms": "Headache, Dizziness, Cognitive impairment, Visual disturbances, Speech difficulties, Memory loss, Motor weakness"
+},
+{
+"code": "T39.2",
+"description": "Poisoning: Pyrazolone derivatives",
+"symptoms": "Nausea, Vomiting, Abdominal pain, Tinnitus, Dizziness, Lethargy, Respiratory depression"
+},
+{
+"code": "B23.1",
+"description": "HIV disease resulting in (persistent) generalized lymphadenopathy",
+"symptoms": "Persistent generalized lymphadenopathy, Unexplained weight loss, Persistent fatigue, Fever, Night sweats"
+},
+{
+"code": "N92.5",
+"description": "Other specified irregular menstruation",
+"symptoms": "Unpredictable menstrual cycle length, Variations in menstrual flow volume, Spotting between periods (metrorrhagia), Prolonged menstrual bleeding (menorrhagia), Shortened menstrual cycle (polymenorrhea), Delayed menstruation (oligomenorrhea), Pelvic discomfort or pain"
+},
+{
+"code": "E72.1",
+"description": "Disorders of sulfur-bearing amino-acid metabolism",
+"symptoms": "Developmental delay, Seizures, Intellectual disability, Hepatic dysfunction, Ocular abnormalities, Skeletal abnormalities, Thromboembolic events"
+},
+{
+"code": "C78.0",
+"description": "Secondary malignant neoplasm of lung",
+"symptoms": "Persistent cough, Hemoptysis, Dyspnea, Chest pain, Weight loss, Fatigue, Recurrent respiratory infections"
+},
+{
+"code": "S68.2",
+"description": "Traumatic amputation of two or more fingers alone (complete)(partial)",
+"symptoms": "Severe hemorrhage, Phantom limb pain, Neuroma formation, Wound infection, Edema at the stump site, Skin necrosis at the amputation site, Decreased range of motion in remaining digits"
+},
+{
+"code": "N36.8",
+"description": "Other specified disorders of urethra",
+"symptoms": "Dysuria, Urethral pain, Hematuria, Urethral discharge, Urinary frequency, Urinary urgency, Pelvic discomfort"
+},
+{
+"code": "K26.7",
+"description": "Duodenal ulcer: Chronic without haemorrhage or perforation",
+"symptoms": "Epigastric pain, Nocturnal pain, Dyspepsia, Heartburn, Bloating, Nausea, Anorexia"
+},
+{
+"code": "N85",
+"description": "Other noninflammatory disorders of uterus, except cervix",
+"symptoms": "Abnormal uterine bleeding, Pelvic pain, Uterine enlargement, Menstrual irregularities, Dysmenorrhea, Infertility, Palpable uterine mass"
+},
+{
+"code": "L25.5",
+"description": "Unspecified contact dermatitis due to plants, except food",
+"symptoms": "Erythema, Pruritus, Vesiculation, Papules, Edema, Scaling, Burning sensation"
+},
+{
+"code": "K74.5",
+"description": "Biliary cirrhosis, unspecified",
+"symptoms": "Fatigue, Pruritus, Jaundice, Hepatomegaly, Splenomegaly, Ascites, Steatorrhea"
+},
+{
+"code": "L81.8",
+"description": "Other specified disorders of pigmentation",
+"symptoms": "Skin discoloration, Patchy skin pigmentation, Hyperpigmentation, Hypopigmentation, Uneven skin tone, Localized changes in skin color, Possible pruritus (itching) at the site of pigmentation change"
+},
+{
+"code": "Z58.1",
+"description": "Exposure to air pollution",
+"symptoms": "Cough, Dyspnea, Wheezing, Eye irritation, Nasal congestion, Headache, Exacerbation of asthma"
+},
+{
+"code": "A55",
+"description": "Chlamydial lymphogranuloma (venereum)",
+"symptoms": "Painless ulcers or sores in the genital area, Swollen and tender lymph nodes in the inguinal region, Rectal pain, discharge, or bleeding, Systemic symptoms such as fever or malaise, Complications like fistula formation"
+},
+{
+"code": "K13.2",
+"description": "Leukoplakia and other disturbances of oral epithelium, including tongue",
+"symptoms": "White or gray patch (plaque) in the mouth, Thickened or hardened area in the mouth, Raised lesions in the mouth, Painless or slightly sensitive lesion, Possible fissure or ulcer within the lesion, Rough texture felt with the tongue, Difficulty with oral hygiene due to lesion location"
+},
+{
+"code": "K41.0",
+"description": "Bilateral femoral hernia, with obstruction, without gangrene",
+"symptoms": "bilateral groin pain, palpable bulge in both groins, abdominal distension, nausea, vomiting, constipation, tenderness in both groin areas"
+},
+{
+"code": "G54.9",
+"description": "Nerve root and plexus disorder, unspecified",
+"symptoms": "Radicular pain, Paresthesia, Muscle weakness, Sensory loss, Hyporeflexia, Atrophy, Fasciculations"
+},
+{
+"code": "L10.0",
+"description": "Pemphigus vulgaris",
+"symptoms": "Flaccid bullae on skin, Oral mucosal erosions, Nikolsky's sign (positive), Skin fragility, Painful lesions, Dysphagia (if esophageal involvement), Secondary bacterial infection of lesions"
+},
+{
+"code": "E05",
+"description": "Thyrotoxicosis [hyperthyroidism]",
+"symptoms": "Tachycardia, Weight loss, Anxiety, Heat intolerance, Tremor, Diaphoresis, Exophthalmos"
+},
+{
+"code": "R06.6",
+"description": "Hiccough",
+"symptoms": "Involuntary diaphragmatic contractions, Sudden inspiratory gasp, Characteristic 'hic' sound, Possible chest discomfort, Potential abdominal muscle spasms, Irritation of the phrenic nerve, Interruption of normal breathing pattern"
+},
+{
+"code": "Z51.2",
+"description": "Other chemotherapy",
+"symptoms": "Nausea, Vomiting, Fatigue, Alopecia (hair loss), Mucositis (inflammation of the mucous membrane), Myelosuppression (reduced bone marrow function), Peripheral neuropathy"
+},
+{
+"code": "J41.0",
+"description": "Simple chronic bronchitis",
+"symptoms": "Chronic cough, Increased mucus production (sputum), Wheezing, Shortness of breath (dyspnea), Chest discomfort, Fatigue, Recurrent respiratory infections"
+},
+{
+"code": "A05.9",
+"description": "Bacterial foodborne intoxication, unspecified",
+"symptoms": "Nausea, Vomiting, Diarrhea, Abdominal cramps, Fever, Dehydration, Headache"
+},
+{
+"code": "M10.0",
+"description": "Idiopathic gout",
+"symptoms": "Severe joint pain, Joint swelling, Joint redness, Joint warmth, Limited range of motion in the affected joint, Tophi formation, Hyperuricemia"
+},
+{
+"code": "V16.9",
+"description": "Pedal cyclist injured in collision with other nonmotor vehicle: Unspecified pedal cyclist injured in traffic accident",
+"symptoms": "Abrasion, Contusion, Laceration, Fracture, Sprain, Strain, Pain"
+},
+{
+"code": "Z03.0",
+"description": "Observation for suspected tuberculosis",
+"symptoms": "Persistent cough, Hemoptysis, Night sweats, Unexplained weight loss, Fatigue, Fever, Chest pain"
+},
+{
+"code": "R16",
+"description": "Hepatomegaly and splenomegaly, not elsewhere classified",
+"symptoms": "Abdominal distension, Abdominal discomfort, Early satiety, Palpable enlarged liver, Palpable enlarged spleen, Fatigue, Weight loss"
+},
+{
+"code": "D47.4",
+"description": "Osteomyelofibrosis",
+"symptoms": "Splenomegaly, Anemia, Thrombocytopenia, Leukoerythroblastosis, Fatigue, Bone pain, Night sweats"
+},
+{
+"code": "S06.6",
+"description": "Traumatic subarachnoid haemorrhage",
+"symptoms": "Severe headache, Neck stiffness, Photophobia, Loss of consciousness, Seizures, Focal neurological deficits, Nausea and vomiting"
+},
+{
+"code": "C16.4",
+"description": "Malignant neoplasm: Pylorus",
+"symptoms": "Abdominal pain, Nausea, Vomiting, Weight loss, Loss of appetite, Dyspepsia, Anemia"
+},
+{
+"code": "C44.6",
+"description": "Malignant neoplasm: Skin of upper limb, including shoulder",
+"symptoms": "Asymmetrical mole or lesion, Irregular borders of skin lesion, Changes in color of a mole or skin lesion, Diameter of skin lesion greater than 6mm, Evolving skin lesion (changing in size, shape, or color), Ulceration of the skin, Bleeding from the skin lesion"
+},
+{
+"code": "T05.4",
+"description": "Traumatic amputation of one foot and other leg [any level, except foot]",
+"symptoms": "Hemorrhage at amputation sites, Severe pain in residual limbs, Phantom limb pain, Muscle weakness in remaining limb, Edema of residual limbs, Skin breakdown at amputation sites, Psychological distress"
+},
+{
+"code": "V46",
+"description": "Car occupant injured in collision with other nonmotor vehicle",
+"symptoms": "Whiplash injury, Contusions, Lacerations, Bone fractures, Concussion, Internal bleeding, Spinal cord injury"
+},
+{
+"code": "S53",
+"description": "Dislocation, sprain and strain of joints and ligaments of elbow",
+"symptoms": "Elbow pain, Limited range of motion, Swelling of the elbow joint, Tenderness to palpation, Bruising around the elbow, Instability of the elbow joint, Deformity of the elbow joint"
+},
+{
+"code": "B05.0",
+"description": "Measles complicated by encephalitis",
+"symptoms": "Fever, Rash, Cough, Runny nose, Conjunctivitis, Severe headache, Altered consciousness, Seizures"
+},
+{
+"code": "R47.0",
+"description": "Dysphasia and aphasia",
+"symptoms": "Difficulty finding words (anomia), Impaired articulation, Reduced speech fluency, Difficulty understanding spoken language, Use of incorrect words or sounds (paraphasia), Impaired repetition of words or phrases, Difficulty writing"
+},
+{
+"code": "B57.2",
+"description": "Chagas disease (chronic) with heart involvement",
+"symptoms": "Cardiomegaly, Heart failure, Arrhythmias, Thromboembolism, Chest pain, Dyspnea, Edema"
+},
+{
+"code": "I13",
+"description": "Hypertensive heart and renal disease",
+"symptoms": "Elevated blood pressure, Proteinuria, Peripheral edema, Dyspnea, Cardiomegaly, Elevated creatinine levels, Fatigue"
+},
+{
+"code": "E06.2",
+"description": "Chronic thyroiditis with transient thyrotoxicosis",
+"symptoms": "Fatigue, Weight gain, Constipation, Dry skin, Hair loss, Goiter, Transient anxiety"
+},
+{
+"code": "W03",
+"description": "Other fall on same level due to collision with, or pushing by, another person",
+"symptoms": "Contusion, Abrasion, Sprain, Strain, Pain, Edema, Limited range of motion"
+},
+{
+"code": "M43",
+"description": "Other deforming dorsopathies",
+"symptoms": "Kyphosis, Scoliosis, Lordosis, Back pain, Limited range of motion in the spine, Muscle spasms, Postural abnormalities"
+},
+{
+"code": "K00.6",
+"description": "Disturbances in tooth eruption",
+"symptoms": "Delayed tooth eruption, Impacted teeth, Malposition of teeth, Gingival inflammation, Pain in the affected area, Difficulty chewing, Overcrowding of teeth"
+},
+{
+"code": "C57.2",
+"description": "Malignant neoplasm: Round ligament",
+"symptoms": "Pelvic pain, Abnormal vaginal bleeding, Palpable mass in the groin or pelvis, Abdominal swelling or bloating, Unexplained weight loss, Fatigue, Pain during intercourse (dyspareunia)"
+},
+{
+"code": "Y58.8",
+"description": "Mixed bacterial vaccines, except combinations with a pertussis component",
+"symptoms": "Injection site pain, Injection site swelling, Erythema, Fever, Malaise, Headache, Urticaria"
+},
+{
+"code": "Z50",
+"description": "Care involving use of rehabilitation procedures",
+"symptoms": "Impaired mobility, Decreased muscle strength, Reduced range of motion, Balance deficits, Functional limitations, Pain, Cognitive impairments"
+},
+{
+"code": "T44.2",
+"description": "Poisoning: Ganglionic blocking drugs, not elsewhere classified",
+"symptoms": "Hypotension, Bradycardia, Mydriasis, Dry mouth, Urinary retention, Constipation, Blurred vision"
+},
+{
+"code": "O10.9",
+"description": "Unspecified pre-existing hypertension complicating pregnancy, childbirth and the puerperium",
+"symptoms": "Elevated blood pressure, Proteinuria, Headache, Edema, Visual disturbances, Epigastric pain, Increased risk of pre-eclampsia"
+},
+{
+"code": "S15.2",
+"description": "Injury of external jugular vein",
+"symptoms": "Neck pain, Swelling in the neck, Hematoma formation, Visible laceration or bruising, Potential for hemorrhage, Tenderness upon palpation, Dysphonia (hoarseness)"
+},
+{
+"code": "C05.0",
+"description": "Malignant neoplasm: Hard palate",
+"symptoms": "Persistent ulceration of the hard palate, Unexplained pain in the mouth, Difficulty swallowing (dysphagia), Speech alterations or difficulty articulating (dysarthria), Presence of a mass or growth on the hard palate, Numbness or altered sensation in the mouth, Enlarged cervical lymph nodes (lymphadenopathy)"
+},
+{
+"code": "D40",
+"description": "Neoplasm of uncertain or unknown behaviour of male genital organs",
+"symptoms": "Palpable mass in the affected genital organ, Scrotal swelling, Testicular pain or discomfort, Changes in testicular size or texture, Lower abdominal pain, Groin pain, Hematuria (if urinary tract is involved)"
+},
+{
+"code": "K14.0",
+"description": "Glossitis",
+"symptoms": "Tongue swelling, Tongue pain, Tongue redness, Difficulty swallowing (dysphagia), Changes in tongue appearance (smooth, glossy), Tenderness to touch, Burning sensation of the tongue"
+},
+{
+"code": "P12.9",
+"description": "Birth injury to scalp, unspecified",
+"symptoms": "Scalp edema, Subgaleal hematoma, Caput succedaneum, Cephalohematoma, Skin discoloration of the scalp, Tenderness upon palpation of the scalp, Possible associated skull fracture"
+},
+{
+"code": "B07",
+"description": "Viral warts",
+"symptoms": "Raised, rough skin growths, Itchy or painful lesions, Cauliflower-like appearance, Bleeding upon friction, Variation in color (skin tone to black)"
+},
+{
+"code": "T59.7",
+"description": "Toxic effect: Carbon dioxide",
+"symptoms": "Headache, Dizziness, Hyperventilation, Confusion, Loss of consciousness, Seizures, Respiratory failure"
+},
+{
+"code": "C18.5",
+"description": "Malignant neoplasm: Splenic flexure",
+"symptoms": "Abdominal pain, Change in bowel habits, Rectal bleeding, Unexplained weight loss, Fatigue, Iron deficiency anemia, Abdominal distension"
+},
+{
+"code": "E12.4",
+"description": "Malnutrition-related diabetes mellitus: With neurological complications",
+"symptoms": "Peripheral neuropathy, Autonomic neuropathy, Diabetic amyotrophy, Cognitive dysfunction, Seizures (in severe cases), Muscle weakness, Hypoglycemic unawareness"
+},
+{
+"code": "X47",
+"description": "Accidental poisoning by and exposure to other gases and vapours",
+"symptoms": "Dyspnea, Cough, Headache, Nausea, Dizziness, Altered mental status, Respiratory distress"
+},
+{
+"code": "Q12.9",
+"description": "Congenital lens malformation, unspecified",
+"symptoms": "Blurred vision, Nystagmus, Strabismus, Leukocoria (white pupil), Reduced visual acuity, Photophobia, Glaucoma"
+},
+{
+"code": "Z56.0",
+"description": "Unemployment, unspecified",
+"symptoms": "Anxiety, Depression, Sleep disturbance, Increased stress, Financial strain, Social isolation, Low self-esteem"
+},
+{
+"code": "M17.2",
+"description": "Post-traumatic gonarthrosis, bilateral",
+"symptoms": "Joint pain in both knees, Stiffness of knee joints, Decreased range of motion in knees, Crepitus in knee joints, Swelling around the knees, Tenderness to palpation of the knee joints, Joint effusion in both knees"
+},
+{
+"code": "V43.9",
+"description": "Car occupant injured in collision with car, pick-up truck or van: Unspecified car occupant injured in traffic accident",
+"symptoms": "Headache, Loss of consciousness, Abdominal pain, Limb fractures, Cervicalgia, Contusions, Lacerations"
+},
+{
+"code": "F01.9",
+"description": "Vascular dementia, unspecified",
+"symptoms": "Memory impairment, Executive dysfunction, Slowed thinking, Focal neurological deficits, Personality changes, Aphasia, Impaired judgment"
+},
+{
+"code": "A50.9",
+"description": "Congenital syphilis, unspecified",
+"symptoms": "Skin lesions, Jaundice, Anemia, Deformities (e.g., Hutchinson's teeth), Neurological issues"
+},
+{
+"code": "Z04.2",
+"description": "Examination and observation following work accident",
+"symptoms": "Pain, Anxiety, Limited mobility, Muscle weakness, Skin abrasion, Swelling, Tenderness"
+},
+{
+"code": "K04",
+"description": "Diseases of pulp and periapical tissues",
+"symptoms": "Tooth pain (odontalgia), Sensitivity to temperature changes in teeth, Inflammation of the dental pulp (pulpitis), Formation of periapical abscess, Tooth discoloration, Swelling of the gums surrounding the affected tooth, Tenderness to palpation of the affected tooth"
+},
+{
+"code": "T50.4",
+"description": "Poisoning: Drugs affecting uric acid metabolism",
+"symptoms": "Nausea, Vomiting, Abdominal pain, Diarrhea, Hyperuricemia (if the drug causes overproduction), Hypouricemia (if the drug causes increased excretion), Renal dysfunction"
+},
+{
+"code": "S01.4",
+"description": "Open wound of cheek and temporomandibular area",
+"symptoms": "Laceration of facial tissue, Active bleeding from the wound, Pain at the site of injury, Swelling around the cheek and jaw, Possible nerve damage resulting in sensory deficits, Risk of infection at the wound site, Difficulty opening or closing the mouth due to temporomandibular joint involvement"
+},
+{
+"code": "C43.4",
+"description": "Malignant neoplasm: Malignant melanoma of scalp and neck",
+"symptoms": "Asymmetrical mole or lesion on scalp or neck, Irregular borders of the lesion, Color variegation within the lesion (e.g., black, brown, red, white, blue), Diameter greater than 6mm, Evolution of the lesion (change in size, shape, or color), Ulceration or bleeding of the lesion, Regional lymphadenopathy"
+},
+{
+"code": "T02.6",
+"description": "Fractures involving multiple regions of upper limb(s) with lower limb(s)",
+"symptoms": "Localized pain at fracture sites, Swelling and edema around the injured areas, Deformity of the affected limbs, Impaired range of motion in the affected limbs, Crepitus upon palpation of fracture sites, Ecchymosis at the fracture sites, Muscle spasms surrounding the fractures"
+},
+{
+"code": "D12.4",
+"description": "Benign neoplasm: Descending colon",
+"symptoms": "Abdominal discomfort, Changes in bowel habits, Rectal bleeding, Anemia (due to chronic blood loss), Palpable abdominal mass (rare), Constipation, Diarrhea"
+},
+{
+"code": "Q44",
+"description": "Congenital malformations of gallbladder, bile ducts and liver",
+"symptoms": "Jaundice, Abdominal distention, Hepatomegaly, Acholic stools, Dark urine, Failure to thrive, Pruritus"
+},
+{
+"code": "B02.2",
+"description": "Zoster with other nervous system involvement",
+"symptoms": "Dermatomal rash, Severe pain, Facial paralysis, Vision impairment, Hearing loss, Encephalitis, Meningitis, Peripheral neuropathy"
+},
+{
+"code": "T18.1",
+"description": "Foreign body in oesophagus",
+"symptoms": "Dysphagia, Odynophagia, Regurgitation, Choking, Drooling, Chest pain, Sensation of foreign body in throat"
+},
+{
+"code": "Y56.9",
+"description": "Topical agent, unspecified",
+"symptoms": "Skin rash, Pruritus, Erythema, Urticaria, Contact dermatitis, Burning sensation, Skin blistering"
+},
+{
+"code": "T51",
+"description": "Toxic effect of alcohol",
+"symptoms": "Altered mental status, Slurred speech, Impaired coordination, Nausea and vomiting, Respiratory depression, Hypotension, Loss of consciousness"
+},
+{
+"code": "N11",
+"description": "Chronic tubulo-interstitial nephritis",
+"symptoms": "Proteinuria, Hypertension, Anemia, Nocturia, Polyuria, Metabolic acidosis, Progressive renal failure"
+},
+{
+"code": "R40.2",
+"description": "Coma, unspecified",
+"symptoms": "Unresponsiveness to stimuli, Absence of voluntary movements, Impaired brainstem reflexes (e.g., pupillary, corneal, gag), Respiratory abnormalities (e.g., Cheyne-Stokes respiration), Abnormal motor responses (e.g., decorticate or decerebrate posturing), Lack of verbal communication, Loss of awareness of self and environment"
+},
+{
+"code": "B50.0",
+"description": "Plasmodium falciparum malaria with cerebral complications",
+"symptoms": "High fever, Headache, Altered mental status, Seizures, Coma, Neurological deficits, Severe anemia"
+},
+{
+"code": "N45.9",
+"description": "Orchitis, epididymitis and epididymo-orchitis without abscess",
+"symptoms": "Scrotal pain, Scrotal swelling, Testicular tenderness, Dysuria, Fever, Urethral discharge, Groin pain"
+},
+{
+"code": "E01.0",
+"description": "Iodine-deficiency-related diffuse (endemic) goitre",
+"symptoms": "Thyroid enlargement, Difficulty swallowing (dysphagia), Difficulty breathing (dyspnea), Cough, Hoarseness, Sense of fullness in the throat, Elevated Thyroid Stimulating Hormone (TSH)"
+},
+{
+"code": "P01",
+"description": "Fetus and newborn affected by maternal complications of pregnancy",
+"symptoms": "Intrauterine growth restriction, Premature birth, Low birth weight, Hypoglycemia, Respiratory distress syndrome, Seizures, Fetal distress"
+},
+{
+"code": "L56.4",
+"description": "Polymorphous light eruption",
+"symptoms": "Erythematous papules, Vesicles, Plaques, Pruritus, Burning sensation of skin, Edema, Scaling of skin"
+},
+{
+"code": "J41",
+"description": "Simple and mucopurulent chronic bronchitis",
+"symptoms": "Chronic cough, Increased mucus production (sputum), Dyspnea (shortness of breath), Wheezing, Chest discomfort, Fatigue, Recurrent respiratory infections"
+},
+{
+"code": "K07.4",
+"description": "Malocclusion, unspecified",
+"symptoms": "Abnormal teeth alignment, Difficulty chewing, Jaw pain, Speech impediments, Mouth breathing, Temporomandibular joint (TMJ) disorder, Increased risk of dental caries"
+},
+{
+"code": "C50.0",
+"description": "Malignant neoplasm: Nipple and areola",
+"symptoms": "Nipple retraction, Nipple discharge (bloody or clear), Eczematous changes of the nipple skin, Palpable breast lump near the nipple, Nipple pain or tenderness, Ulceration of the nipple, Enlarged axillary lymph nodes"
+},
+{
+"code": "O45.9",
+"description": "Premature separation of placenta, unspecified",
+"symptoms": "Vaginal bleeding, Abdominal pain, Uterine tenderness, Fetal heart rate abnormalities, Premature labor, Uterine contractions, Back pain"
+},
+{
+"code": "T11.2",
+"description": "Dislocation, sprain and strain of unspecified joint and ligament of upper limb, level unspecified",
+"symptoms": "Localized pain, Limited range of motion, Swelling, Joint instability, Muscle spasm, Bruising, Tenderness to palpation"
+},
+{
+"code": "D01.0",
+"description": "Carcinoma in situ: Colon",
+"symptoms": "Asymptomatic in early stages, Occult blood in stool, Changes in bowel habits, Abdominal discomfort, Rectal bleeding, Iron deficiency anemia, Weight loss"
+},
+{
+"code": "R49.1",
+"description": "Aphonia",
+"symptoms": "Inability to speak, Whispered speech, Hoarseness (may precede or accompany aphonia), Dysphonia (impaired voice quality), Laryngitis (potential underlying cause), Vocal cord paralysis (potential underlying cause), Globus sensation (feeling of a lump in the throat)"
+},
+{
+"code": "T43.0",
+"description": "Poisoning: Tricyclic and tetracyclic antidepressants",
+"symptoms": "Cardiac arrhythmia, Hypotension, Seizures, Mydriasis, Altered mental status, Respiratory depression, Dry mouth"
+},
+{
+"code": "D53.2",
+"description": "Scorbutic anaemia",
+"symptoms": "Fatigue, Weakness, Pallor, Gingival bleeding, Petechiae, Ecchymoses, Impaired wound healing"
+},
+{
+"code": "G12",
+"description": "Spinal muscular atrophy and related syndromes",
+"symptoms": "Progressive muscle weakness, Muscle atrophy, Fasciculations (muscle twitching), Hypotonia (decreased muscle tone), Feeding difficulties, Respiratory distress, Skeletal deformities (e.g., scoliosis)"
+},
+{
+"code": "S12.0",
+"description": "Fracture of first cervical vertebra",
+"symptoms": "Severe neck pain, Muscle spasm in the neck, Tenderness to palpation of the cervical spine, Limited range of motion in the neck, Neurological deficits (e.g., weakness, numbness) depending on spinal cord involvement, Headache, Possible respiratory compromise"
+},
+{
+"code": "C02.2",
+"description": "Malignant neoplasm: Ventral surface of tongue",
+"symptoms": "Tongue pain, ulceration of the ventral tongue, dysphagia, odynophagia, speech difficulty (dysarthria), cervical lymphadenopathy, halitosis"
+},
+{
+"code": "Y02",
+"description": "Assault by pushing or placing victim before moving object",
+"symptoms": "Contusions, Abrasions, Lacerations, Fractures, Traumatic brain injury, Spinal cord injury, Internal bleeding"
+},
+{
+"code": "S28",
+"description": "Crushing injury of thorax and traumatic amputation of part of thorax",
+"symptoms": "Chest pain, Dyspnea, Hemothorax, Pneumothorax, Rib fractures, Soft tissue contusion, Amputation of thoracic wall"
+},
+{
+"code": "J32.1",
+"description": "Chronic frontal sinusitis",
+"symptoms": "Facial pain or pressure (localized to the forehead), Persistent nasal congestion, Thick, discolored nasal discharge, Postnasal drip, Headache, Fatigue, Cough (may worsen at night)"
+},
+{
+"code": "L92",
+"description": "Granulomatous disorders of skin and subcutaneous tissue",
+"symptoms": "Skin nodules, Papules, Plaques, Ulceration, Localized swelling, Skin discoloration (erythema or hyperpigmentation), Pruritus"
+},
+{
+"code": "V93.7",
+"description": "Accident on board watercraft without accident to watercraft, not causing drowning and submersion: Water-skis",
+"symptoms": "Lacerations, Contusions, Sprains, Fractures, Head trauma, Concussion, Hypothermia"
+},
+{
+"code": "Z22.3",
+"description": "Carrier of other specified bacterial diseases",
+"symptoms": "Asymptomatic infection, Positive laboratory test for specific bacteria, Potential for transmission of bacteria to others, Absence of clinical signs of active bacterial disease, Normal white blood cell count, Absence of fever, No inflammation present"
+},
+{
+"code": "M63.1",
+"description": "Myositis in protozoal and parasitic infections classified elsewhere",
+"symptoms": "Muscle pain (myalgia), Muscle weakness, Muscle tenderness, Fever, Fatigue, Swelling of affected muscles, Elevated creatine kinase (CK) levels"
+},
+{
+"code": "M31.3",
+"description": "Wegener granulomatosis",
+"symptoms": "Sinusitis, Pulmonary nodules, Hemoptysis, Glomerulonephritis, Skin ulcers, Arthralgia, Fever"
+},
+{
+"code": "Q34.8",
+"description": "Other specified congenital malformations of respiratory system",
+"symptoms": "Dyspnea, Cyanosis, Stridor, Recurrent respiratory infections, Feeding difficulties, Failure to thrive, Abnormal chest shape"
+},
+{
+"code": "Z70.1",
+"description": "Counselling related to patient's sexual behaviour and orientation",
+"symptoms": "Anxiety, Depression, Relationship difficulties, Low self-esteem, Confusion about sexual identity, Concerns about sexual performance, Difficulties with sexual expression"
+},
+{
+"code": "I68",
+"description": "Cerebrovascular disorders in diseases classified elsewhere",
+"symptoms": "Focal neurological deficits, Altered level of consciousness, Headache, Seizures, Visual disturbances, Speech difficulties (dysarthria, aphasia), Motor weakness (hemiparesis)"
+},
+{
+"code": "W78",
+"description": "Inhalation of gastric contents",
+"symptoms": "Coughing, Wheezing, Dyspnea, Cyanosis, Tachypnea, Rales, Fever"
+},
+{
+"code": "T24.7",
+"description": "Corrosion of third degree of hip and lower limb, except ankle and foot",
+"symptoms": "Full-thickness skin destruction, Underlying tissue damage, Insensitivity to touch, Eschar formation, Fluid loss, Risk of infection, Scarring and contractures"
+},
+{
+"code": "S75.7",
+"description": "Injury of multiple blood vessels at hip and thigh level",
+"symptoms": "Hemorrhage, Hematoma formation, Ischemia in the lower extremity, Diminished or absent peripheral pulses, Pain at the hip and thigh, Swelling at the hip and thigh, Compromised limb perfusion"
+},
+{
+"code": "O86.3",
+"description": "Other genitourinary tract infections following delivery",
+"symptoms": "Dysuria, Urinary frequency, Urgency, Suprapubic pain, Fever, Chills, Hematuria"
+},
+{
+"code": "S27.5",
+"description": "Injury of thoracic trachea",
+"symptoms": "Dyspnea, Hemoptysis, Subcutaneous emphysema, Chest pain, Stridor, Hoarseness, Pneumothorax"
+},
+{
+"code": "R82",
+"description": "Other abnormal findings in urine",
+"symptoms": "Hematuria (blood in urine), Proteinuria (protein in urine), Glucosuria (glucose in urine), Pyuria (pus in urine), Ketonuria (ketones in urine), Bacteriuria (bacteria in urine), Crystalluria (crystals in urine)"
+},
+{
+"code": "U89.9",
+"description": "Agent resistant to unspecified antibiotic",
+"symptoms": "Persistent infection, Lack of response to antibiotic treatment, Elevated white blood cell count, Fever, Inflammation at the site of infection, Sepsis, Prolonged duration of illness"
+},
+{
+"code": "K60.3",
+"description": "Anal fistula",
+"symptoms": "Anal pain, Purulent discharge from perianal skin, Swelling around the anus, Bleeding from the anus, Painful bowel movements, Pruritus ani, Fever (in severe cases)"
+},
+{
+"code": "L63.1",
+"description": "Alopecia universalis",
+"symptoms": "Complete loss of scalp hair, Complete loss of eyebrow hair, Complete loss of eyelash hair, Absence of facial hair, Absence of body hair, Smooth, non-inflamed skin in affected areas, Nail abnormalities (in some cases)"
+},
+{
+"code": "J69.0",
+"description": "Pneumonitis due to food and vomit",
+"symptoms": "Cough, Fever, Dyspnea, Tachypnea, Cyanosis, Wheezing, Chest Pain"
+},
+{
+"code": "B37.7",
+"description": "Candidal sepsis",
+"symptoms": "Fever, rigors, hypotension, tachycardia, tachypnea, leukocytosis, organ dysfunction"
+},
+{
+"code": "R83.8",
+"description": "Abnormal findings in cerebrospinal fluid: Other abnormal findings",
+"symptoms": "Elevated protein levels in CSF, Increased white blood cell count in CSF (pleocytosis), Presence of oligoclonal bands in CSF, Abnormal CSF glucose levels, Elevated CSF lactate levels, Presence of xanthochromia in CSF, Abnormal CSF pressure"
+},
+{
+"code": "E34.5",
+"description": "Androgen resistance syndrome",
+"symptoms": "Infertility, Gynecomastia, Undescended testes, Ambiguous genitalia, Feminization, Decreased libido, Reduced muscle mass"
+},
+{
+"code": "S34.1",
+"description": "Other injury of lumbar spinal cord",
+"symptoms": "Lower back pain, Muscle weakness in lower extremities, Sensory loss in legs or feet, Bowel incontinence, Bladder dysfunction, Impaired motor function, Paralysis (depending on severity)"
+},
+{
+"code": "T65.1",
+"description": "Toxic effect: Strychnine and its salts",
+"symptoms": "Muscle spasms, Opisthotonos (severe hyperextension and spasticity), Risus sardonicus (rigid smile), Respiratory failure, Seizures, Hyperreflexia, Cyanosis"
+},
+{
+"code": "T37.3",
+"description": "Poisoning: Other antiprotozoal drugs",
+"symptoms": "Nausea, Vomiting, Abdominal pain, Diarrhea, Headache, Dizziness, Cardiac arrhythmia"
+},
+{
+"code": "C76.1",
+"description": "Malignant neoplasm of other and ill-defined sites: Thorax",
+"symptoms": "Persistent cough, Chest pain, Dyspnea, Hoarseness, Weight loss, Fatigue, Superior vena cava syndrome"
+},
+{
+"code": "S66.3",
+"description": "Injury of extensor muscle and tendon of other finger at wrist and hand level",
+"symptoms": "Pain with finger extension, Tenderness at the wrist or hand, Swelling around the affected area, Limited range of motion in the affected finger, Weakness in finger extension, Possible palpable gap in the tendon, Ecchymosis"
+},
+{
+"code": "H32.8",
+"description": "Other chorioretinal disorders in diseases classified elsewhere",
+"symptoms": "Blurred vision, Visual field defects, Photopsia (flashes of light), Metamorphopsia (distorted vision), Reduced visual acuity, Chorioretinal lesions observed on fundoscopy, Scotoma"
+},
+{
+"code": "Q83.1",
+"description": "Accessory breast",
+"symptoms": "Presence of extra breast tissue, Nipple or areola formation in atypical location, Cyclical tenderness or pain in the accessory breast tissue during menstruation, Lactation from the accessory breast tissue postpartum, Swelling in the axillary or inframammary region, Cosmetic disfigurement, Increased risk of breast cancer in the accessory tissue"
+},
+{
+"code": "K28.6",
+"description": "Gastrojejunal ulcer: Chronic or unspecified with both haemorrhage and perforation",
+"symptoms": "Hematemesis, Melena, Sudden onset of severe abdominal pain, Peritonitis, Hypotension, Tachycardia, Rigid abdomen"
+},
+{
+"code": "G99.2",
+"description": "Myelopathy in diseases classified elsewhere",
+"symptoms": "Muscle weakness, Sensory loss, Spasticity, Bowel dysfunction, Bladder dysfunction, Pain, Impaired motor function"
+},
+{
+"code": "Z63.5",
+"description": "Disruption of family by separation and divorce",
+"symptoms": "Anxiety, Depression, Insomnia, Loss of appetite, Difficulty concentrating, Social withdrawal, Increased irritability"
+},
+{
+"code": "F90.1",
+"description": "Hyperkinetic conduct disorder",
+"symptoms": "Excessive motor activity, Impulsivity, Difficulty sustaining attention, Aggression towards people or animals, Destructive behavior, Deceitfulness or theft, Violation of rules"
+},
+{
+"code": "V80.3",
+"description": "Rider or occupant injured in collision with two- or three-wheeled motor vehicle",
+"symptoms": "Fractures, Contusions, Lacerations, Sprains, Strains, Head trauma, Internal bleeding"
+},
+{
+"code": "M70.5",
+"description": "Other bursitis of knee",
+"symptoms": "Localized knee pain, Swelling around the knee joint, Tenderness to palpation, Limited range of motion, Pain exacerbated by activity, Erythema of the overlying skin, Warmth around the knee joint"
+},
+{
+"code": "E27.1",
+"description": "Primary adrenocortical insufficiency",
+"symptoms": "Hyperpigmentation, Hypotension, Weight loss, Muscle weakness, Fatigue, Anorexia, Hyponatremia"
+},
+{
+"code": "H69.9",
+"description": "Eustachian tube disorder, unspecified",
+"symptoms": "Ear pain (otalgia), Sensation of fullness in the ear, Tinnitus (ringing in the ear), Dizziness or vertigo, Hearing loss (conductive), Popping or clicking sounds in the ear, Muffled hearing"
+},
+{
+"code": "B76.1",
+"description": "Necatoriasis",
+"symptoms": "Iron deficiency anemia, Ground itch (pruritic rash at penetration site), Abdominal pain, Diarrhea, Fatigue, Protein malnutrition, Eosinophilia"
+},
+{
+"code": "I32.8",
+"description": "Pericarditis in other diseases classified elsewhere",
+"symptoms": "Chest pain exacerbated by inspiration and lying down, Pericardial friction rub, Shortness of breath (dyspnea), Fatigue, Fever, Palpitations, Electrocardiogram (ECG) abnormalities (e.g., ST-segment elevation, T-wave inversion)"
+},
+{
+"code": "Y70.8",
+"description": "Anaesthesiology devices associated with adverse incidents: Miscellaneous devices, not elsewhere classified",
+"symptoms": "Hypoxia, Hypercapnia, Hypotension, Hypertension, Arrhythmia, Respiratory distress, Allergic reaction"
+},
+{
+"code": "E75.3",
+"description": "Sphingolipidosis, unspecified",
+"symptoms": "Hepatosplenomegaly, Developmental delay, Neurological deterioration, Seizures, Hypotonia, Cherry-red spot on macula, Failure to thrive"
+},
+{
+"code": "G90.1",
+"description": "Familial dysautonomia [Riley-Day]",
+"symptoms": "Postural hypotension, Absence of overflow tears, Swallowing dysfunction, Poor temperature control, Blunted pain perception, Gastrointestinal dysmotility, Emotional lability"
+},
+{
+"code": "L70.5",
+"description": "Acn?excori?e des jeunes filles",
+"symptoms": "Papules, Pustules, Excoriations, Crusted lesions, Hyperpigmentation, Scarring, Inflammation"
+},
+{
+"code": "K85.8",
+"description": "Other acute pancreatitis",
+"symptoms": "Severe abdominal pain (epigastric, radiating to the back), Nausea, Vomiting, Abdominal distension, Fever, Tachycardia, Hypotension"
+},
+{
+"code": "P83.1",
+"description": "Neonatal erythema toxicum",
+"symptoms": "Macules, Papules, Pustules, Erythema, Blanching rash, Absence of systemic symptoms, Lesions on trunk, face and extremities"
+},
+{
+"code": "V89.0",
+"description": "Person injured in unspecified motor-vehicle accident, nontraffic",
+"symptoms": "Pain, Loss of consciousness, Dizziness, Nausea, Headache, Bruising, Amnesia"
+},
+{
+"code": "Z38.4",
+"description": "Twin, born outside hospital",
+"symptoms": "Hypothermia, Respiratory distress, Cyanosis, Apnea, Bradycardia, Hypoglycemia, Increased risk of infection"
+},
+{
+"code": "I87",
+"description": "Other disorders of veins",
+"symptoms": "Chronic venous insufficiency, Edema, Skin discoloration (hyperpigmentation), Venous stasis ulcers, Pain or aching in the legs, Heaviness in the legs, Lipodermatosclerosis"
+},
+{
+"code": "M79.6",
+"description": "Pain in limb",
+"symptoms": "Localized tenderness, Aching pain, Sharp pain, Throbbing pain, Burning sensation, Stiffness, Limited range of motion"
+},
+{
+"code": "Z00.5",
+"description": "Examination of potential donor of organ and tissue",
+"symptoms": "Normal vital signs, Absence of significant medical complaints, Possible anxiety or apprehension, Evidence of suitable organ function based on testing (e.g., renal function tests, liver function tests), Absence of contraindications for organ donation (e.g., active infection, malignancy), Normal physical examination findings, Acceptable blood type and tissue compatibility results"
+},
+{
+"code": "Q13",
+"description": "Congenital malformations of anterior segment of eye",
+"symptoms": "Corneal opacity, Glaucoma, Iris abnormalities (e.g., aniridia, coloboma), Cataract, Microphthalmia, Abnormal anterior chamber angle, Decreased visual acuity"
+},
+{
+"code": "Z52.7",
+"description": "Heart donor",
+"symptoms": "Absence of cardiac function (upon declaration of death), Brain death confirmation, Hemodynamic stability prior to organ procurement, Absence of systemic infection, Absence of malignancy, Optimal organ preservation parameters, Negative infectious disease screening tests"
+},
+{
+"code": "C47.3",
+"description": "Malignant neoplasm: Peripheral nerves of thorax",
+"symptoms": "Thoracic pain, Paresthesia, Muscle weakness in the chest region, Dyspnea (shortness of breath), Hoarseness, Horner's syndrome (ptosis, miosis, anhidrosis), Shoulder pain radiating down the arm"
+},
+{
+"code": "T06.1",
+"description": "Injuries of nerves and spinal cord involving other multiple body regions",
+"symptoms": "Muscle weakness, Sensory deficits (numbness, tingling), Loss of reflexes, Pain radiating along nerve pathways, Bowel or bladder dysfunction, Paralysis (partial or complete), Spinal shock"
+},
+{
+"code": "D16.3",
+"description": "Benign neoplasm: Short bones of lower limb",
+"symptoms": "Localized pain, Palpable mass, Limited range of motion, Swelling, Tenderness to palpation, Asymptomatic in some cases, Pathological fracture"
+},
+{
+"code": "T54.3",
+"description": "Toxic effect: Corrosive alkalis and alkali-like substances",
+"symptoms": "Burning pain at the site of contact, Tissue necrosis, Esophageal perforation, Severe vomiting, Hypotension, Respiratory distress, Alkalemia"
+},
+{
+"code": "D44.1",
+"description": "Neoplasm of uncertain or unknown behaviour: Adrenal gland",
+"symptoms": "Hypertension, Hyperglycemia, Weight gain, Muscle weakness, Fatigue, Headache, Anxiety"
+},
+{
+"code": "O00.8",
+"description": "Other ectopic pregnancy",
+"symptoms": "Unilateral pelvic pain, Vaginal spotting, Amenorrhea or missed period, Dizziness, Shoulder pain (referred), Nausea, Abdominal cramping"
+},
+{
+"code": "O03",
+"description": "Spontaneous abortion",
+"symptoms": "Vaginal bleeding, Abdominal cramping, Passage of tissue or clots, Back pain, Decreased pregnancy symptoms, Uterine contractions, Pelvic pressure"
+},
+{
+"code": "H51.8",
+"description": "Other specified disorders of binocular movement",
+"symptoms": "Diplopia (double vision), Asthenopia (eye strain), Headache, Difficulty with depth perception, Blurred vision, Nystagmus (involuntary eye movements), Photophobia (light sensitivity)"
+},
+{
+"code": "S05.3",
+"description": "Ocular laceration without prolapse or loss of intraocular tissue",
+"symptoms": "Eye pain, Blurred vision, Photophobia, Tearing, Conjunctival injection, Corneal abrasion, Diplopia"
+},
+{
+"code": "C15.1",
+"description": "Malignant neoplasm: Thoracic part of oesophagus",
+"symptoms": "Dysphagia, Odynophagia, Weight loss, Retrosternal pain, Hoarseness, Chronic cough, Regurgitation"
+},
+{
+"code": "M48.4",
+"description": "Fatigue fracture of vertebra",
+"symptoms": "Localized back pain, Pain exacerbated by activity, Tenderness to palpation over the affected vertebra, Muscle spasm, Limited range of motion, Neurological deficits (in severe cases), Pain radiating to the lower extremities"
+},
+{
+"code": "X10",
+"description": "Contact with hot drinks, food, fats and cooking oils",
+"symptoms": "First-degree burn, Second-degree burn, Third-degree burn, Pain, Blistering, Erythema, Edema"
+},
+{
+"code": "B50",
+"description": "Plasmodium falciparum malaria",
+"symptoms": "Fever, Chills, Sweating, Headache, Muscle pain (myalgia), Nausea, Vomiting"
+},
+{
+"code": "E44.1",
+"description": "Mild protein-energy malnutrition",
+"symptoms": "Fatigue, Irritability, Growth retardation (in children), Muscle weakness, Increased susceptibility to infections, Dry skin, Sparse hair"
+},
+{
+"code": "N00.8",
+"description": "Acute nephritic syndrome: Other",
+"symptoms": "Hematuria, Proteinuria, Edema, Hypertension, Oliguria, Azotemia, Fatigue"
+},
+{
+"code": "I51.8",
+"description": "Other ill-defined heart diseases",
+"symptoms": "Chest pain, Palpitations, Dyspnea, Fatigue, Edema, Syncope, Arrhythmia"
+},
+{
+"code": "R57.1",
+"description": "Hypovolaemic shock",
+"symptoms": "Hypotension, Tachycardia, Oliguria, Cool, clammy skin, Altered mental status (e.g., confusion, anxiety), Weakness, Rapid, shallow respirations"
+},
+{
+"code": "F00",
+"description": "Dementia in Alzheimer disease",
+"symptoms": "Progressive memory loss, Cognitive decline, Disorientation, Impaired judgment, Difficulty with language (aphasia), Changes in mood and behavior, Difficulty with visual-spatial orientation"
+},
+{
+"code": "E16.3",
+"description": "Increased secretion of glucagon",
+"symptoms": "Hyperglycemia, Weight loss, Erythematous skin rash, Abdominal pain, Diarrhea, Glucose intolerance, Necrolytic migratory erythema"
+},
+{
+"code": "C15",
+"description": "Malignant neoplasm of oesophagus",
+"symptoms": "Dysphagia, Odynophagia, Weight loss, Hoarseness, Chronic cough, Chest pain, Regurgitation"
+},
+{
+"code": "T47.7",
+"description": "Poisoning: Emetics",
+"symptoms": "Nausea, Vomiting, Abdominal cramping, Dehydration, Electrolyte imbalance, Esophageal irritation, Aspiration pneumonia"
+},
+{
+"code": "S44.5",
+"description": "Injury of cutaneous sensory nerve at shoulder and upper arm level",
+"symptoms": "Paresthesia, Numbness, Hypoesthesia, Hyperesthesia, Allodynia, Neuralgia, Impaired tactile discrimination"
+},
+{
+"code": "D05.7",
+"description": "Other carcinoma in situ of breast",
+"symptoms": "Abnormal mammogram, Nipple discharge, Breast lump, Skin changes (e.g., dimpling, thickening), Breast pain, Asymmetry of breasts, Palpable thickening in the breast tissue"
+},
+{
+"code": "Y55",
+"description": "Agents primarily acting on smooth and skeletal muscles and the respiratory system",
+"symptoms": "Muscle weakness, Muscle spasms, Respiratory distress, Bronchospasm, Hypoventilation, Hypotonia, Tachypnea"
+},
+{
+"code": "Z41.3",
+"description": "Ear piercing",
+"symptoms": "Localized pain at the piercing site, Localized swelling at the piercing site, Redness around the piercing site, Potential bleeding during and immediately after the procedure, Risk of infection (e.g., bacterial or fungal), Formation of keloid scars in susceptible individuals, Allergic reaction to jewelry material"
+},
+{
+"code": "A15.8",
+"description": "Other respiratory tuberculosis, confirmed bacteriologically and histologically",
+"symptoms": "Persistent cough with sputum production, Hemoptysis (blood-tinged sputum), Weight loss, Night sweats, Fever, Shortness of breath, Chest pain"
+},
+{
+"code": "G45",
+"description": "Transient cerebral ischaemic attacks and related syndromes",
+"symptoms": "Sudden onset of unilateral weakness, Transient speech disturbance (dysphasia or aphasia), Temporary vision loss in one eye (amaurosis fugax), Sudden onset of dizziness or vertigo, Transient sensory loss (numbness or tingling), Temporary difficulty with balance or coordination (ataxia), Sudden severe headache"
+},
+{
+"code": "F44.8",
+"description": "Other dissociative [conversion] disorders",
+"symptoms": "Trance states, Possession experiences, Psychogenic aphonia, Psychogenic dysphagia, Sensory deficits (e.g., anesthesia, paresthesia), Motor deficits (e.g., weakness, paralysis), Disturbances of self-perception"
+},
+{
+"code": "M00.1",
+"description": "Pneumococcal arthritis and polyarthritis",
+"symptoms": "Joint pain, Joint swelling, Joint redness, Limited range of motion, Fever, Chills, Leukocytosis"
+},
+{
+"code": "Z13.1",
+"description": "Special screening examination for diabetes mellitus",
+"symptoms": "Elevated fasting plasma glucose (FPG), Elevated 2-hour plasma glucose during oral glucose tolerance test (OGTT), Elevated HbA1c (glycated hemoglobin), Polyuria (frequent urination), Polydipsia (excessive thirst), Unexplained weight loss, Fatigue"
+},
+{
+"code": "J16",
+"description": "Pneumonia due to other infectious organisms, not elsewhere classified",
+"symptoms": "Cough, Fever, Dyspnea, Chest pain, Productive sputum, Crackles or rales on auscultation, Hypoxemia"
+},
+{
+"code": "P56",
+"description": "Hydrops fetalis due to haemolytic disease",
+"symptoms": "Generalized edema, Pleural effusion, Pericardial effusion, Ascites, Severe anemia, Hepatosplenomegaly, Placental edema"
+},
+{
+"code": "N46",
+"description": "Male infertility",
+"symptoms": "Low sperm count (oligospermia), Absent sperm (azoospermia), Abnormal sperm morphology (teratozoospermia), Impaired sperm motility (asthenozoospermia), Erectile dysfunction, Decreased libido, Hormonal imbalances"
+},
+{
+"code": "Z48.0",
+"description": "Attention to surgical dressings and sutures",
+"symptoms": "Wound site examination, Dressing change, Suture removal, Assessment for signs of infection (e.g., redness, swelling, purulent discharge), Wound cleansing, Monitoring for dehiscence, Pain assessment and management related to the wound"
+},
+{
+"code": "K03.3",
+"description": "Pathological resorption of teeth",
+"symptoms": "Tooth pain, Tooth sensitivity, Discoloration of the tooth, Loosening of the tooth, Swelling of the gums, Formation of a sinus tract, Radiographic evidence of tooth structure loss"
+},
+{
+"code": "M09.2",
+"description": "Juvenile arthritis in ulcerative colitis",
+"symptoms": "Joint pain, Joint swelling, Joint stiffness, Limited range of motion in affected joints, Persistent diarrhea, Abdominal pain, Rectal bleeding"
+},
+{
+"code": "P57.8",
+"description": "Other specified kernicterus",
+"symptoms": "Lethargy, Poor feeding, High-pitched cry, Hypertonia, Opisthotonus, Retrocollis, Seizures"
+},
+{
+"code": "G44.8",
+"description": "Other specified headache syndromes",
+"symptoms": "Throbbing head pain, Localized head pain, Sensitivity to light, Sensitivity to sound, Nausea, Dizziness, Visual disturbances"
+},
+{
+"code": "T06",
+"description": "Other injuries involving multiple body regions, not elsewhere classified",
+"symptoms": "Ecchymosis, Lacerations, Edema, Pain, Restricted Range of Motion, Hemorrhage, Neurological Deficits"
+},
+{
+"code": "A96",
+"description": "Arenaviral haemorrhagic fever",
+"symptoms": "Fever, Fatigue, Muscle pain, Bleeding from mucous membranes, Petechiae, Edema, Jaundice, Neurological symptoms"
+},
+{
+"code": "P94.2",
+"description": "Congenital hypotonia",
+"symptoms": "Decreased muscle tone, Floppy limbs, Poor head control, Difficulty feeding, Delayed motor development, Diminished reflexes, Weak cry"
+},
+{
+"code": "L91.9",
+"description": "Hypertrophic disorder of skin, unspecified",
+"symptoms": "Skin thickening, Elevated skin lesions, Fibrosis of the skin, Induration of the skin, Hyperpigmentation, Pruritus, Local discomfort"
+},
+{
+"code": "D39.1",
+"description": "Neoplasm of uncertain or unknown behaviour: Ovary",
+"symptoms": "Abdominal pain, Pelvic discomfort, Abdominal distension, Changes in bowel habits, Urinary frequency, Nausea, Unexplained weight gain or loss"
+},
+{
+"code": "T29.3",
+"description": "Burns of multiple regions, at least one burn of third degree mentioned",
+"symptoms": "Erythema, Blisters, Eschar formation, Edema, Severe pain at burn sites (possibly absent in deep third-degree burns), Hypovolemic shock, Increased risk of infection"
+},
+{
+"code": "I77.9",
+"description": "Disorder of arteries and arterioles, unspecified",
+"symptoms": "Intermittent claudication, Skin discoloration, Diminished peripheral pulses, Extremity pain, Ulceration, Edema, Coldness in affected limb"
+},
+{
+"code": "B33.0",
+"description": "Epidemic myalgia",
+"symptoms": "Severe muscle pain, Fever, Fatigue, Respiratory symptoms, Muscle tenderness, Joint pain, Gastrointestinal issues"
+},
+{
+"code": "N82.4",
+"description": "Other female intestinal-genital tract fistulae",
+"symptoms": "Fecaluria, Pneumaturia, Recurrent urinary tract infections, Vaginal discharge (foul-smelling), Abdominal pain, Fecal incontinence, Dyspareunia"
+},
+{
+"code": "R23.2",
+"description": "Flushing",
+"symptoms": "Facial erythema, Warmth of skin, Increased skin temperature, Visible vasodilation, Burning sensation of the skin, Sudden onset of redness, Transient skin discoloration"
+},
+{
+"code": "C68.1",
+"description": "Malignant neoplasm: Paraurethral gland",
+"symptoms": "Urethral bleeding, Dysuria, Palpable mass near the urethra, Urinary frequency, Urinary urgency, Pelvic pain, Hematuria"
+},
+{
+"code": "A84.0",
+"description": "Far Eastern tick-borne encephalitis [Russian spring-summer encephalitis]",
+"symptoms": "Fever, Headache, Altered mental status, Seizures, Neck stiffness, Fatigue, Myalgias, Coma"
+},
+{
+"code": "M35.4",
+"description": "Diffuse (eosinophilic) fasciitis",
+"symptoms": "Skin thickening, Induration of the skin, Joint pain (arthralgia), Muscle pain (myalgia), Restricted range of motion, Eosinophilia, Fatigue"
+},
+{
+"code": "M91.9",
+"description": "Juvenile osteochondrosis of hip and pelvis, unspecified",
+"symptoms": "Hip pain, Groin pain, Limping, Restricted range of motion of the hip, Thigh pain, Knee pain (referred), Muscle atrophy in the affected leg"
+},
+{
+"code": "H95",
+"description": "Postprocedural disorders of ear and mastoid process, not elsewhere classified",
+"symptoms": "Tinnitus, Vertigo, Hearing loss, Aural fullness, Otalgia, Otorrhea, Facial nerve palsy"
+},
+{
+"code": "V97.0",
+"description": "Occupant of aircraft injured in other specified air transport accidents",
+"symptoms": "Head trauma, Spinal cord injury, Fractures, Internal bleeding, Burns, Soft tissue injuries, Post-traumatic stress disorder"
+},
+{
+"code": "S23.2",
+"description": "Dislocation of other and unspecified parts of thorax",
+"symptoms": "Localized pain in the chest, Limited range of motion, Tenderness to palpation, Swelling around the affected area, Deformity or asymmetry of the chest wall, Difficulty breathing, Muscle spasm"
+},
+{
+"code": "B68.1",
+"description": "Taenia saginata taeniasis",
+"symptoms": "Abdominal discomfort, Nausea, Diarrhea, Weight loss, Increased appetite, Visible proglottids in stool, Anal pruritus"
+},
+{
+"code": "V85",
+"description": "Occupant of special construction vehicle injured in transport accident",
+"symptoms": "Bone fractures, lacerations, traumatic brain injury, internal bleeding, spinal cord injury, soft tissue damage, loss of consciousness"
+},
+{
+"code": "O26.9",
+"description": "Pregnancy-related condition, unspecified",
+"symptoms": "Abdominal pain, Vaginal bleeding, Nausea, Fatigue, Dizziness, Changes in fetal movement, Elevated blood pressure"
+},
+{
+"code": "R78.3",
+"description": "Finding of hallucinogen in blood",
+"symptoms": "Altered mental status, Pupillary dilation, Tachycardia, Elevated blood pressure, Visual hallucinations, Auditory hallucinations, Anxiety"
+},
+{
+"code": "D30.2",
+"description": "Benign neoplasm: Ureter",
+"symptoms": "Hematuria, Flank pain, Urinary frequency, Urinary urgency, Hydronephrosis, Dysuria, Abdominal discomfort"
+},
+{
+"code": "T20.0",
+"description": "Burn of unspecified degree of head and neck",
+"symptoms": "Erythema, Pain, Edema, Blistering (if second degree or higher), Eschar formation (if third degree), Pruritus, Skin discoloration"
+},
+{
+"code": "S71.0",
+"description": "Open wound of hip",
+"symptoms": "Laceration of hip, Hemorrhage at wound site, Pain at the hip joint, Edema around the hip, Erythema surrounding wound, Limited range of motion of hip, Risk of wound infection"
+},
+{
+"code": "B20.4",
+"description": "HIV disease resulting in candidiasis",
+"symptoms": "Oral thrush (white patches in the mouth), Esophageal candidiasis (painful swallowing), Vaginal itching and discharge, Systemic fever, Weight loss, Fatigue, Disseminated candidiasis (infection spreading to organs)"
+},
+{
+"code": "N91.0",
+"description": "Primary amenorrhoea",
+"symptoms": "Absence of menarche (first menstruation), Lack of breast development, Absence of pubic hair, Delayed or absent development of secondary sexual characteristics, Infertility (in later stages if untreated), Short stature, Headache"
+},
+{
+"code": "E23.6",
+"description": "Other disorders of pituitary gland",
+"symptoms": "Headache, Visual disturbances, Fatigue, Changes in menstruation (in females), Decreased libido, Weight changes (gain or loss), Growth abnormalities"
+},
+{
+"code": "Y82.0",
+"description": "Other and unspecified medical devices associated with adverse incidents: Diagnostic and monitoring devices",
+"symptoms": "Inaccurate readings, Device malfunction, Electrical burns, Skin irritation, Allergic reaction, Delayed diagnosis, False alarms"
+},
+{
+"code": "O98.3",
+"description": "Other infections with a predominantly sexual mode of transmission complicating pregnancy, childbirth and the puerperium",
+"symptoms": "Genital lesions, Pelvic pain, Vaginal discharge, Dysuria, Fever, Lymphadenopathy, Pruritus"
+},
+{
+"code": "S90",
+"description": "Superficial injury of ankle and foot",
+"symptoms": "Skin abrasion, Contusion, Superficial laceration, Localized pain, Mild edema, Erythema, Tenderness to palpation"
+},
+{
+"code": "M80",
+"description": "Osteoporosis with pathological fracture",
+"symptoms": "Bone pain, Fracture (hip, spine, wrist, or other), Height loss over time, Stooped posture (kyphosis), Limited mobility, Vertebral compression fractures, Increased risk of subsequent fractures"
+},
+{
+"code": "G62.9",
+"description": "Polyneuropathy, unspecified",
+"symptoms": "Distal paresthesia, Loss of reflexes, Muscle weakness, Sensory loss (vibration, proprioception), Burning pain, Impaired gait, Autonomic dysfunction (e.g., orthostatic hypotension)"
+},
+{
+"code": "K77.0",
+"description": "Liver disorders in infectious and parasitic diseases classified elsewhere",
+"symptoms": "Jaundice, Hepatomegaly, Elevated liver enzymes (ALT, AST), Fatigue, Abdominal pain, Nausea, Dark urine"
+},
+{
+"code": "K25.2",
+"description": "Gastric ulcer: Acute with both haemorrhage and perforation",
+"symptoms": "Hematemesis, Melena, Sudden, severe abdominal pain, Abdominal rigidity, Tachycardia, Hypotension, Peritonitis"
+},
+{
+"code": "P71.9",
+"description": "Transitory neonatal disorder of calcium and magnesium metabolism, unspecified",
+"symptoms": "Muscle twitching, tremors, seizures, poor feeding, apnea, irritability, cardiac arrhythmias"
+},
+{
+"code": "L74.2",
+"description": "Miliaria profunda",
+"symptoms": "Nonpruritic, flesh-colored papules, Deep-seated, firm nodules, Anhidrosis in affected areas, Heat intolerance, Decreased sweating, Prickling sensation, Occasional mild erythema"
+},
+{
+"code": "D23.6",
+"description": "Benign neoplasm: Skin of upper limb, including shoulder",
+"symptoms": "Skin lesion, Palpable mass, Discoloration of skin, Asymptomatic growth, Well-defined borders, Non-ulcerated surface, Slow growth rate"
+},
+{
+"code": "H92.2",
+"description": "Otorrhagia",
+"symptoms": "Aural bleeding, Ear pain (otalgia), Tinnitus, Hearing loss, Dizziness (vertigo), Aural fullness, Headache"
+},
+{
+"code": "T33.4",
+"description": "Superficial frostbite of arm",
+"symptoms": "Skin discoloration (redness, pallor, or cyanosis), Burning sensation, Tingling sensation, Numbness, Skin feels cold to the touch, Mild edema, Formation of superficial blisters"
+},
+{
+"code": "N98.3",
+"description": "Complications of attempted introduction of embryo in embryo transfer",
+"symptoms": "Pelvic pain, Vaginal bleeding, Infection, Ectopic pregnancy, Ovarian hyperstimulation syndrome (OHSS), Uterine perforation, Emotional distress"
+},
+{
+"code": "S62.4",
+"description": "Multiple fractures of metacarpal bones",
+"symptoms": "Localized pain in the hand, Swelling of the hand, Bruising of the hand, Deformity of the hand, Inability to move the fingers, Tenderness upon palpation, Crepitus upon palpation"
+},
+{
+"code": "O91.0",
+"description": "Infection of nipple associated with childbirth",
+"symptoms": "Nipple pain, Nipple erythema, Nipple edema, Purulent nipple discharge, Fever, Warmth to the touch of the affected breast, Breast tenderness"
+},
+{
+"code": "C84.9",
+"description": "Mature T/NK-cell lymphoma, unspecified",
+"symptoms": "Lymphadenopathy, Splenomegaly, Hepatomegaly, B symptoms (fever, night sweats, weight loss), Pruritus, Skin lesions (plaques, nodules, or erythroderma), Peripheral neuropathy"
+},
+{
+"code": "Z93",
+"description": "Artificial opening status",
+"symptoms": "Presence of stoma, Need for specialized appliance, Potential for stoma site infection, Skin irritation around stoma, Risk of stoma stenosis, Electrolyte imbalance, Dehydration"
+},
+{
+"code": "E29",
+"description": "Testicular dysfunction",
+"symptoms": "Decreased libido, Erectile dysfunction, Infertility, Gynecomastia, Muscle weakness, Fatigue, Decreased bone density"
+},
+{
+"code": "Z35.0",
+"description": "Supervision of pregnancy with history of infertility",
+"symptoms": "Anxiety related to pregnancy maintenance, Elevated blood pressure, Gestational diabetes screening results, Uterine contractions, Vaginal spotting, Edema, Weight gain monitoring"
+},
+{
+"code": "V84.4",
+"description": "Person injured while boarding or alighting from special agricultural vehicle",
+"symptoms": "Fractures, Lacerations, Contusions, Sprains, Strains, Head trauma, Internal bleeding"
+},
+{
+"code": "Q71.9",
+"description": "Reduction defect of upper limb, unspecified",
+"symptoms": "Limb length discrepancy, Missing fingers or parts of the hand, Underdeveloped arm bones, Asymmetrical upper limbs, Limited range of motion, Compensatory movements of the trunk or shoulder, Difficulty with fine motor skills"
+},
+{
+"code": "D83",
+"description": "Common variable immunodeficiency",
+"symptoms": "Recurrent sinopulmonary infections (e.g., pneumonia, sinusitis, bronchitis), Gastrointestinal disorders (e.g., chronic diarrhea, malabsorption), Increased susceptibility to opportunistic infections, Autoimmune manifestations (e.g., rheumatoid arthritis, autoimmune hemolytic anemia, thrombocytopenia), Granulomatous disease, Lymphoid hyperplasia (e.g., splenomegaly, lymphadenopathy), Increased risk of certain cancers (e.g., lymphoma, gastric cancer)"
+},
+{
+"code": "V20.9",
+"description": "Motorcycle rider injured in collision with pedestrian or animal: Unspecified motorcycle rider injured in traffic accident",
+"symptoms": "Head trauma, Limb fractures, Abrasion, Laceration, Internal bleeding, Spinal cord injury, Loss of consciousness"
+},
+{
+"code": "F62.9",
+"description": "Enduring personality change, unspecified",
+"symptoms": "Marked change in overall personality structure, Emotional dysregulation, Impaired impulse control, Disturbances in perception and thinking, Difficulties in interpersonal relationships, Social withdrawal, Changes in habits and interests"
+},
+{
+"code": "A79",
+"description": "Other rickettsioses",
+"symptoms": "Fever, Rash, History of tick bite, Headache, Body aches, Fatigue, Malaise, Encephalitis or meningitis (in severe cases)"
+},
+{
+"code": "S13.4",
+"description": "Sprain and strain of cervical spine",
+"symptoms": "Neck pain, Neck stiffness, Muscle spasm in the neck, Headache, Limited range of motion in the neck, Tenderness to palpation in the neck, Pain radiating to the shoulder"
+},
+{
+"code": "F16",
+"description": "Mental and behavioural disorders due to use of hallucinogens",
+"symptoms": "Visual hallucinations, Auditory hallucinations, Paranoia, Anxiety, Depersonalization, Distorted perception of reality, Impaired judgment"
+},
+{
+"code": "T42.4",
+"description": "Poisoning: Benzodiazepines",
+"symptoms": "Central nervous system depression, Respiratory depression, Hypotension, Ataxia, Dysarthria, Drowsiness, Coma"
+},
+{
+"code": "M05.2",
+"description": "Rheumatoid vasculitis",
+"symptoms": "Palpable purpura, Digital ulceration, Peripheral neuropathy, Skin necrosis, Mononeuritis multiplex, Livedo reticularis, Systemic inflammation"
+},
+{
+"code": "V51.9",
+"description": "Occupant of pick-up truck or van injured in collision with pedal cycle: Unspecified occupant of pick-up truck or van injured in traffic accident",
+"symptoms": "Headache, Neck pain, Back pain, Limb fractures, Soft tissue injuries, Whiplash, Concussion"
+},
+{
+"code": "Z44.0",
+"description": "Fitting and adjustment of artificial arm (complete)(partial)",
+"symptoms": "Skin irritation at prosthesis interface, Pain or discomfort at the residual limb, Prosthesis malalignment, Decreased range of motion, Soft tissue breakdown at prosthesis interface, Socket fit issues (too tight or too loose), Gait deviations"
+},
+{
+"code": "B46",
+"description": "Zygomycosis",
+"symptoms": "Black eschar on the skin or mucous membranes, Sinus congestion or pain, Fever, Weight loss, Respiratory distress, Systemic symptoms such as fatigue, Risk of tissue necrosis or sepsis"
+},
+{
+"code": "X06",
+"description": "Exposure to ignition or melting of other clothing and apparel",
+"symptoms": "First-degree burns, Second-degree burns, Third-degree burns, Blisters, Pain, Inflammation, Tissue damage"
+},
+{
+"code": "A42.9",
+"description": "Actinomycosis, unspecified",
+"symptoms": "Painful swelling, Abscess formation, Draining fistulas, Fever, Fatigue, Weight loss, Inflammation"
+},
+{
+"code": "J06.0",
+"description": "Acute laryngopharyngitis",
+"symptoms": "Sore throat, Painful swallowing (odynophagia), Hoarseness, Cough, Fever, Nasal congestion, Cervical lymphadenopathy"
+},
+{
+"code": "F13.9",
+"description": "Mental and behavioural disorders due to use of sedatives or hypnotics: Unspecified mental and behavioural disorder",
+"symptoms": "Anxiety, Depression, Cognitive impairment, Sleep disturbances, Mood swings, Irritability, Impaired judgment"
+},
+{
+"code": "O15",
+"description": "Eclampsia",
+"symptoms": "Seizures, hypertension, proteinuria, headache, blurred vision, abdominal pain, hyperreflexia"
+},
+{
+"code": "D09.7",
+"description": "Carcinoma in situ of other specified sites",
+"symptoms": "Abnormal cell growth at the affected site, Presence of precancerous lesions, Dysplasia identified through histological examination, Potential for malignant transformation, Asymptomatic presentation in many cases, Localized cellular abnormalities, Abnormal tissue architecture"
+},
+{
+"code": "F48.8",
+"description": "Other specified neurotic disorders",
+"symptoms": "Anxiety, Depressed mood, Obsessive thoughts, Compulsive behaviors, Phobias, Panic attacks, Sleep disturbances"
+},
+{
+"code": "K06.0",
+"description": "Gingival recession",
+"symptoms": "Exposed tooth roots, Tooth sensitivity to temperature changes, Gingival inflammation, Visible shortening of the gingiva, Increased risk of root caries, Aesthetic concerns, Difficulty in maintaining oral hygiene"
+},
+{
+"code": "K45",
+"description": "Other abdominal hernia",
+"symptoms": "Abdominal pain, Palpable bulge in the abdomen, Discomfort aggravated by straining, Constipation, Nausea, Vomiting, Abdominal distension"
+},
+{
+"code": "A19.8",
+"description": "Other miliary tuberculosis",
+"symptoms": "Fever, Night sweats, Weight loss, Fatigue, Hepatosplenomegaly, Lymphadenopathy, Pulmonary symptoms"
+},
+{
+"code": "L57.0",
+"description": "Actinic keratosis",
+"symptoms": "Rough, scaly patches on the skin, Pink, red, or brown discoloration, Gritty sensation when touched, Itching or burning sensation, Horn-like projections on the skin, Located on sun-exposed areas (face, scalp, ears, hands), May bleed if scratched"
+},
+{
+"code": "Q05",
+"description": "Spina bifida",
+"symptoms": "Visible sac on the back, Motor weakness in the legs, Sensory deficits in the lower extremities, Bowel incontinence, Bladder incontinence, Hydrocephalus, Chiari II malformation"
+},
+{
+"code": "P00.9",
+"description": "Fetus and newborn affected by unspecified maternal condition",
+"symptoms": "Low birth weight, Respiratory distress, Hypoglycemia, Jaundice, Feeding difficulties, Lethargy, Irritability"
+},
+{
+"code": "T10",
+"description": "Fracture of upper limb, level unspecified",
+"symptoms": "Localized pain, Swelling at the fracture site, Tenderness to palpation, Limited range of motion, Deformity of the limb, Crepitus upon movement, Ecchymosis"
+},
+{
+"code": "J15.4",
+"description": "Pneumonia due to other streptococci",
+"symptoms": "Cough with purulent sputum, Pleuritic chest pain, Fever, Dyspnea, Tachypnea, Crackles or rales on auscultation, Hypoxemia"
+},
+{
+"code": "M16.6",
+"description": "Other secondary coxarthrosis, bilateral",
+"symptoms": "Bilateral hip pain exacerbated by activity, Stiffness in both hips, especially in the morning or after rest, Reduced range of motion in both hips, Limping gait due to pain and stiffness, Crepitus (grating sensation) in the hip joints, Muscle weakness in the hip and thigh areas bilaterally, Pain radiating to the groin, buttock, or thigh bilaterally"
+},
+{
+"code": "N50",
+"description": "Other disorders of male genital organs",
+"symptoms": "Scrotal pain, Testicular swelling, Penile discharge, Groin discomfort, Epididymal tenderness, Prostate enlargement, Erectile dysfunction"
+},
+{
+"code": "Z57.4",
+"description": "Occupational exposure to toxic agents in agriculture",
+"symptoms": "Skin irritation or dermatitis, Respiratory distress or shortness of breath, Headache, Nausea or vomiting, Eye irritation or conjunctivitis, Neurological symptoms such as dizziness or weakness, Chronic cough"
+},
+{
+"code": "R09.3",
+"description": "Abnormal sputum",
+"symptoms": "Hemoptysis, Mucopurulent sputum, Increased sputum production, Tenacious sputum, Discolored sputum, Foul-smelling sputum, Frothy sputum"
+},
+{
+"code": "T03.2",
+"description": "Dislocations, sprains and strains involving multiple regions of upper limb(s)",
+"symptoms": "Localized pain in multiple upper limb joints, Swelling and edema in affected areas, Limited range of motion in the upper limbs, Muscle spasms or cramping, Tenderness to palpation, Joint instability, Ecchymosis around the injured sites"
+},
+{
+"code": "D13.0",
+"description": "Benign neoplasm: Oesophagus",
+"symptoms": "Dysphagia (difficulty swallowing), Odynophagia (painful swallowing), Regurgitation of undigested food, Chest pain or discomfort, Heartburn, Weight loss (unintentional), Globus sensation (feeling of a lump in the throat)"
+},
+{
+"code": "S52.2",
+"description": "Fracture of shaft of ulna",
+"symptoms": "Severe localized pain in the forearm, Swelling around the fracture site, Tenderness to palpation over the ulna shaft, Deformity of the forearm, Inability to pronate or supinate the forearm, Limited range of motion in the elbow and wrist, Crepitus upon palpation of the fracture site"
+},
+{
+"code": "S00.0",
+"description": "Superficial injury of scalp",
+"symptoms": "Abrasion, Contusion, Superficial laceration, Mild pain, Localized swelling, Erythema, Minimal bleeding"
+},
+{
+"code": "C10.2",
+"description": "Malignant neoplasm: Lateral wall of oropharynx",
+"symptoms": "Persistent sore throat, Dysphagia (difficulty swallowing), Odynophagia (painful swallowing), Otalgia (ear pain), Neck mass or swelling, Hoarseness, Unexplained weight loss"
+},
+{
+"code": "J00",
+"description": "Acute nasopharyngitis [common cold]",
+"symptoms": "nasal congestion, rhinorrhea, sneezing, sore throat, cough, headache, malaise"
+},
+{
+"code": "T51.0",
+"description": "Toxic effect: Ethanol",
+"symptoms": "Altered mental status, Slurred speech, Ataxia, Nausea, Vomiting, Respiratory depression, Hypoglycemia"
+},
+{
+"code": "D41.2",
+"description": "Neoplasm of uncertain or unknown behaviour: Ureter",
+"symptoms": "Hematuria (blood in urine), Flank pain, Urinary frequency, Urgency to urinate, Dysuria (painful urination), Hydronephrosis (swelling of the kidney due to urine backup), Palpable abdominal mass (rare)"
+},
+{
+"code": "L44.4",
+"description": "Infantile papular acrodermatitis [Giannotti-Crosti]",
+"symptoms": "Erythematous papules, Symmetrical distribution on extremities and face, Non-pruritic lesions, Possible association with viral infections (e.g., Epstein-Barr virus, Hepatitis B), Lymphadenopathy, Hepatitis, Facial papules"
+},
+{
+"code": "G53",
+"description": "Cranial nerve disorders in diseases classified elsewhere",
+"symptoms": "Facial pain, Diplopia, Dysarthria, Dysphagia, Hearing loss, Vertigo, Loss of taste"
+},
+{
+"code": "R00.0",
+"description": "Tachycardia, unspecified",
+"symptoms": "Rapid heart rate (greater than 100 bpm), Palpitations, Shortness of breath (dyspnea), Chest pain, Dizziness, Lightheadedness, Anxiety"
+},
+{
+"code": "Y44.9",
+"description": "Other and unspecified agents affecting blood constituents",
+"symptoms": "Thrombocytopenia, Leukopenia, Anemia, Coagulopathy, Agranulocytosis, Pancytopenia, Eosinophilia"
+},
+{
+"code": "Y43",
+"description": "Primarily systemic agents",
+"symptoms": "Generalized rash, Systemic inflammation, Hypotension, Tachycardia, Fever, Nausea, Vomiting"
+},
+{
+"code": "E13.0",
+"description": "Other specified diabetes mellitus: With coma",
+"symptoms": "Hyperglycemia, Loss of consciousness, Dehydration, Electrolyte imbalance, Kussmaul respirations (if associated with DKA), Hypotension, Tachycardia"
+},
+{
+"code": "R52.2",
+"description": "Other chronic pain",
+"symptoms": "Persistent aching pain, Fatigue, Sleep disturbance, Irritability, Depressed mood, Limited range of motion, Muscle stiffness"
+},
+{
+"code": "B42.0",
+"description": "Pulmonary sporotrichosis",
+"symptoms": "Persistent cough, Shortness of breath, Chest pain, Hemoptysis (coughing up blood), Fever, Night sweats, Fatigue, Weight loss"
+},
+{
+"code": "C03",
+"description": "Malignant neoplasm of gum",
+"symptoms": "Gingival bleeding, Non-healing ulcer in the gum, Persistent sore in the mouth, Pain or tenderness in the gum, Loose teeth, Swelling or thickening of the gum tissue, Difficulty chewing"
+},
+{
+"code": "I06.9",
+"description": "Rheumatic aortic valve disease, unspecified",
+"symptoms": "Dyspnea, Orthopnea, Paroxysmal nocturnal dyspnea, Chest pain, Palpitations, Fatigue, Syncope"
+},
+{
+"code": "D48.1",
+"description": "Neoplasm of uncertain or unknown behaviour: Connective and other soft tissue",
+"symptoms": "Palpable mass, Localized pain, Swelling, Limited range of motion, Skin discoloration, Neuropathic pain, Deep vein thrombosis"
+},
+{
+"code": "N94.3",
+"description": "Premenstrual tension syndrome",
+"symptoms": "Irritability, Anxiety, Depressed mood, Breast tenderness, Abdominal bloating, Headache, Fatigue"
+},
+{
+"code": "S69",
+"description": "Other and unspecified injuries of wrist and hand",
+"symptoms": "Pain, Swelling, Bruising, Limited range of motion, Tenderness to palpation, Deformity, Numbness or tingling"
+},
+{
+"code": "V93",
+"description": "Accident on board watercraft without accident to watercraft, not causing drowning and submersion",
+"symptoms": "Head trauma, Limb fracture, Soft tissue injury, Concussion, Sprains, Lacerations, Contusions"
+},
+{
+"code": "C88.9",
+"description": "Malignant immunoproliferative disease, unspecified",
+"symptoms": "Lymphadenopathy, Splenomegaly, Hepatomegaly, Anemia, Thrombocytopenia, Weight loss, Fatigue"
+},
+{
+"code": "I97.1",
+"description": "Other functional disturbances following cardiac surgery",
+"symptoms": "Postoperative arrhythmia, Pericardial effusion, Myocardial dysfunction, Valve dysfunction, Pulmonary hypertension, Postpericardiotomy syndrome, Exercise intolerance"
+},
+{
+"code": "P26.8",
+"description": "Other pulmonary haemorrhages originating in the perinatal period",
+"symptoms": "Respiratory distress, Apnea, Cyanosis, Grunting, Nasal flaring, Hypotension, Pallor"
+},
+{
+"code": "H83",
+"description": "Other diseases of inner ear",
+"symptoms": "Tinnitus, Vertigo, Sensorineural hearing loss, Aural fullness, Nystagmus, Disequilibrium, Difficulty with balance"
+},
+{
+"code": "W39",
+"description": "Discharge of firework",
+"symptoms": "Thermal burns, Penetrating injury, Acoustic trauma, Ocular trauma, Inhalation injury, Tissue damage, Lacerations"
+},
+{
+"code": "L23.3",
+"description": "Allergic contact dermatitis due to drugs in contact with skin",
+"symptoms": "Pruritus, Erythema, Edema, Vesiculation, Scaling, Crusting, Burning sensation"
+},
+{
+"code": "F98.6",
+"description": "Cluttering",
+"symptoms": "Excessive repetitions of sounds, syllables, or words, Interjections within speech, Revisions of phrases or sentences, Rapid and irregular speech rate, Reduced speech intelligibility, Lack of awareness of speech disfluencies, Co-occurring language or articulation errors"
+},
+{
+"code": "V88.4",
+"description": "Person injured in collision between car and heavy transport vehicle, nontraffic",
+"symptoms": "Head trauma, Spinal cord injury, Fractures, Internal hemorrhage, Soft tissue contusions, Lacerations, Abdominal trauma"
+},
+{
+"code": "Z39.0",
+"description": "Care and examination immediately after delivery",
+"symptoms": "Uterine contraction assessment, Perineal evaluation, Vital sign monitoring, Assessment of bleeding, Evaluation of pain levels, Breast examination for lactation, Psychological well-being assessment"
+},
+{
+"code": "L71.1",
+"description": "Rhinophyma",
+"symptoms": "Nasal enlargement, Nodular skin on the nose, Skin thickening on the nose, Redness of the nasal skin, Prominent pores on the nose, Telangiectasia on the nose, Sebaceous gland hyperplasia on the nose"
+},
+{
+"code": "M79",
+"description": "Other soft tissue disorders, not elsewhere classified",
+"symptoms": "Localized pain, tenderness to palpation, stiffness, muscle spasms, decreased range of motion, weakness, referred pain"
+},
+{
+"code": "C77.5",
+"description": "Secondary and unspecified malignant neoplasm: Intrapelvic lymph nodes",
+"symptoms": "Pelvic pain, Lower extremity edema, Changes in bowel habits, Urinary frequency, Weight loss, Fatigue, Palpable lymphadenopathy in the pelvis"
+},
+{
+"code": "B88.9",
+"description": "Infestation, unspecified",
+"symptoms": "Pruritus, Skin rash, Fatigue, Nausea, Abdominal pain, Weight loss, Local irritation"
+},
+{
+"code": "D82.8",
+"description": "Immunodeficiency associated with other specified major defects",
+"symptoms": "Recurrent infections (bacterial, viral, fungal), Chronic diarrhea, Failure to thrive, Eczema, Thrombocytopenia, Autoimmune disorders, Lymphoproliferative disorders"
+},
+{
+"code": "T36.7",
+"description": "Poisoning: Antifungal antibiotics, systemically used",
+"symptoms": "Nausea, Vomiting, Abdominal pain, Diarrhea, Skin rash, Hepatotoxicity, Nephrotoxicity"
+},
+{
+"code": "C25.7",
+"description": "Malignant neoplasm: Other parts of pancreas",
+"symptoms": "Abdominal pain, Weight loss, Jaundice, Nausea, Vomiting, Fatigue, Loss of appetite"
+},
+{
+"code": "S35.5",
+"description": "Injury of iliac blood vessels",
+"symptoms": "Hypotension, Tachycardia, Pelvic pain, Groin hematoma, Lower extremity ischemia, Absent or diminished femoral pulse, Abdominal distension"
+},
+{
+"code": "M71.1",
+"description": "Other infective bursitis",
+"symptoms": "Localized joint pain, Joint swelling, Joint redness (erythema), Limited range of motion, Fever, Warmth around the affected joint, Purulent drainage (if ruptured)"
+},
+{
+"code": "J20.1",
+"description": "Acute bronchitis due to Haemophilus influenzae",
+"symptoms": "Productive cough, Dyspnea, Wheezing, Chest discomfort, Fever, Rhonchi, Sputum production"
+},
+{
+"code": "V81.7",
+"description": "Occupant of railway train or railway vehicle injured in derailment without antecedent collision",
+"symptoms": "Fractures, Lacerations, Concussion, Spinal cord injury, Internal bleeding, Soft tissue damage, Post-traumatic stress disorder"
+},
+{
+"code": "Z30.3",
+"description": "Menstrual extraction",
+"symptoms": "Vaginal bleeding, Cramping, Pelvic pain, Anxiety, Nausea, Diaphoresis, Lightheadedness"
+},
+{
+"code": "A80",
+"description": "Acute poliomyelitis",
+"symptoms": "Fever, Fatigue, Muscle weakness, Flaccid paralysis, Headache,  Neck stiffness,  difficulty breathing"
+},
+{
+"code": "Q26.8",
+"description": "Other congenital malformations of great veins",
+"symptoms": "Cyanosis, Dyspnea, Fatigue, Edema, Tachycardia, Heart murmur, Growth retardation"
+},
+{
+"code": "Z62.1",
+"description": "Parental overprotection",
+"symptoms": "Child's difficulty developing independence, Anxiety in the child related to perceived threats, Social skill deficits in the child, Emotional immaturity in the child, Increased dependency on parents, Difficulty with problem-solving, Reduced self-confidence"
+},
+{
+"code": "M23.3",
+"description": "Other meniscus derangements",
+"symptoms": "Joint line tenderness, Clicking sensation in the knee, Catching sensation in the knee, Knee effusion, Limited range of motion, Pain with knee flexion, Joint instability"
+},
+{
+"code": "Q82.5",
+"description": "Congenital non-neoplastic naevus",
+"symptoms": "Hyperpigmented skin macule or patch, Elevated skin lesion, Presence at birth or early infancy, Variable size and shape, Potential for hair growth within the lesion (hypertrichosis), Irregular borders, Color variations (brown, black, blue)"
+}
+]

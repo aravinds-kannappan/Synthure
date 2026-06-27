@@ -15,6 +15,7 @@ import {
   type Synthesis,
   type Verification,
 } from '@/lib/synthure'
+import { fhirBundleToNote } from '@/lib/fhir'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -159,6 +160,12 @@ const ROLE_BRIEF: Record<Stakeholder, string> = {
     'You are the Benefits Analyst agent for the employer and plan sponsor. Work only with aggregated, anonymized information. Cover the population cohort this encounter rolls into, cost exposure and projection, network utilization, benefits and plan design optimization, ACA and COBRA compliance posture, and wellness program matching. Be strategic and quantitative without exposing identifying clinical detail.',
 }
 
+// Model routing: send complex, denial sensitive encounters through the frontier
+// model (Sonnet) and keep routine ones on the cheaper, faster model (Haiku).
+function writerModel(s: Stakeholder, ex: ExtractionResult): string {
+  return ex.denialRisk >= 60 && (s === 'hospital' || s === 'physician') ? SONNET : HAIKU
+}
+
 async function claudeReport(
   client: Anthropic,
   s: Stakeholder,
@@ -166,11 +173,17 @@ async function claudeReport(
   ex: ExtractionResult,
 ): Promise<StakeholderReport> {
   const msg = await client.messages.create({
-    model: HAIKU,
+    model: writerModel(s, ex),
     max_tokens: 2600,
-    tools: [REPORT_TOOL],
+    // Prompt caching: the tool schema and the shared style guide are stable
+    // across all four writers and across requests within the cache TTL, so we
+    // mark them cacheable to cut input token cost.
+    tools: [{ ...REPORT_TOOL, cache_control: { type: 'ephemeral' } }],
     tool_choice: { type: 'tool', name: 'write_report' },
-    system: `${ROLE_BRIEF[s]}\n\n${STYLE}`,
+    system: [
+      { type: 'text', text: STYLE, cache_control: { type: 'ephemeral' } },
+      { type: 'text', text: ROLE_BRIEF[s] },
+    ],
     messages: [{ role: 'user', content: exContext(note, ex) }],
   })
   const block = msg.content.find((b) => b.type === 'tool_use')
@@ -276,6 +289,8 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     note = (body?.note || '').toString().slice(0, 30000)
+    // Accept a real FHIR Bundle as an alternative to pasted text.
+    if (!note.trim() && body?.fhir) note = fhirBundleToNote(body.fhir).slice(0, 30000)
   } catch {
     /* ignore */
   }
