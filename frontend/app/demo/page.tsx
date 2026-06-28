@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-react'
 import Nav from '@/components/Nav'
 import PortalShell from '@/components/portals/PortalShell'
+import SafetyConsole from '@/components/SafetyConsole'
 import { useSynthesis, type AgentStatus } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
 
@@ -56,6 +57,7 @@ const PHASES: { key: AgentDef['phase']; title: string }[] = [
   { key: 'intake', title: 'Understand the note' },
   { key: 'write', title: 'Write four tailored reports' },
   { key: 'verify', title: 'Verify & orchestrate' },
+  { key: 'safeguard', title: 'Align & safeguard' },
 ]
 
 export default function DemoPage() {
@@ -245,6 +247,21 @@ export default function DemoPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Alignment & safety layer */}
+        {state.safety && (
+          <div className="mt-8">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-white">Alignment & safety</h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Synthure is not just a chain of agents. Before anything reaches a portal, an alignment layer drawn from the safety
+                literature checks every report against a clinical constitution, gates each action by autonomy tier, and escalates
+                to a human when it is unsure.
+              </p>
+            </div>
+            <SafetyConsole safety={state.safety} live={state.live} />
           </div>
         )}
       </main>

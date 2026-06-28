@@ -42,5 +42,13 @@
   "denial": {
     "modeled": false,
     "reason": "No public claim adjudication (paid vs denied) dataset exists. DataFog complexity_score, the only labeled proxy available, is an inverse length artifact (corr about -0.62 with note length), so a model trained on it learns nothing real. The denial heuristic was removed; the product shows sourced prior authorization and claim validity facts instead of a fabricated probability."
+  },
+  "safety_redteam": {
+    "method": "Red teaming (Ganguli et al. 2022) of the deterministic safety checks",
+    "injected_violations": 7,
+    "caught": 7,
+    "catch_rate": 1.0,
+    "clean_cases": 2,
+    "false_positives": 0
   }
 }

@@ -75,6 +75,16 @@ The live demo runs entirely on **Next.js route handlers**. The four writer agent
 - **Without a key**, an offline rules based extractor (a regex for codes plus a medication dictionary) and the note derived engine produce the same structured reports, so the demo always works. This offline extractor is exact when a note already contains valid codes and exactly spelled drug names, but it does not recognize diagnoses written only in prose; that is what the Claude NER path is for. Every report is sanitized to contain no hyphens or dashes.
 - **In both modes**, the risk numbers are no longer heuristics. Readmission is the real CMS HRRP published 30 day rate for the encounter's dominant condition; claim readiness is a deterministic scrub whose every input is a sourced fact (prior authorization from a published payer list, a claim validity issue, or an administrative flag stated in the note). No denial probability is shown, because no public claim outcome data exists to model one. See `eval/` for the benchmarks behind these numbers.
 
+## Alignment & safety layer
+
+Synthure is more than a chain of agents. Before any report reaches a portal, an **alignment layer** applies inference-time safety mechanisms drawn from the alignment literature (rendered live in the demo, `frontend/lib/safety.ts` + `components/SafetyConsole.tsx`):
+
+- **A clinical constitution + critique-and-revise** ([Constitutional AI](https://arxiv.org/abs/2212.08073), Bai et al. 2022). Every report is checked against six explicit principles (no fabricated codes, no agent-issued prescribing or diagnosing, costs labeled as estimates, no PHI in aggregate views, abstain under low confidence, sourced risk only). A Constitution Critic — a real Claude Sonnet agent when a key is set, deterministic rule checks otherwise — flags violations and a revise step removes them.
+- **An autonomy gate** (corrigibility / scalable oversight). Each action is routed to one of three tiers: automated, single human approval, or **prohibited** (prescribe, diagnose, change treatment — never generated).
+- **Selective prediction** ([Geifman & El-Yaniv 2017](https://arxiv.org/abs/1705.08500)). Below 0.60 extraction confidence, the system abstains and escalates to a human.
+
+We are precise about what this is: **no reward model is trained here**. The writers run on Claude (which Anthropic aligned with RLHF); this layer adds inference-time safeguards on top. A red-team eval ([Ganguli et al. 2022](https://arxiv.org/abs/2209.07858), `eval/safety_eval.py`) catches **7/7** injected violations with 0 false positives on the clean cases.
+
 ## Project structure
 
 ```

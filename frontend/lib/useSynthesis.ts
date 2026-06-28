@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 import {
   PIPELINE,
   type ExtractionResult,
+  type SafetyResult,
   type Stakeholder,
   type StakeholderReport,
   type Synthesis,
@@ -26,6 +27,8 @@ const MIN_MS: Record<string, number> = {
   employer: 800,
   verify: 950,
   synth: 950,
+  critic: 900,
+  gate: 750,
 }
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
@@ -48,6 +51,7 @@ export interface SynthesisState {
   reports: Partial<Record<Stakeholder, StakeholderReport>>
   verification: Verification | null
   synthesis: Synthesis | null
+  safety: SafetyResult | null
   live: boolean | null
   error: string | null
 }
@@ -64,6 +68,7 @@ export function useSynthesis() {
     reports: {},
     verification: null,
     synthesis: null,
+    safety: null,
     live: null,
     error: null,
   })
@@ -80,6 +85,7 @@ export function useSynthesis() {
       reports: {},
       verification: null,
       synthesis: null,
+      safety: null,
       live: null,
       error: null,
     })
@@ -95,6 +101,7 @@ export function useSynthesis() {
       reports: {},
       verification: null,
       synthesis: null,
+      safety: null,
       live: null,
       error: null,
     })
@@ -109,6 +116,7 @@ export function useSynthesis() {
     }
     const verifyReady = deferred<void>()
     const synthReady = deferred<void>()
+    const safetyReady = deferred<void>()
     const allReady = deferred<void>()
 
     const alive = () => runId.current === myRun
@@ -155,6 +163,10 @@ export function useSynthesis() {
                 setState((s) => ({ ...s, synthesis: evt.synthesis }))
                 synthReady.resolve()
                 break
+              case 'safety':
+                setState((s) => ({ ...s, safety: evt.safety }))
+                safetyReady.resolve()
+                break
               case 'done':
                 setState((s) => ({ ...s, live: !!evt.live }))
                 allReady.resolve()
@@ -171,6 +183,7 @@ export function useSynthesis() {
         )
         verifyReady.resolve()
         synthReady.resolve()
+        safetyReady.resolve()
         allReady.resolve()
       } catch (err) {
         if (!alive()) return
@@ -181,6 +194,7 @@ export function useSynthesis() {
         )
         verifyReady.resolve()
         synthReady.resolve()
+        safetyReady.resolve()
         allReady.resolve()
       }
     })()
@@ -189,6 +203,7 @@ export function useSynthesis() {
     const gateFor = (id: string): Promise<void> => {
       if (id === 'verify') return verifyReady.promise
       if (id === 'synth') return synthReady.promise
+      if (id === 'critic' || id === 'gate') return safetyReady.promise
       if (['patient', 'physician', 'hospital', 'employer'].includes(id))
         return reportReady[id as Stakeholder].promise
       return extractionReady.promise

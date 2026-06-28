@@ -9,12 +9,15 @@ import {
 } from '@/lib/engine'
 import {
   STAKEHOLDER_ORDER,
+  CONSTITUTION,
   type ExtractionResult,
+  type SafetyResult,
   type Stakeholder,
   type StakeholderReport,
   type Synthesis,
   type Verification,
 } from '@/lib/synthure'
+import { assessSafety } from '@/lib/safety'
 import { fhirBundleToNote } from '@/lib/fhir'
 
 export const runtime = 'nodejs'
@@ -288,6 +291,63 @@ async function claudeSynthesis(
   return dehyphen(block.input as Synthesis)
 }
 
+// ── Constitution Critic (Constitutional AI, inference time) ──────────────────
+// Augments the deterministic safety pass with a Claude critic that reads every
+// report against the clinical constitution and reports any principle it judges
+// violated. Findings are merged into the deterministic SafetyResult.
+const CRITIC_TOOL: Anthropic.Tool = {
+  name: 'critique',
+  description: 'Audit the reports against the clinical constitution and report any violations.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      critiques: {
+        type: 'array',
+        description: 'One entry per violated principle. Empty if every principle is satisfied.',
+        items: {
+          type: 'object',
+          properties: {
+            target: { type: 'string', enum: ['patient', 'physician', 'hospital', 'employer', 'all'] },
+            issue: { type: 'string', description: 'Which principle is violated and how, in one sentence.' },
+            severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+          },
+          required: ['target', 'issue', 'severity'],
+        },
+      },
+    },
+    required: ['critiques'],
+  },
+}
+
+async function claudeCritic(
+  client: Anthropic,
+  note: string,
+  reports: StakeholderReport[],
+): Promise<SafetyResult['critiques']> {
+  const principles = CONSTITUTION.map((p, i) => `${i + 1}. ${p.principle}`).join('\n')
+  const msg = await client.messages.create({
+    model: SONNET,
+    max_tokens: 900,
+    tools: [CRITIC_TOOL],
+    tool_choice: { type: 'tool', name: 'critique' },
+    system:
+      'You are the Constitution Critic, an alignment safeguard in the style of Constitutional AI. Audit the four reports against the clinical constitution below. Report only genuine violations; if a principle holds, do not invent a problem. Be strict about fabricated codes, any agent issued prescribing or diagnosing, and unqualified cost claims. Write with no hyphens and no dashes.\n\nCLINICAL CONSTITUTION:\n' +
+      principles,
+    messages: [
+      {
+        role: 'user',
+        content: `CLINICAL NOTE:\n${note}\n\nREPORTS:\n${JSON.stringify(
+          reports.map((r) => ({ for: r.stakeholder, summary: r.summary, sections: r.sections, actions: r.actions })),
+        )}`,
+      },
+    ],
+  })
+  const block = msg.content.find((b) => b.type === 'tool_use')
+  if (!block || block.type !== 'tool_use') throw new Error('no tool_use from critic')
+  const inp = block.input as { critiques?: { target: Stakeholder | 'all'; issue: string; severity: 'low' | 'medium' | 'high' }[] }
+  return (inp.critiques ?? []).map((c) => ({ ...dehyphen(c), action: 'flagged' as const }))
+}
+
 export async function POST(req: Request) {
   let note = ''
   try {
@@ -359,6 +419,22 @@ export async function POST(req: Request) {
           synthesis = fallbackSynthesis(ex)
         }
         send({ type: 'synthesis', synthesis })
+
+        // Alignment & safety: deterministic constitution + autonomy gate always,
+        // augmented by the Claude Constitution Critic when a key is present.
+        const safety = assessSafety(note, ex, reports)
+        if (client) {
+          try {
+            const extra = await claudeCritic(client, note, reports)
+            const seen = new Set(safety.critiques.map((c) => c.issue))
+            for (const c of extra) if (!seen.has(c.issue)) safety.critiques.push(c)
+            safety.caughtViolations = safety.critiques.length
+            safety.mode = 'claude assisted'
+          } catch {
+            /* keep the deterministic safety result */
+          }
+        }
+        send({ type: 'safety', safety })
 
         send({ type: 'done', model: client ? 'claude' : 'synthure engine', live: !!client })
       } catch (err) {

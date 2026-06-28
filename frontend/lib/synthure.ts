@@ -58,11 +58,69 @@ export interface Synthesis {
   connections: string[]
 }
 
+// ── Alignment & safety layer ─────────────────────────────────────────────────
+// Inference time safety mechanisms drawn from the alignment literature. We do not
+// train a reward model here; we apply the inference time techniques these papers
+// introduced (a constitution with critique and revise, an autonomy gate, and
+// selective prediction) and rely on Claude's own RLHF training for the writers.
+
+export interface Principle {
+  id: string
+  principle: string
+  basis: string // the safety research this principle draws on
+}
+
+// The clinical constitution every report is checked against (Constitutional AI,
+// Bai et al. 2022). Each principle names the research it is grounded in.
+export const CONSTITUTION: Principle[] = [
+  { id: 'grounding', principle: 'Every code and clinical claim must trace to the note. No fabrication.', basis: 'Constitutional AI, Bai et al. 2022; Chain of Verification, Dhuliawala et al. 2023' },
+  { id: 'no_clinical_decisions', principle: 'Agents never prescribe, diagnose, or change treatment. Decision support only.', basis: 'Corrigibility and scalable oversight; tiered autonomy' },
+  { id: 'cost_estimates', principle: 'Cost and coverage figures are labeled as estimates, never stated as certainties.', basis: 'Calibrated, honest uncertainty; Sparrow, Glaese et al. 2022' },
+  { id: 'privacy', principle: 'Aggregated and employer views carry no individual identifying information.', basis: 'Privacy preserving aggregation; de identification' },
+  { id: 'abstain', principle: 'When extraction confidence is low, the system abstains and escalates to a human.', basis: 'Selective prediction, Geifman and El-Yaniv 2017' },
+  { id: 'sourced_risk', principle: 'Risk numbers come from published data or are not shown. No invented probabilities.', basis: 'Truthful, non deceptive outputs; InstructGPT RLHF, Ouyang et al. 2022' },
+]
+
+export interface ConstitutionCheck {
+  id: string
+  principle: string
+  basis: string
+  status: 'pass' | 'flag'
+  detail: string
+}
+
+export interface SafetyCritique {
+  target: Stakeholder | 'all'
+  issue: string
+  severity: 'low' | 'medium' | 'high'
+  action: 'revised' | 'flagged' | 'blocked'
+}
+
+export interface AutonomyAction {
+  action: string
+  tier: 1 | 2 | 3
+  decision: 'auto' | 'human approval' | 'prohibited'
+}
+
+export interface SafetyResult {
+  constitution: ConstitutionCheck[]
+  critiques: SafetyCritique[]
+  revision: { target: Stakeholder | 'all'; before: string; after: string; note: string } | null
+  autonomy: AutonomyAction[]
+  abstained: boolean
+  abstainReason: string | null
+  passed: number
+  total: number
+  caughtViolations: number
+  mode: 'deterministic' | 'claude assisted'
+}
+
 export interface SynthesisResult {
   extraction: ExtractionResult
   reports: StakeholderReport[]
   verification: Verification
   synthesis: Synthesis
+  safety: SafetyResult
   model: string
 }
 
@@ -114,7 +172,7 @@ export interface AgentDef {
   id: string
   name: string
   role: string
-  phase: 'intake' | 'write' | 'verify'
+  phase: 'intake' | 'write' | 'verify' | 'safeguard'
   accent: string
   stakeholder?: Stakeholder
 }
@@ -130,6 +188,8 @@ export const PIPELINE: AgentDef[] = [
   { id: 'employer', name: 'Benefits Analyst', role: 'Writes the employer benefits report', phase: 'write', accent: '#a78bfa', stakeholder: 'employer' },
   { id: 'verify', name: 'Verifier', role: 'Cross checks every claim against the knowledge base', phase: 'verify', accent: '#34d399' },
   { id: 'synth', name: 'Orchestrator', role: 'Tailors & connects all four reports', phase: 'verify', accent: '#fbbf24' },
+  { id: 'critic', name: 'Constitution Critic', role: 'Checks every report against the clinical constitution and revises violations', phase: 'safeguard', accent: '#f43f5e' },
+  { id: 'gate', name: 'Autonomy Gate', role: 'Routes each action across the three autonomy tiers and abstains when unsure', phase: 'safeguard', accent: '#fb7185' },
 ]
 
 // ── Sample notes for the demo ────────────────────────────────────────────────
