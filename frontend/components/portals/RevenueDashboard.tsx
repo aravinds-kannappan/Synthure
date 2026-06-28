@@ -18,10 +18,11 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
   const dxCodes = state.diagnoses.filter((x) => x.accepted).map((x) => x.code)
   const submitted = state.claimStatus === 'submitted' || state.claimStatus === 'reimbursed'
 
+  const authItems = procedures.filter((p) => p.authNeeded)
   const drivers = [
-    d.denialRisk >= 45 ? 'Service mix and authorization sensitivity raise first pass denial likelihood.' : 'Low complexity and clean coding keep first pass approval likely.',
-    state.priorAuthApproved ? 'Prior authorization is on file, which removed the largest denial driver.' : 'Network status and eligibility are weighted heavily in the score.',
-    state.financialAssistance ? 'Patient financial assistance is in progress, reducing bad debt exposure.' : 'Historical denial patterns for similar codes were retrieved and considered.',
+    authItems.length ? `Prior authorization required by published payer policy: ${authItems.map((p) => `${p.label} (${p.code})`).join(', ')}.` : 'No ordered service appears on the prior authorization lists we check.',
+    state.priorAuthApproved ? 'Prior authorization is on file, which clears the largest review item.' : authItems.length ? 'Authorization is pending; submitting it up front protects reimbursement.' : 'Eligibility and network status should be verified before the date of service.',
+    state.financialAssistance ? 'Patient financial assistance is in progress, reducing bad debt exposure.' : 'This is a sourced claim readiness scrub, not a denial prediction.',
   ]
 
   return (
@@ -33,7 +34,7 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
           </span>
           <div>
             <div className="text-sm font-semibold text-white">Revenue Cycle</div>
-            <div className="text-[11px] text-slate-500">Claim operations · denial management</div>
+            <div className="text-[11px] text-slate-500">Claim operations · prior authorization & readiness</div>
           </div>
         </div>
         <span className="rounded-md px-2.5 py-1 font-mono text-[11px]" style={{ background: `${ACCENT}14`, color: ACCENT, border: `1px solid ${ACCENT}33` }}>
@@ -121,7 +122,7 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
             </div>
 
             <div>
-              <div className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400">Denial drivers</div>
+              <div className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400">Claim readiness drivers</div>
               <ul className="space-y-1.5">
                 {drivers.map((dr, i) => (
                   <li key={i} className="flex gap-2 text-[13px] text-slate-300">
@@ -151,15 +152,15 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-3 text-center">
-              <Gauge value={d.denialRisk} color={riskColor(d.denialRisk)} label="Denial risk" />
+              <Gauge value={d.reviewRisk} color={riskColor(d.reviewRisk)} label="Review load" />
               <p className="mt-1 text-[11px] text-slate-500">
-                {state.priorAuthApproved ? 'Prior auth on file, denial risk reduced.' : d.denialRisk >= 45 ? 'Front load documentation to protect reimbursement.' : 'Clean claim, standard turnaround expected.'}
+                {state.priorAuthApproved ? 'Prior auth on file, review load reduced.' : d.reviewRisk >= 45 ? 'Front load authorization and documentation.' : 'Clean claim, standard turnaround expected.'}
               </p>
             </motion.div>
             <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-3 text-center">
-              <Gauge value={d.readmissionRisk} color={riskColor(d.readmissionRisk)} label="Readmission / HRRP" />
+              <Gauge value={d.readmissionRisk} color={riskColor(d.readmissionRisk)} label="Readmission · CMS HRRP" />
               <p className="mt-1 text-[11px] text-slate-500">
-                {d.readmissionRisk >= 45 ? 'Care transition task opened to limit HRRP exposure.' : 'Below typical HRRP concern threshold.'}
+                {d.readmissionRisk >= 45 ? 'CMS published rate is elevated; care transition task opened.' : 'CMS published rate; below typical HRRP concern.'}
               </p>
             </div>
           </div>

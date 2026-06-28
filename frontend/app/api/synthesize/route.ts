@@ -33,7 +33,10 @@ function exContext(note: string, ex: ExtractionResult): string {
     `- Procedures: ${ex.cpt.map((c) => `${c.code} ${c.label}`).join('; ') || 'none coded'}`,
     `- Medications: ${ex.entities.filter((e) => e.type === 'MEDICATION').map((e) => e.text).join(', ') || 'none'}`,
     `- Signs/symptoms: ${ex.entities.filter((e) => e.type === 'SIGN_SYMPTOM').map((e) => e.text).join(', ') || 'none'}`,
-    `- Denial risk: ${ex.denialRisk}%  ·  Readmission risk: ${ex.readmissionRisk}%  ·  NER confidence: ${ex.confidence}`,
+    `- Prior authorization required (published payer policy): ${ex.priorAuth.map((p) => `${p.procedure} ${p.code} [${p.source}]`).join('; ') || 'none'}`,
+    `- Claim review factors (sourced, deterministic): ${ex.reviewFactors.map((f) => f.label).join('; ') || 'none'}`,
+    `- Readmission risk (calibrated to CMS HRRP published rate): ${ex.readmissionRisk}%  ·  NER confidence: ${ex.confidence}`,
+    'IMPORTANT: Do not state a denial probability. There is no claim outcome model. Only discuss prior authorization and claim readiness as sourced facts, and readmission as the CMS published rate.',
   ].join('\n')
 }
 
@@ -153,17 +156,18 @@ const ROLE_BRIEF: Record<Stakeholder, string> = {
   patient:
     'You are the Patient Advocate agent. Write for the patient at about a 6th grade reading level: warm, clear, and reassuring, never alarming. Your report MUST (1) translate every diagnosis and medical term into plain everyday language, explaining what each condition is and why it matters; (2) explain each medication, what it does and how to take it; (3) explain any lab values or test results; (4) include a detailed insurance and cost allocation section that estimates what insurance is likely to cover for each service and medication, the patient out of pocket range, deductible and copay context, and financial assistance options, clearly labeled as illustrative estimates; (5) give clear next steps, when to seek care sooner, and questions to ask. Be genuinely useful and complete.',
   physician:
-    'You are the Care Navigator agent supporting the treating physician. Be precise and clinical. Cover suggested ICD 10 and CPT coding with sequencing rationale, documentation and specificity prompts, prior authorization needs, denial risk and concrete mitigations, order and care coordination, follow up and monitoring, and grounded clinical references. You never prescribe or diagnose; you support the physician and save them time.',
+    'You are the Care Navigator agent supporting the treating physician. Be precise and clinical. Cover suggested ICD 10 and CPT coding with sequencing rationale, documentation and specificity prompts, prior authorization needs (only those listed as required by published payer policy), claim readiness and concrete mitigations, order and care coordination, follow up and monitoring, and grounded clinical references. Do not state a denial probability. You never prescribe or diagnose; you support the physician and save them time.',
   hospital:
-    'You are the Revenue Cycle agent for the hospital. Cover the full revenue cycle in detail: claim construction, denial probability with its drivers, routing and adjudication lane, expected reimbursement posture, readmission and HRRP exposure, AR and appeals workflow, and patient financial and assistance screening. Be operational and financial.',
+    'You are the Revenue Cycle agent for the hospital. Cover the full revenue cycle in detail: claim construction, claim readiness with its sourced drivers (prior authorization from published payer policy and claim validity, never a fabricated denial probability), routing and review lane, expected reimbursement posture, readmission and HRRP exposure using the CMS published rate provided, AR and appeals workflow, and patient financial and assistance screening. Be operational and financial.',
   employer:
     'You are the Benefits Analyst agent for the employer and plan sponsor. Work only with aggregated, anonymized information. Cover the population cohort this encounter rolls into, cost exposure and projection, network utilization, benefits and plan design optimization, ACA and COBRA compliance posture, and wellness program matching. Be strategic and quantitative without exposing identifying clinical detail.',
 }
 
-// Model routing: send complex, denial sensitive encounters through the frontier
-// model (Sonnet) and keep routine ones on the cheaper, faster model (Haiku).
+// Model routing: send claims with a heavy review load (prior authorization or
+// validity flags) through the frontier model (Sonnet) and keep routine ones on
+// the cheaper, faster model (Haiku).
 function writerModel(s: Stakeholder, ex: ExtractionResult): string {
-  return ex.denialRisk >= 60 && (s === 'hospital' || s === 'physician') ? SONNET : HAIKU
+  return ex.reviewRisk >= 60 && (s === 'hospital' || s === 'physician') ? SONNET : HAIKU
 }
 
 async function claudeReport(

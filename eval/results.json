@@ -1,0 +1,46 @@
+{
+  "generated_by": "eval/train_risk.py (pure stdlib, reproducible)",
+  "icd_classifier": {
+    "task": "symptom text -> ICD 10 category",
+    "type": "tuned_hybrid_word_char_bm25",
+    "dataset": "Inje/SYMPTOMS-COT-ICD10-2024",
+    "note": "Tuned blend of word TF IDF centroid, character 3 to 4 gram TF IDF centroid, and BM25. Weights chosen on a validation slice, evaluated on a disjoint held out split.",
+    "alpha_word": 0.4,
+    "beta_char": 0.2,
+    "bm25_weight": 0.4,
+    "trained": {
+      "mrr": 0.3399,
+      "recall@1": 0.251,
+      "recall@3": 0.3892,
+      "recall@5": 0.4417,
+      "n": 781
+    },
+    "bm25_baseline": {
+      "mrr": 0.3302,
+      "recall@1": 0.242,
+      "recall@3": 0.3854,
+      "recall@5": 0.4353,
+      "n": 781
+    },
+    "n_train": 2495,
+    "n_val": 624,
+    "n_test": 781,
+    "n_categories": 1378
+  },
+  "readmission_head": {
+    "task": "30 day all cause readmission probability",
+    "source": "CMS Hospital Readmissions Reduction Program (HRRP) and Hospital Compare, published national risk standardized 30 day all cause readmission rates.",
+    "type": "cms_calibrated_lookup",
+    "note": "ICD 10 prefix maps to the real CMS HRRP published rate; national all cause rate is the baseline. Multiple codes take the maximum (dominant condition drives readmission).",
+    "loo_chapter_regression": {
+      "mae_pp": 5.27,
+      "mean_baseline_mae_pp": 4.29,
+      "n_conditions": 10,
+      "reading": "Chapter features do not beat the mean baseline, so we calibrate to published rates directly rather than extrapolate."
+    }
+  },
+  "denial": {
+    "modeled": false,
+    "reason": "No public claim adjudication (paid vs denied) dataset exists. DataFog complexity_score, the only labeled proxy available, is an inverse length artifact (corr about -0.62 with note length), so a model trained on it learns nothing real. The denial heuristic was removed; the product shows sourced prior authorization and claim validity facts instead of a fabricated probability."
+  }
+}

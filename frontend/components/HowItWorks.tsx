@@ -61,12 +61,12 @@ const WRITER_LINES: Record<Stakeholder, string[]> = {
   ],
   physician: [
     'Dx I10, E11.9 · Rx lisinopril, atorvastatin',
-    'Denial risk 32%, standard submission',
+    'No prior auth required, standard submission',
     'Order pre validated: lipid panel (80061)',
   ],
   hospital: [
-    'Claim routed → standard adjudication lane',
-    'Denial 32% · readmission 30% · in range',
+    'Claim routed → standard review lane',
+    'Readmission 18% (CMS HRRP) · clean claim',
     'Est. reimbursement within expected band',
   ],
   employer: [
@@ -109,8 +109,8 @@ export default function HowItWorks() {
 
   const extractN = Math.round(sub(p, R.extract[0], R.extract[1]) * ENTITIES.length)
   const knowledgeN = Math.round(sub(p, R.knowledge[0], R.knowledge[1]) * CODE_RESOLVE.length)
-  const denialFill = Math.round(sub(p, R.risk[0], R.risk[1]) * 32)
-  const readmitFill = Math.round(sub(p, R.risk[0], R.risk[1]) * 30)
+  const reviewFill = Math.round(sub(p, R.risk[0], R.risk[1]) * 12)
+  const readmitFill = Math.round(sub(p, R.risk[0], R.risk[1]) * 18)
 
   const writersP = sub(p, R.writers[0], R.writers[1])
   const activeWriter = Math.min(3, Math.floor(writersP * 4))
@@ -163,7 +163,7 @@ export default function HowItWorks() {
     type: 'A clinician writes a note. Synthure starts reading instantly.',
     extract: 'The NER agent scans the text and pulls out every clinical entity.',
     knowledge: 'The knowledge agent resolves each code against the medical knowledge base.',
-    risk: 'Risk models score denial and readmission probability.',
+    risk: 'Readmission is the CMS HRRP published rate; prior authorization is sourced from payer policy.',
     writers: `The ${STAKEHOLDERS[STAKEHOLDER_ORDER[activeWriter]].agent} writes the ${STAKEHOLDERS[STAKEHOLDER_ORDER[activeWriter]].label.toLowerCase()}’s report…`,
     verify: 'The Verifier audits every statement against the extracted facts.',
     orch: 'The Orchestrator ties all four tailored reports together.',
@@ -283,10 +283,10 @@ export default function HowItWorks() {
               {/* RISK: gauges */}
               {phase === 'risk' && (
                 <motion.div key="risk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                  <StageTitle color="#fbbf24" Icon={Activity} title="Risk Models" sub="scoring denial & readmission" />
+                  <StageTitle color="#fbbf24" Icon={Activity} title="Risk & Readiness" sub="CMS readmission · prior auth" />
                   <div className="space-y-5 mt-2">
-                    <Gauge label="Denial probability" value={denialFill} color="#fbbf24" />
-                    <Gauge label="Readmission risk" value={readmitFill} color="#22d3ee" />
+                    <Gauge label="Claim review load" value={reviewFill} color="#fbbf24" />
+                    <Gauge label="Readmission (CMS HRRP)" value={readmitFill} color="#22d3ee" />
                   </div>
                 </motion.div>
               )}

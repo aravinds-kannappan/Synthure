@@ -6,6 +6,7 @@
 // operational layer rather than four independent views.
 
 import type { ExtractionResult, Stakeholder } from './synthure'
+import priorAuthList from './models/prior_auth.json'
 import { PLAIN_DX, MED_INFO, CPT_PRICE, LAB_MEANING, icdKey, fmt$ } from './knowledge'
 
 export type Portal = Stakeholder
@@ -45,7 +46,12 @@ export interface EncounterState {
 
 let _seq = 0
 const uid = () => `e${Date.now().toString(36)}_${(_seq++).toString(36)}`
-const AUTH_CODES = ['27447', '93458']
+// Sourced from the same published prior authorization lists the engine uses,
+// so the interactive portal and the report agree on what needs authorization.
+const AUTH_CODES = new Set([
+  ...Object.keys(priorAuthList.codes),
+  ...Object.keys(priorAuthList.commercial_common),
+])
 const PORTAL_LABEL: Record<Portal, string> = { patient: 'Patient', physician: 'Clinician', hospital: 'Revenue Cycle', employer: 'Benefits' }
 export const portalLabel = (p: Portal | 'system') => (p === 'system' ? 'System' : PORTAL_LABEL[p])
 
@@ -67,7 +73,7 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
     price: CPT_PRICE[c.code] ?? 150,
     known: c.label !== 'CPT procedure code',
     accepted: true,
-    authNeeded: AUTH_CODES.includes(c.code),
+    authNeeded: AUTH_CODES.has(c.code),
   }))
   const medications: EncMed[] = ex.entities
     .filter((e) => e.type === 'MEDICATION')
@@ -101,7 +107,7 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
 // ── Derived (pure recompute) ─────────────────────────────────────────────────
 export interface DerivedService { code: string; label: string; price: number; patient: number }
 export interface Derived {
-  denialRisk: number
+  reviewRisk: number
   readmissionRisk: number
   route: 'standard' | 'frontier'
   allowed: number
@@ -140,18 +146,21 @@ export function derive(s: EncounterState): Derived {
   const allowed = activeProc.reduce((a, p) => a + p.price, 0)
   const coins = 0.2
 
-  const anyAuthNeeded = s.procedures.some((p) => p.accepted && p.authNeeded) || s.base.denialRisk >= 45
+  const anyAuthNeeded = s.procedures.some((p) => p.accepted && p.authNeeded)
   const authorizedAll = !anyAuthNeeded || s.priorAuthApproved
 
-  let denial = s.base.denialRisk
-  if (s.priorAuthApproved) denial -= 22
+  // Claim readiness recomputed from the current claim state, not a denial model.
+  // Readiness improves when the required authorization is approved or an
+  // authorization sensitive procedure is dropped, both auditable changes.
+  let review = s.base.reviewRisk
+  if (s.priorAuthApproved && anyAuthNeeded) review = Math.max(5, review - 35)
   const removed = s.procedures.length - activeProc.length
-  denial -= removed * 4
-  if (s.claimStatus === 'submitted' || s.claimStatus === 'reimbursed') denial -= 4
-  denial = Math.max(5, Math.min(94, Math.round(denial)))
-  const route: Derived['route'] = denial > 60 ? 'frontier' : 'standard'
+  review -= removed * 4
+  if (s.claimStatus === 'submitted' || s.claimStatus === 'reimbursed') review -= 4
+  review = Math.max(5, Math.min(95, Math.round(review)))
+  const route: Derived['route'] = review > 60 ? 'frontier' : 'standard'
 
-  const expectedReimb = Math.round(allowed * (1 - (denial / 100) * 0.35))
+  const expectedReimb = Math.round(allowed * (1 - (review / 100) * 0.35))
 
   const faFactor = s.financialAssistance ? 0.4 : 1
   const services: DerivedService[] = activeProc.map((p) => ({
@@ -171,11 +180,11 @@ export function derive(s: EncounterState): Derived {
       ? 'cardiometabolic'
       : 'chronic care'
 
-  const slope = 1.5 + (denial / 100) * 4
+  const slope = 1.5 + (review / 100) * 4
   const trend = Array.from({ length: 8 }, (_, i) => Math.round(100 + slope * i + (i % 2 === 0 ? 1.5 : -1)))
 
   return {
-    denialRisk: denial,
+    reviewRisk: review,
     readmissionRisk: s.base.readmissionRisk,
     route,
     allowed,
@@ -187,7 +196,7 @@ export function derive(s: EncounterState): Derived {
     services,
     cohort,
     cohortLabel: cohort === 'cardiometabolic' ? 'Cardiometabolic' : 'Chronic care',
-    costTier: activeProc.length && denial > 50 ? 'Higher' : 'Moderate',
+    costTier: activeProc.length && anyAuthNeeded ? 'Higher' : 'Moderate',
     pipeline: pipelineFor(s.claimStatus),
     anyAuthNeeded,
     authorizedAll,
@@ -232,7 +241,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         procedures: s.procedures.map((p) => (p.code === a.code ? { ...p, accepted: on } : p)),
         events: [
-          ev('physician', ['patient', 'hospital', 'employer'], 'action', `${on ? 'Procedure added to' : 'Procedure removed from'} the plan: ${pr.code}`, `${pr.label}. Patient cost, expected reimbursement, and denial risk were recalculated.`),
+          ev('physician', ['patient', 'hospital', 'employer'], 'action', `${on ? 'Procedure added to' : 'Procedure removed from'} the plan: ${pr.code}`, `${pr.label}. Patient cost, expected reimbursement, and claim readiness were recalculated.`),
           ...s.events,
         ],
       }
@@ -257,7 +266,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         priorAuthApproved: true,
         claimStatus: s.claimStatus === 'review' ? 'ready' : s.claimStatus,
         events: [
-          ev('physician', ['patient', 'hospital'], 'action', 'Prior authorization approved', 'The flagged procedures are authorized. Denial risk dropped and the claim is cleared for submission. The patient now sees the procedure as covered.'),
+          ev('physician', ['patient', 'hospital'], 'action', 'Prior authorization approved', 'The flagged procedures are authorized. Claim readiness improved and the claim is cleared for submission. The patient now sees the procedure as covered.'),
           ...s.events,
         ],
       }

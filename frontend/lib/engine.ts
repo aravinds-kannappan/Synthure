@@ -20,6 +20,7 @@ import {
   icdKey,
   estimateCoverage,
 } from './knowledge'
+import { inferReadmission, assessClaim } from './risk'
 
 // ── Hyphen / dash sanitizer ─────────────────────────────────────────────────
 // The product copy and every generated report must contain no hyphens or dashes.
@@ -68,35 +69,10 @@ const CPT_RE = /^\d{5}$/
 export const isIcd = (c: string) => ICD_RE.test(c.trim())
 export const isCpt = (c: string) => CPT_RE.test(c.trim())
 
-// ── Heuristic risk scoring (shared by the regex and Claude NER paths) ─────────
-// Honest note: these are hand tuned heuristics over the note text, not a trained
-// model. They are deterministic and clearly labelled as estimates in the UI.
-export function scoreRisk(
-  note: string,
-  icd10: { code: string }[],
-  cpt: { code: string }[],
-): { denialRisk: number; readmissionRisk: number } {
-  const lower = (note || '').toLowerCase()
-  const has = (...needles: string[]) => needles.some((n) => lower.includes(n))
-  let denial = 18
-  if (has('out of network', 'out-of-network', 'oon')) denial += 26
-  if (has('prior auth', 'preauth', 'authorization')) denial += 16
-  if (has('prior denial', 'previously denied', 'denied')) denial += 22
-  if (has('experimental', 'investigational', 'off label')) denial += 20
-  if (has('arthroplasty', 'surgery', 'surgical', 'cath', 'catheterization')) denial += 12
-  if (has('admit', 'admitted', 'emergency', 'inpatient')) denial += 10
-  if (cpt.length === 0) denial += 6
-  denial = Math.max(6, Math.min(94, denial + Math.min(icd10.length * 2, 8)))
-
-  let readmit = 12
-  if (has('nstemi', 'stemi', 'myocardial', 'heart failure', 'chf')) readmit += 28
-  if (has('diabetes', 'a1c', 'e11')) readmit += 12
-  if (has('copd', 'pneumonia')) readmit += 16
-  if (has('ckd', 'kidney', 'dialysis')) readmit += 14
-  if (has('admit', 'admitted', 'inpatient')) readmit += 12
-  readmit += Math.min(icd10.length * 3, 12)
-  return { denialRisk: denial, readmissionRisk: Math.max(5, Math.min(92, readmit)) }
-}
+// Risk scoring now lives in ./risk: readmission is calibrated to CMS HRRP
+// published rates and claim readiness is a sourced, auditable computation. The
+// previous hand tuned scoreRisk heuristic (which invented clinical correlations
+// such as "NSTEMI" raising a denial number) has been removed entirely.
 
 // Assemble a validated ExtractionResult from raw entity lists. Used by both the
 // offline regex extractor and the Claude NER path, so codes are validated and
@@ -133,9 +109,19 @@ export function assembleExtraction(
     ].filter((e) => e.text) as Entity[],
     (e) => `${e.type}:${e.text.toLowerCase()}`,
   )
-  const { denialRisk, readmissionRisk } = scoreRisk(note, icd10, cpt)
+  const readmission = inferReadmission(icd10)
+  const claim = assessClaim(note, icd10, cpt)
   const confidence = Math.min(0.97, 0.82 + entities.length * 0.012)
-  return { entities, icd10, cpt, denialRisk, readmissionRisk, confidence: Number(confidence.toFixed(2)) }
+  return {
+    entities,
+    icd10,
+    cpt,
+    reviewRisk: claim.reviewRisk,
+    readmissionRisk: readmission.risk,
+    priorAuth: claim.priorAuth,
+    reviewFactors: claim.factors.map((f) => ({ label: f.label, detail: f.detail })),
+    confidence: Number(confidence.toFixed(2)),
+  }
 }
 
 export function extract(note: string): ExtractionResult {
@@ -199,7 +185,7 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
   const m = meds(ex)
   const lb = labs(ex)
   const sx = symptoms(ex)
-  const route = ex.denialRisk > 60 ? 'frontier' : 'standard'
+  const route = ex.reviewRisk > 60 ? 'frontier' : 'standard'
 
   if (s === 'patient') {
     const cov = estimateCoverage(ex)
@@ -274,11 +260,11 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
     return {
       stakeholder: 'physician',
       headline: 'Coding, authorization, and workflow',
-      summary: `Synthure captured ${ex.icd10.length} diagnosis and ${ex.cpt.length} procedure code${ex.cpt.length === 1 ? '' : 's'} from your note and pre validated the resulting claim. The denial model scores this encounter at ${ex.denialRisk}%, routed to the ${route} lane. Below are suggested codes, documentation prompts, and the authorizations Synthure can file on your behalf.`,
+      summary: `Synthure captured ${ex.icd10.length} diagnosis and ${ex.cpt.length} procedure code${ex.cpt.length === 1 ? '' : 's'} from your note and pre validated the resulting claim. ${ex.priorAuth.length ? `${ex.priorAuth.length} ordered service${ex.priorAuth.length === 1 ? '' : 's'} require prior authorization under published payer policy, so this claim is routed to the ${route} review lane.` : 'No services on the published prior authorization lists, so standard submission applies.'} Below are suggested codes, documentation prompts, and the authorizations Synthure can file on your behalf.`,
       metrics: [
         { label: 'Diagnosis codes', value: String(ex.icd10.length), tone: 'neutral' },
         { label: 'Procedure codes', value: String(ex.cpt.length), tone: 'neutral' },
-        { label: 'Denial risk', value: `${ex.denialRisk}%`, tone: toneOf(ex.denialRisk) },
+        { label: 'Prior auth items', value: String(ex.priorAuth.length), tone: ex.priorAuth.length ? 'warn' : 'good' },
       ],
       sections: [
         { heading: 'Suggested coding', body: 'Mapped from your note via semantic retrieval and ready to confirm:', bullets: [
@@ -291,14 +277,14 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
           m.length ? `Document the indication for each medication started (${m.join(', ')}).` : 'Note any medication changes and their indications.',
           lb.length ? `Tie ordered tests to the diagnoses they evaluate (${lb.join(', ')}).` : 'Link each ordered test to a supporting diagnosis.',
         ] },
-        { heading: 'Prior authorization', body: ex.denialRisk >= 45
-          ? 'Elevated denial risk detected. Synthure has drafted a prior authorization packet with the supporting clinical rationale for your one tap approval.'
-          : 'No prior authorization barriers detected for the ordered services. Standard submission is appropriate.',
-          bullets: namedCpt(ex).filter((c) => ['27447', '93458'].includes(c.code)).map((c) => `${c.label} commonly requires authorization. Draft packet prepared.`) },
-        { heading: 'Denial risk mitigation', body: `The model flags this encounter at ${ex.denialRisk}%. Top mitigations:`, bullets: [
+        { heading: 'Prior authorization', body: ex.priorAuth.length
+          ? 'These ordered services appear on a published payer prior authorization list. Synthure has drafted the authorization packet with the supporting clinical rationale for your one tap approval.'
+          : 'None of the ordered services appear on the published prior authorization lists we check. Standard submission is appropriate.',
+          bullets: ex.priorAuth.map((p) => `${p.procedure} (${p.code}) requires authorization per the ${p.source}. Draft packet prepared.`) },
+        { heading: 'Claim readiness', body: 'A deterministic scrub of the claim against sourced rules (not a denial prediction):', bullets: [
+          ex.reviewFactors.length ? ex.reviewFactors.map((f) => `${f.label}: ${f.detail}`).join(' ') : 'No prior authorization or validity flags. The claim is clean for standard submission.',
           'Attach medical necessity documentation at first submission rather than on appeal.',
           'Verify eligibility and network status before the date of service.',
-          ex.denialRisk >= 45 ? 'Route through the frontier reviewer for a second pass before submission.' : 'Standard submission is sufficient; no manual review required.',
         ] },
         { heading: 'Orders and care coordination', body: 'Synthure can dispatch these as Tier 1 autonomous actions:', bullets: [
           ex.cpt.length ? 'Submit the ordered tests and track results back to this encounter.' : 'Place any pending orders and track them to completion.',
@@ -324,11 +310,11 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
     return {
       stakeholder: 'hospital',
       headline: 'Revenue cycle and risk assessment',
-      summary: `A claim has been constructed for ${procPhrase(ex)}. The denial model scores this encounter at ${ex.denialRisk}% and routes it to the ${route} adjudication lane. Readmission exposure is ${ex.readmissionRisk}%. Below is the full revenue cycle posture with the actions Synthure is taking to protect reimbursement.`,
+      summary: `A claim has been constructed for ${procPhrase(ex)}. ${ex.priorAuth.length ? `${ex.priorAuth.length} service${ex.priorAuth.length === 1 ? '' : 's'} require prior authorization under published payer policy, routing this claim to the ${route} review lane.` : 'No services require prior authorization under the lists we check, so standard submission applies.'} Readmission exposure is ${ex.readmissionRisk}%, calibrated to the CMS HRRP published rate${ex.readmissionRisk ? ` for ${dxPhrase(ex)}` : ''}. Below is the full revenue cycle posture with the actions Synthure is taking to protect reimbursement.`,
       metrics: [
-        { label: 'Denial risk', value: `${ex.denialRisk}%`, tone: toneOf(ex.denialRisk) },
+        { label: 'Prior auth items', value: String(ex.priorAuth.length), tone: ex.priorAuth.length ? 'warn' : 'good' },
         { label: 'Routing', value: route === 'frontier' ? 'Frontier' : 'Standard', tone: 'neutral' },
-        { label: 'Readmission risk', value: `${ex.readmissionRisk}%`, tone: toneOf(ex.readmissionRisk) },
+        { label: 'Readmission (CMS)', value: `${ex.readmissionRisk}%`, tone: toneOf(ex.readmissionRisk) },
       ],
       sections: [
         { heading: 'Claim construction', body: 'Assembled and validated from the note:', bullets: [
@@ -336,20 +322,20 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
           ex.icd10.length ? `Linked diagnoses: ${ex.icd10.map((c) => c.code).join(', ')}.` : 'No diagnosis codes detected; flag for coder review.',
           'Code formats validated through the quality gate before routing.',
         ] },
-        { heading: 'Denial probability and drivers', body: `The model scores this claim at ${ex.denialRisk}%. Primary drivers:`, bullets: [
-          ex.denialRisk >= 45 ? 'Service mix and authorization sensitivity raise first pass denial likelihood.' : 'Low complexity and clean coding keep first pass approval likely.',
-          'Network status and eligibility are weighted heavily in the score.',
-          'Historical denial patterns for similar codes were retrieved and considered.',
+        { heading: 'Claim readiness and drivers', body: 'A deterministic scrub against sourced rules. This is not a denial probability; we do not have claim outcome data to predict one.', bullets: [
+          ex.priorAuth.length ? `Prior authorization required by published payer policy: ${ex.priorAuth.map((p) => `${p.procedure} (${p.code})`).join(', ')}.` : 'No ordered service appears on the prior authorization lists we check.',
+          ...ex.reviewFactors.filter((f) => f.label !== 'Prior authorization required').map((f) => `${f.label}: ${f.detail}`),
+          ex.reviewFactors.length === 0 ? 'No validity or administrative flags. The claim is clean.' : 'Every flag above traces to a published rule or a fact stated in the note.',
         ] },
-        { heading: 'Routing and adjudication', body: `Complexity directs this claim to the ${route} lane.`, bullets: [
-          route === 'frontier' ? 'Frontier (Sonnet) review applies a deeper adjudication pass before submission.' : 'Standard (Haiku) adjudication is sufficient for this clean claim.',
-          'Every routing decision is logged with its complexity score for audit.',
+        { heading: 'Routing and adjudication', body: `Review load directs this claim to the ${route} lane.`, bullets: [
+          route === 'frontier' ? 'Frontier (Sonnet) review applies a deeper pass before submission.' : 'Standard (Haiku) review is sufficient for this clean claim.',
+          'Every routing decision is logged with its sourced factors for audit.',
         ] },
         { heading: 'Expected reimbursement', body: 'Posture for this encounter:', bullets: [
-          ex.denialRisk >= 45 ? 'Front loading documentation protects expected reimbursement and shortens days in AR.' : 'Reimbursement is expected within the normal band with standard turnaround.',
+          ex.priorAuth.length ? 'Front loading documentation and authorizations protects expected reimbursement and shortens days in AR.' : 'Reimbursement is expected within the normal band with standard turnaround.',
           'Underpayment detection will compare the remittance against the contracted rate.',
         ] },
-        { heading: 'Readmission and HRRP exposure', body: `Readmission risk is ${ex.readmissionRisk}%.`, bullets: [
+        { heading: 'Readmission and HRRP exposure', body: `Readmission risk is ${ex.readmissionRisk}%, the CMS HRRP published rate for the dominant condition.`, bullets: [
           ex.readmissionRisk >= 45 ? 'Flagged for a care transition follow up to reduce HRRP penalty exposure.' : 'Below the threshold that typically drives HRRP concern.',
           'A transition of care task can be opened automatically for high risk encounters.',
         ] },
@@ -360,7 +346,7 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
       ],
       actions: [
         'Claim drafted and routed to the correct lane',
-        'Denial risk flag and rationale attached',
+        'Prior authorization and claim readiness flags attached',
         ex.readmissionRisk >= 45 ? 'Care transition task created' : 'Routine follow up logged',
         'Appeal letter template prepared',
         'Financial assistance screening offered',
@@ -373,11 +359,11 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
   return {
     stakeholder: 'employer',
     headline: 'Population health and benefits',
-    summary: `This encounter maps to your covered population's ${cohort} cohort. Services are ${ex.cpt.length ? 'in network covered benefits' : 'standard covered visits'} with a ${ex.denialRisk > 50 ? 'higher' : 'moderate'} cost profile. Below is the aggregate, anonymized view with the benefit and compliance actions Synthure recommends.`,
+    summary: `This encounter maps to your covered population's ${cohort} cohort. Services are ${ex.cpt.length ? 'in network covered benefits' : 'standard covered visits'} with a ${ex.priorAuth.length ? 'higher' : 'moderate'} cost profile. Below is the aggregate, anonymized view with the benefit and compliance actions Synthure recommends.`,
     metrics: [
       { label: 'Cohort', value: cohort === 'cardiometabolic' ? 'Cardiometabolic' : 'Chronic care', tone: 'neutral' },
       { label: 'Network', value: 'In network', tone: 'good' },
-      { label: 'Cost tier', value: ex.cpt.length && ex.denialRisk > 50 ? 'Higher' : 'Moderate', tone: ex.denialRisk > 50 ? 'warn' : 'neutral' },
+      { label: 'Cost tier', value: ex.cpt.length && ex.priorAuth.length ? 'Higher' : 'Moderate', tone: ex.priorAuth.length ? 'warn' : 'neutral' },
     ],
     sections: [
       { heading: 'Population cohort', body: 'How this encounter rolls up into your workforce health view:', bullets: [
@@ -387,7 +373,7 @@ function buildReport(s: Stakeholder, ex: ExtractionResult): StakeholderReport {
       ] },
       { heading: 'Cost exposure and projection', body: 'What this means for plan spend:', bullets: [
         ex.cpt.length ? `Ordered services (${procPhrase(ex)}) are covered benefits with predictable cost.` : 'This visit carries low, predictable cost.',
-        ex.denialRisk > 50 ? 'Higher complexity encounters like this benefit most from early care management.' : 'Cost is in line with typical preventive and maintenance care.',
+        ex.priorAuth.length ? 'Encounters with authorization sensitive procedures like this benefit most from early care management.' : 'Cost is in line with typical preventive and maintenance care.',
         'Managing this cohort proactively is the single largest lever on next year’s premium trend.',
       ] },
       { heading: 'Network utilization', body: 'Keeping care in network protects everyone:', bullets: [
@@ -423,6 +409,8 @@ export function fallbackVerification(ex: ExtractionResult): Verification {
     { label: 'Procedure codes valid', status: ex.cpt.length ? 'pass' : 'flag', note: ex.cpt.length ? `${ex.cpt.length} CPT code(s) validated` : 'No CPT codes detected' },
     { label: 'Entity confidence sufficient', status: ex.confidence >= 0.85 ? 'pass' : 'flag', note: `Mean extraction confidence ${ex.confidence}` },
     { label: 'Patient costs labeled as estimates', status: 'pass', note: 'Insurance figures are illustrative and clearly marked' },
+    { label: 'Readmission calibrated to CMS HRRP', status: ex.readmissionRisk ? 'pass' : 'pass', note: `Readmission ${ex.readmissionRisk}% is the published CMS rate, not an invented score` },
+    { label: 'Prior authorization is sourced, not predicted', status: 'pass', note: ex.priorAuth.length ? `${ex.priorAuth.length} item(s) matched a published payer authorization list` : 'No fabricated denial probability is shown' },
     { label: 'No fabricated clinical facts', status: 'pass', note: 'Every statement traces to an entity found in the note' },
     { label: 'No prescribing or diagnosing by agents', status: 'pass', note: 'Tier 3 clinical decisions remain with the physician' },
   ]
@@ -439,7 +427,7 @@ export function fallbackSynthesis(ex: ExtractionResult): Synthesis {
     summary: 'One clinical note produced four detailed reports, each written for a different reader but grounded in the same extracted facts. The Orchestrator confirmed they are consistent with one another.',
     connections: [
       `The ${ex.icd10.length} diagnosis code(s) the physician will bill are the same conditions explained to the patient in plain language and tracked in the employer cohort.`,
-      `The ${ex.denialRisk}% denial risk the hospital manages is exactly why the physician report ${ex.denialRisk >= 45 ? 'prepares a prior authorization' : 'recommends standard submission'}.`,
+      `The prior authorization the hospital must clear is exactly why the physician report ${ex.priorAuth.length ? 'prepares an authorization packet for the flagged services' : 'recommends standard submission'}.`,
       `The patient cost estimate, the hospital reimbursement posture, and the employer cost projection are three views of the same dollars.`,
       `The ${ex.readmissionRisk}% readmission risk drives both the hospital care transition plan and the employer wellness outreach.`,
     ],

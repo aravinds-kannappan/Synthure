@@ -80,7 +80,7 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
               )}
             </div>
             <div className="mt-2 text-[11px] text-slate-500">
-              {d.acceptedCodes} of {d.totalCodes} codes in the claim · changes recompute cost, reimbursement, and denial risk live
+              {d.acceptedCodes} of {d.totalCodes} codes in the claim · changes recompute cost, reimbursement, and claim readiness live
             </div>
           </div>
 
@@ -98,7 +98,7 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
                     </li>
                   ))}
                   {state.procedures.filter((p) => p.accepted && p.authNeeded).length === 0 && (
-                    <li className="text-[13px] text-slate-400">Elevated denial risk. A drafted packet is ready for approval.</li>
+                    <li className="text-[13px] text-slate-400">A claim readiness flag is open. A drafted packet is ready for approval.</li>
                   )}
                 </ul>
                 <button
@@ -149,10 +149,10 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
 
         <div className="space-y-4 lg:border-l lg:border-white/[0.06] lg:pl-5">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-3 text-center">
-            <Gauge value={d.denialRisk} color={riskColor(d.denialRisk)} label="Denial risk" />
+            <Gauge value={d.reviewRisk} color={riskColor(d.reviewRisk)} label="Review load" />
           </motion.div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-3 text-center">
-            <Gauge value={d.readmissionRisk} color={riskColor(d.readmissionRisk)} label="Readmission" />
+            <Gauge value={d.readmissionRisk} color={riskColor(d.readmissionRisk)} label="Readmission · CMS" />
           </div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] px-3 py-2.5 text-[11px] leading-relaxed text-slate-500">
             Decision support only. Synthure never prescribes or diagnoses. Every suggestion traces to the note.

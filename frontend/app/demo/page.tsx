@@ -202,16 +202,16 @@ export default function DemoPage() {
                       <div className="text-[10px] text-slate-500">codes</div>
                     </div>
                     <div className="rounded-lg bg-white/[0.03] py-2">
-                      <div className="text-base font-semibold text-amber-400">{ex.denialRisk}%</div>
-                      <div className="text-[10px] text-slate-500">denial risk</div>
+                      <div className="text-base font-semibold text-amber-400">{ex.readmissionRisk}%</div>
+                      <div className="text-[10px] text-slate-500">readmit (CMS)</div>
                     </div>
                     <div className="rounded-lg bg-white/[0.03] py-2">
-                      <div className="text-base font-semibold text-teal-300">{Math.round(ex.confidence * 100)}%</div>
-                      <div className="text-[10px] text-slate-500">NER conf.</div>
+                      <div className="text-base font-semibold text-teal-300">{ex.priorAuth.length}</div>
+                      <div className="text-[10px] text-slate-500">prior auth</div>
                     </div>
                   </div>
                   <p className="mt-3 text-[10px] leading-relaxed text-slate-600">
-                    Denial and readmission are heuristic estimates, not a trained model.
+                    Readmission is the CMS HRRP published rate; prior authorization is looked up from published payer policy. No denial probability is shown, there is no claim outcome data to model one.
                   </p>
                 </motion.div>
               )}
@@ -219,7 +219,7 @@ export default function DemoPage() {
               {state.phase === 'complete' &&
                 (state.live ? (
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Live: Claude read the note to extract entities and wrote the four reports. Codes were validated; risk scores are heuristic.
+                    Live: Claude read the note to extract entities and wrote the four reports. Codes were validated; readmission is the CMS published rate and prior authorization is sourced from payer policy.
                   </p>
                 ) : (
                   <p className="text-[11px] text-slate-600 leading-relaxed">

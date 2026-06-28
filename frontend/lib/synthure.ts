@@ -13,8 +13,10 @@ export interface ExtractionResult {
   entities: Entity[]
   icd10: { code: string; label: string }[]
   cpt: { code: string; label: string }[]
-  denialRisk: number // 0-100
-  readmissionRisk: number // 0-100
+  reviewRisk: number // 0-100 deterministic claim readiness (sourced, not a model)
+  readmissionRisk: number // 0-100 calibrated to CMS HRRP published rates
+  priorAuth: { code: string; procedure: string; source: string }[]
+  reviewFactors: { label: string; detail: string }[]
   confidence: number // 0-1
 }
 
@@ -89,7 +91,7 @@ export const STAKEHOLDERS: Record<
   hospital: {
     label: 'Hospital',
     agent: 'Revenue Cycle',
-    blurb: 'Claim routing, denial risk, and reimbursement',
+    blurb: 'Claim routing, prior authorization, and reimbursement',
     accent: '#22d3ee',
     glyph: '⬡',
     rgb: '34,211,238',
@@ -121,7 +123,7 @@ export const PIPELINE: AgentDef[] = [
   { id: 'intake', name: 'Intake & Quality Gate', role: 'Validates the note, dedups, checks code formats', phase: 'intake', accent: '#2dd4bf' },
   { id: 'ner', name: 'Biomedical NER', role: 'Extracts symptoms, diagnoses, meds & labs', phase: 'intake', accent: '#2dd4bf' },
   { id: 'rag', name: 'Knowledge Retrieval', role: 'Maps entities to ICD 10 / CPT and guidelines', phase: 'intake', accent: '#2dd4bf' },
-  { id: 'risk', name: 'Risk Models', role: 'Scores denial & readmission probability', phase: 'intake', accent: '#f59e0b' },
+  { id: 'risk', name: 'Risk & Readiness', role: 'CMS calibrated readmission risk and sourced claim readiness', phase: 'intake', accent: '#f59e0b' },
   { id: 'patient', name: 'Patient Advocate', role: 'Writes a plain language patient report', phase: 'write', accent: '#2dd4bf', stakeholder: 'patient' },
   { id: 'physician', name: 'Care Navigator', role: 'Writes the physician workflow report', phase: 'write', accent: '#818cf8', stakeholder: 'physician' },
   { id: 'hospital', name: 'Revenue Cycle', role: 'Writes the hospital revenue report', phase: 'write', accent: '#22d3ee', stakeholder: 'hospital' },

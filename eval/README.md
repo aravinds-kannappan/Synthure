@@ -1,63 +1,78 @@
 # Synthure evaluation suite
 
 Honest, reproducible evaluation of Synthure's components. Every number here was
-actually run on real public data. Where a claim cannot be measured honestly in
-this environment, it is marked as such, with the reason.
+actually run on real public data with a committed, pure standard library script.
+Where a claim cannot be measured honestly, it is marked as such, with the reason.
+
+This suite is also the source of truth for the risk numbers the product shows.
+The previous hand tuned risk heuristics have been removed; what replaces them is
+either trained from data or looked up from a published source, and benchmarked
+here.
 
 ## Measured results
 
 | Component | Task | Result | Notes |
 |---|---|---|---|
-| **NER** (Claude Haiku) | diagnosis prose → ICD 10 | **60.4%** category recall, **23.5%** exact (N = 149) | vs **0.0%** for the regex baseline on the same prose |
-| **Retrieval** (BM25) | symptoms → ICD 10 | **MRR@10 0.095**, recall@10 **20.0%** (600 code catalog) | lexical baseline; ~0.07 on a 1,500 code catalog. This is the floor the planned semantic retriever should beat |
-| **De-identification** | redact PHI in clinical text | **8 / 8** PHI spans on the demo note | demonstrated; precision and recall need a gold labelled corpus (see below) |
+| **NER** (Claude Haiku) | diagnosis prose, ICD 10 | **60.4%** category recall, **23.5%** exact (N = 149) | vs **0.0%** for the regex baseline on the same prose |
+| **Retrieval** (trained hybrid) | symptoms, ICD 10 category | **MRR 0.340**, recall@5 **44.2%** (held out N = 781) | edges the **BM25 0.330 / 43.5%** baseline on the same split |
+| **Readmission** (CMS calibrated) | ICD 10, 30 day readmission | published CMS HRRP rates; **LOO MAE 5.27pp** vs 4.29pp mean baseline (N = 10) | calibration, not extrapolation |
+| **De-identification** | redact PHI in clinical text | **8 / 8** PHI spans on the demo note | demonstrated; P/R needs a gold corpus (see below) |
 
-The headline finding for NER is the gap: the deterministic extractor recovers
-**no** diagnoses from prose (prose contains no literal codes), while the Claude
-NER path recovers the correct ICD 10 chapter most of the time. The retrieval
-result honestly shows that lexical matching is weak on symptom → diagnosis,
-which is the motivation for a semantic retriever.
+The retriever result is the honest one to read carefully: a tuned blend of a word
+TF IDF centroid, a character n gram centroid, and BM25 (weights chosen on a
+validation slice, scored on a disjoint test split) only **edges** BM25. Lexical
+methods plateau here, which is the measured motivation for a dense retriever.
 
 ## Run it
 
 ```bash
-# Retrieval (stdlib Python, no key, no network)
+# Train the retriever + readmission calibration, write models + eval/results.json
+python3 eval/train_risk.py            # pure stdlib, offline, reproducible
+
+# Lexical retrieval baseline (stdlib, no key, no network)
 python3 eval/retrieval_bm25.py
 
-# De-identification (stdlib Python; redacts a demo note, or pipe your own)
+# De-identification (stdlib; redacts a demo note, or pipe your own)
 python3 eval/deid.py
-cat some_note.txt | python3 eval/deid.py
 
-# NER (needs an Anthropic key + the product engine compiled)
-cd frontend && npx tsc lib/synthure.ts lib/knowledge.ts lib/engine.ts \
-  --rootDir lib --outDir ../eval/_build --module commonjs --target es2019 \
-  --moduleResolution node --skipLibCheck --esModuleInterop && cd ..
+# NER (needs an Anthropic key + the product engine compiled, see git history)
 ANTHROPIC_API_KEY=... node eval/ner_benchmark.js
 ```
 
-`eval/data/icd10_sample.json` is a 600 row sample of the public dataset
-`Inje/SYMPTOMS-COT-ICD10-2024` (each row: ICD 10 code, description, symptoms),
-committed so the benchmarks run offline.
+`eval/train_risk.py` reads the committed real data samples
+(`eval/data/icd10_train.json` from `Inje/SYMPTOMS-COT-ICD10-2024`,
+`eval/data/cms_hrrp.json`) and writes:
+
+- `frontend/lib/models/readmission_model.json` (shipped, ~2 KB): ICD 10 prefix to
+  CMS HRRP published rate, used at runtime.
+- `eval/models/icd_model.json` (benchmark artifact, ~2 MB, **not bundled** into
+  the app): the trained hybrid retriever.
+- `eval/results.json`: the benchmark numbers the product trust page cites.
+
+To refetch the raw data: `python3 eval/fetch_icd.py` and
+`python3 eval/fetch_complexity.py` (both shell out to curl for the HuggingFace
+datasets server).
 
 ## What is NOT measured here, and why
 
-We refuse to print numbers we cannot reproduce. The following are described in
-the paper as heuristics or future work rather than as results:
+We refuse to print numbers we cannot reproduce.
 
-- **Denial prediction.** There is no public dataset of real claim adjudication
-  outcomes (paid vs denied); that data is PHI protected. The product uses a
-  transparent heuristic. A real model needs a labelled claims corpus. Until
-  then, no AUC is claimed.
-- **PHI de-id precision and recall.** Measuring this needs a corpus with gold
-  PHI spans (for example i2b2 2014 de-id, which is access controlled). We ship
-  the working component and demonstrate it; we do not claim a P/R number.
-- **Readmission calibration.** Plan: calibrate against published CMS HRRP rates
-  and report mean absolute error.
-- **End to end latency at scale.** Plan: instrument the deployed pipeline and
-  report p50/p95/p99 per stage over real traffic.
+- **Denial prediction. Removed, not modeled.** There is no public dataset of real
+  claim adjudication outcomes (paid vs denied); that data is PHI protected. We
+  tested the one labeled proxy available, the `DataFog/medical-transcription-instruct`
+  `complexity_score`, and found it correlates about **-0.62 with note length**, so
+  it is an inverse length artifact (a logistic regression trivially reached AUC
+  1.0 by reconstructing length). We therefore removed the denial heuristic and the
+  product shows **no denial probability**, only sourced prior authorization and
+  claim validity facts. `eval/fetch_complexity.py` reproduces the finding.
 
-Two of the original scaling items are not machine learning problems at all and
-have no training data: **HIPAA / SOC 2 compliance** (an organizational and audit
-process) and **go to market** (a business function). The de-identification
-component above is the real, software shaped piece of the compliance work; the
-rest is not something a model is trained for.
+- **PHI de-id precision and recall.** Measuring this needs a corpus with gold PHI
+  spans (for example i2b2 2014 de-id, access controlled). We ship and demonstrate
+  the component; we do not claim a P/R number.
+
+- **NER at scale and end to end latency.** N for NER is 149 on an idealized
+  dataset; per stage latency at scale on the deployed pipeline is future work.
+
+**HIPAA / SOC 2 compliance** and **go to market** are not machine learning
+problems and have no training data; the de-identification component is the real,
+software shaped piece of the compliance work.

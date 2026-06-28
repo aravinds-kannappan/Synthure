@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "source_cms": "CMS Prior Authorization Process for Certain Hospital Outpatient Department (OPD) Services, nationally required CPT/HCPCS categories.",
+    "source_commercial": "Procedures that commercial payers commonly place on prior authorization lists (high cost elective surgery and advanced imaging). Marked separately because they are payer dependent, not a single national rule.",
+    "note": "This is a lookup of published payer policy, not a prediction. A code being present means an authorization is required or commonly required, which is a sourced fact, not a denial probability."
+  },
+  "codes": {
+    "15820": "Blepharoplasty", "15821": "Blepharoplasty", "15822": "Blepharoplasty", "15823": "Blepharoplasty",
+    "67900": "Blepharoplasty / brow ptosis repair", "67901": "Blepharoplasty / brow ptosis repair",
+    "67902": "Blepharoplasty / brow ptosis repair", "67903": "Blepharoplasty / brow ptosis repair",
+    "67904": "Blepharoplasty / brow ptosis repair", "67906": "Blepharoplasty / brow ptosis repair", "67908": "Blepharoplasty / brow ptosis repair",
+    "64612": "Botulinum toxin injection", "64615": "Botulinum toxin injection", "64616": "Botulinum toxin injection",
+    "64642": "Botulinum toxin injection", "64643": "Botulinum toxin injection", "64644": "Botulinum toxin injection",
+    "64645": "Botulinum toxin injection", "64646": "Botulinum toxin injection", "64647": "Botulinum toxin injection",
+    "15830": "Panniculectomy", "15847": "Panniculectomy", "15877": "Panniculectomy",
+    "30400": "Rhinoplasty", "30410": "Rhinoplasty", "30420": "Rhinoplasty", "30430": "Rhinoplasty",
+    "30435": "Rhinoplasty", "30450": "Rhinoplasty", "21210": "Rhinoplasty / facial bone graft",
+    "36473": "Vein ablation", "36474": "Vein ablation", "36475": "Vein ablation", "36476": "Vein ablation",
+    "36478": "Vein ablation", "36479": "Vein ablation", "36482": "Vein ablation", "36483": "Vein ablation",
+    "63650": "Implanted spinal neurostimulator", "63685": "Implanted spinal neurostimulator", "63688": "Implanted spinal neurostimulator",
+    "22551": "Cervical spine fusion", "22552": "Cervical spine fusion",
+    "64490": "Facet joint intervention", "64491": "Facet joint intervention", "64492": "Facet joint intervention",
+    "64493": "Facet joint intervention", "64494": "Facet joint intervention", "64495": "Facet joint intervention",
+    "64633": "Facet joint denervation", "64634": "Facet joint denervation", "64635": "Facet joint denervation", "64636": "Facet joint denervation"
+  },
+  "commercial_common": {
+    "27447": "Total knee arthroplasty",
+    "27130": "Total hip arthroplasty",
+    "29827": "Arthroscopic rotator cuff repair",
+    "93458": "Elective diagnostic cardiac catheterization",
+    "70553": "MRI brain with and without contrast",
+    "72148": "MRI lumbar spine",
+    "74177": "CT abdomen and pelvis with contrast",
+    "43644": "Bariatric surgery (gastric bypass)",
+    "43775": "Bariatric surgery (sleeve gastrectomy)"
+  }
+}
