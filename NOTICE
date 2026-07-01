@@ -1,0 +1,24 @@
+Synthure
+Copyright (c) 2026 Aravind Kannappan
+
+This product includes machine learning models from the OpenMed project
+(https://github.com/maziyarpanahi/openmed, https://huggingface.co/OpenMed),
+licensed under the Apache License, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0):
+
+  - OpenMed/OpenMed-PII-ClinicalE5-Small-33M-v1
+  - OpenMed/OpenMed-NER-DiseaseDetect-TinyMed-65M
+  - OpenMed/OpenMed-NER-PharmaDetect-TinyMed-65M
+
+The models were converted to int8 ONNX for in browser inference; the weights
+are otherwise unmodified. This product also vendors the transformers.js web
+bundle (@huggingface/transformers, Apache 2.0) and the ONNX Runtime Web wasm
+binaries (MIT) under frontend/public/vendor/.
+
+Knowledge artifacts are built from public primary sources: CDC/NCHS ICD-10-CM
+FY2026 release, CMS Physician Fee Schedule and Clinical Laboratory Fee
+Schedule 2026, CMS hospital outpatient department prior authorization list,
+CMS Unplanned Hospital Visits national data (data.cms.gov), AHRQ HCUP CCSR
+v2025-1, NLM RxNorm prescribable content, and MedlinePlus Connect. CPT
+descriptors are copyright of the American Medical Association and are not
+distributed with this product.

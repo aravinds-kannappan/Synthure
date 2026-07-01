@@ -7,7 +7,7 @@ import {
   MessageCircleQuestion, CheckCircle2, Sparkles, BadgeCheck, FileClock, HandCoins,
 } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
-import { fmt$ } from '@/lib/knowledge'
+import { fmt$ } from '@/lib/engine'
 import { useEncounter } from './EncounterContext'
 import { ReportDrawer } from './widgets'
 import Inbox from './Inbox'
@@ -65,7 +65,7 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
             <Wallet className="h-4 w-4" />
             <span className="text-xs font-semibold uppercase tracking-wider">Your estimated cost</span>
             {state.financialAssistance && (
-              <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">assistance applied</span>
+              <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">assistance screening requested</span>
             )}
           </div>
           <div className="mt-2 flex items-baseline gap-2">
@@ -78,13 +78,17 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
             {d.services.map((s) => (
               <div key={s.code} className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-600">{s.label}</span>
-                <span className="text-slate-500">{fmt$(s.price)} billed · <span className="font-medium text-teal-700">~{fmt$(s.patient)} you</span></span>
+                {s.price != null ? (
+                  <span className="text-slate-500">{fmt$(s.price)} CMS amount{s.patient != null && <> · <span className="font-medium text-teal-700">~{fmt$(s.patient)} you</span></>}</span>
+                ) : (
+                  <span className="text-slate-400">no published amount</span>
+                )}
               </div>
             ))}
-            {d.medMonthly > 0 && (
+            {meds.length > 0 && (
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-slate-600">{meds.length} prescription(s)</span>
-                <span className="font-medium text-teal-700">~{fmt$(d.medMonthly)}/mo</span>
+                <span className="text-slate-600">{meds.length} prescription{meds.length > 1 ? 's' : ''}</span>
+                <span className="text-slate-400">cost depends on your plan formulary</span>
               </div>
             )}
           </div>
@@ -102,9 +106,12 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
               </span>
             )}
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
-            Illustrative estimate based on a typical commercial PPO. Updates live as your care team finalizes your plan.
-          </p>
+          <div className="mt-2 space-y-0.5">
+            {d.assumptions.map((a, i) => (
+              <p key={i} className="text-[11px] leading-relaxed text-slate-400">{a}</p>
+            ))}
+          </div>
+          <PlanEditor />
         </motion.div>
 
         {/* Billing status */}
@@ -124,7 +131,14 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
                     <span className="text-sm font-semibold text-slate-800">{dx.name}</span>
                     <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">{dx.code}</span>
                   </div>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-slate-600">This means {dx.plain}</p>
+                  {dx.plain ? (
+                    <>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-slate-600">{dx.plain}</p>
+                      {dx.plainSource && <p className="mt-1 text-[10px] text-slate-400">Source: {dx.plainSource}</p>}
+                    </>
+                  ) : (
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-slate-600">Your report below explains this in plain language.</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -142,9 +156,13 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
                     <Pill className="h-4 w-4 text-teal-700" />
                   </span>
                   <div>
-                    <div className="text-sm font-semibold capitalize text-slate-800">{m.name}</div>
-                    <p className="text-[13px] leading-relaxed text-slate-600">It {m.use}.</p>
-                    <p className="mt-0.5 text-[12px] leading-relaxed text-slate-400">{m.how.charAt(0).toUpperCase() + m.how.slice(1)}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold capitalize text-slate-800">{m.name}</span>
+                      {m.verified && (
+                        <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-700">RxNorm verified</span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-slate-600">Your medication guide below explains what it does and how to take it.</p>
                   </div>
                 </div>
               ))}
@@ -160,7 +178,7 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
               {state.labs.map((r) => (
                 <div key={r.label} className="rounded-xl border border-slate-200 bg-white p-3.5">
                   <span className="text-sm font-semibold text-slate-800">{r.label}</span>
-                  <p className="mt-0.5 text-[13px] leading-relaxed text-slate-600">This is {r.meaning}</p>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-slate-600">Explained in your results section below.</p>
                 </div>
               ))}
             </div>
@@ -243,6 +261,51 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
     <div className="mb-3 flex items-center gap-2 text-slate-700">
       <span className="text-teal-600">{icon}</span>
       <h3 className="text-sm font-semibold">{title}</h3>
+    </div>
+  )
+}
+
+function PlanEditor() {
+  const { state, dispatch } = useEncounter()
+  const p = state.plan
+  const upd = (k: 'deductibleRemaining' | 'coinsurance' | 'oopMaxRemaining', v: number) =>
+    dispatch({ type: 'setPlan', plan: { ...p, [k]: v } })
+  return (
+    <div className="mt-3 rounded-lg border border-teal-200/70 bg-white/70 p-3">
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-teal-700">Your plan design (editable)</div>
+      <div className="grid grid-cols-3 gap-2">
+        <label className="text-[11px] text-slate-500">
+          Deductible left
+          <input
+            type="number"
+            min={0}
+            value={p.deductibleRemaining}
+            onChange={(e) => upd('deductibleRemaining', Math.max(0, Number(e.target.value)))}
+            className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-[13px] text-slate-800"
+          />
+        </label>
+        <label className="text-[11px] text-slate-500">
+          Coinsurance %
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={Math.round(p.coinsurance * 100)}
+            onChange={(e) => upd('coinsurance', Math.min(100, Math.max(0, Number(e.target.value))) / 100)}
+            className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-[13px] text-slate-800"
+          />
+        </label>
+        <label className="text-[11px] text-slate-500">
+          OOP max left
+          <input
+            type="number"
+            min={0}
+            value={p.oopMaxRemaining}
+            onChange={(e) => upd('oopMaxRemaining', Math.max(0, Number(e.target.value)))}
+            className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-[13px] text-slate-800"
+          />
+        </label>
+      </div>
     </div>
   )
 }

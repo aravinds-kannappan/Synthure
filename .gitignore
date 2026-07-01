@@ -13,3 +13,7 @@ node_modules/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+
+scripts/build_knowledge/.cache/
+frontend/.next/
+eval/_build/

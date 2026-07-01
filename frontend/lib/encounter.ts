@@ -1,23 +1,57 @@
 // ── Shared encounter state ──────────────────────────────────────────────────
 // One mutable encounter that all four portals read from and write to. Actions in
 // any portal mutate this state and emit cross-portal events, and a pure derive()
-// recomputes risk, cost, reimbursement, and cohort so every change ripples
-// through the others. This is what makes the four portals one interconnected
-// operational layer rather than four independent views.
+// recomputes readiness, cost, and reimbursement so every change ripples through
+// the others.
+//
+// Every number here is either (a) a CMS published amount delivered with the
+// extraction, (b) standard benefit arithmetic over the visible plan design
+// parameters, or (c) a count. The old tuned adjustments (minus 22 points for an
+// authorization, a 0.4x assistance factor, $10 per medication, a fabricated
+// cohort trend) are gone.
 
-import type { ExtractionResult, Stakeholder } from './synthure'
+import type { ExtractionResult, ReadinessCheck, Stakeholder } from './synthure'
 import priorAuthList from './models/prior_auth.json'
-import { PLAIN_DX, MED_INFO, CPT_PRICE, LAB_MEANING, icdKey, fmt$ } from './knowledge'
+import { fmt$ } from './engine'
 
 export type Portal = Stakeholder
 export const PORTALS: Portal[] = ['patient', 'physician', 'hospital', 'employer']
 
 export type ClaimStatus = 'review' | 'ready' | 'submitted' | 'reimbursed'
 
-export interface EncDx { code: string; name: string; plain: string; known: boolean; accepted: boolean }
-export interface EncProc { code: string; label: string; price: number; known: boolean; accepted: boolean; authNeeded: boolean }
-export interface EncMed { name: string; use: string; how: string; active: boolean }
-export interface EncLab { label: string; meaning: string }
+export interface EncDx {
+  code: string
+  name: string // official ICD 10 CM FY2026 description
+  plain: string | null // MedlinePlus Connect consumer text, when available
+  plainSource: string | null
+  billable: boolean
+  source: 'linked' | 'literal'
+  entity?: string // the note phrase this code was linked from
+  accepted: boolean
+}
+export interface EncProc {
+  code: string
+  label: string
+  price: number | null // CMS PFS/CLFS national amount; null when not published
+  schedule: string | null
+  accepted: boolean
+  authNeeded: boolean
+}
+export interface EncMed { name: string; verified: boolean; active: boolean }
+export interface EncLab { label: string }
+
+// ── Plan design: visible, editable inputs, not hidden constants ──────────────
+// Defaults are the published KFF Employer Health Benefits Survey averages for
+// single coverage. The user can change them in the plan panel; the math below
+// is ordinary benefit arithmetic over whatever is set here.
+export interface PlanDesign {
+  deductibleRemaining: number
+  coinsurance: number // plan's member share after deductible, e.g. 0.2
+  oopMaxRemaining: number
+}
+export const DEFAULT_PLAN: PlanDesign = { deductibleRemaining: 1886, coinsurance: 0.2, oopMaxRemaining: 4500 }
+export const PLAN_SOURCE =
+  'Defaults: KFF Employer Health Benefits Survey averages for single coverage (editable)'
 
 export type EventKind = 'system' | 'action' | 'message'
 export interface EncEvent {
@@ -38,6 +72,7 @@ export interface EncounterState {
   medications: EncMed[]
   labs: EncLab[]
   symptoms: string[]
+  plan: PlanDesign
   priorAuthApproved: boolean
   financialAssistance: boolean
   claimStatus: ClaimStatus
@@ -46,8 +81,8 @@ export interface EncounterState {
 
 let _seq = 0
 const uid = () => `e${Date.now().toString(36)}_${(_seq++).toString(36)}`
-// Sourced from the same published prior authorization lists the engine uses,
-// so the interactive portal and the report agree on what needs authorization.
+// Same published prior authorization lists the pipeline uses, so the portal and
+// the reports agree on what needs authorization.
 const AUTH_CODES = new Set([
   ...Object.keys(priorAuthList.codes),
   ...Object.keys(priorAuthList.commercial_common),
@@ -62,33 +97,26 @@ function ev(from: Portal | 'system', to: Portal[], kind: EventKind, title: strin
 export function initEncounter(ex: ExtractionResult): EncounterState {
   const diagnoses: EncDx[] = ex.icd10.map((c) => ({
     code: c.code,
-    name: c.label !== 'ICD 10 diagnosis code' ? c.label : 'A condition noted by your clinician',
-    plain: PLAIN_DX[icdKey(c.code)] || 'something your care team is watching closely and will explain at your visit.',
-    known: c.label !== 'ICD 10 diagnosis code',
+    name: c.label,
+    plain: c.plain ?? null,
+    plainSource: c.plainSource ?? null,
+    billable: c.billable !== false,
+    source: c.source ?? 'literal',
+    entity: c.entity,
     accepted: true,
   }))
   const procedures: EncProc[] = ex.cpt.map((c) => ({
     code: c.code,
     label: c.label,
-    price: CPT_PRICE[c.code] ?? 150,
-    known: c.label !== 'CPT procedure code',
+    price: c.price ?? null,
+    schedule: c.schedule ?? null,
     accepted: true,
     authNeeded: AUTH_CODES.has(c.code),
   }))
   const medications: EncMed[] = ex.entities
     .filter((e) => e.type === 'MEDICATION')
-    .map((e) => {
-      const info = MED_INFO[e.text]
-      return {
-        name: e.text,
-        use: info?.use ?? 'helps manage your condition',
-        how: info?.how ?? 'taken exactly as prescribed; ask your pharmacist about side effects.',
-        active: true,
-      }
-    })
-  const labs: EncLab[] = ex.entities
-    .filter((e) => e.type === 'LAB_VALUE')
-    .map((e) => ({ label: e.text, meaning: LAB_MEANING[e.text] ?? 'discussed with your care team as part of your results.' }))
+    .map((e) => ({ name: e.text, verified: true, active: true }))
+  const labs: EncLab[] = ex.entities.filter((e) => e.type === 'LAB_VALUE').map((e) => ({ label: e.text }))
   const symptoms = ex.entities.filter((e) => e.type === 'SIGN_SYMPTOM').map((e) => e.text)
   return {
     base: ex,
@@ -97,6 +125,7 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
     medications,
     labs,
     symptoms,
+    plan: { ...DEFAULT_PLAN },
     priorAuthApproved: false,
     financialAssistance: false,
     claimStatus: 'review',
@@ -105,28 +134,38 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
 }
 
 // ── Derived (pure recompute) ─────────────────────────────────────────────────
-export interface DerivedService { code: string; label: string; price: number; patient: number }
+export interface DerivedService {
+  code: string
+  label: string
+  price: number | null
+  patient: number | null
+  atRisk: boolean
+  atRiskWhy: string | null
+}
 export interface Derived {
-  reviewRisk: number
-  readmissionRisk: number
+  checks: ReadinessCheck[]
+  reviewRisk: number // share of checks flagged, 0-100
   route: 'standard' | 'frontier'
-  allowed: number
-  expectedReimb: number
-  patientLow: number
-  patientHigh: number
+  readmissionRisk: number
+  readmissionDriver: string | null
+  readmissionCalibrated: boolean
+  allowed: number // sum of published amounts for accepted services
+  unpriced: number // accepted services without a published amount
+  expectedReimb: number // published amounts on services with no flagged check
+  atRisk: number // published amounts tied to a flagged check
+  patientEst: number | null // benefit math over the visible plan design
   estPay: string
-  medMonthly: number
+  assumptions: string[]
   services: DerivedService[]
-  cohort: 'cardiometabolic' | 'chronic care'
+  medsActive: number
+  cohorts: { id: string; label: string }[]
   cohortLabel: string
-  costTier: 'Moderate' | 'Higher'
   pipeline: { label: string; state: 'done' | 'active' | 'todo' }[]
   anyAuthNeeded: boolean
   authorizedAll: boolean
   acceptedCodes: number
   totalCodes: number
-  inNetwork: number
-  trend: number[]
+  plan: PlanDesign
 }
 
 const STAGES = ['Coded', 'Quality gate', 'Adjudication', 'Submit', 'Reimbursed']
@@ -140,70 +179,150 @@ function pipelineFor(cs: ClaimStatus): Derived['pipeline'] {
   return STAGES.map((label, i) => ({ label, state: idx[cs][i] }))
 }
 
+// Recompute the readiness checklist against the CURRENT claim state, mirroring
+// the server checks: same rules, same sources, applied to what is accepted now.
+function recomputeChecks(s: EncounterState): ReadinessCheck[] {
+  const dx = s.diagnoses.filter((d) => d.accepted)
+  const procs = s.procedures.filter((p) => p.accepted)
+  const nonBillable = dx.filter((d) => !d.billable)
+  const authProcs = procs.filter((p) => p.authNeeded)
+  const out: ReadinessCheck[] = [
+    {
+      id: 'billable',
+      label: 'Diagnosis codes are billable',
+      status: nonBillable.length ? 'flag' : 'pass',
+      severity: 'blocking',
+      detail: nonBillable.length
+        ? `${nonBillable.map((d) => d.code).join(', ')} ${nonBillable.length === 1 ? 'is a category header, not a billable code' : 'are category headers'} in the CMS ICD 10 CM order file.`
+        : dx.length
+          ? 'Every billed diagnosis code is billable per the CMS ICD 10 CM FY2026 order file.'
+          : 'No diagnosis codes to validate.',
+      source: 'CMS ICD 10 CM FY2026 order file',
+    },
+    {
+      id: 'linkage',
+      label: 'Procedures have a supporting diagnosis',
+      status: procs.length > 0 && dx.length === 0 ? 'flag' : 'pass',
+      severity: 'blocking',
+      detail:
+        procs.length > 0 && dx.length === 0
+          ? 'Procedures are billed with no diagnosis code to establish medical necessity.'
+          : procs.length
+            ? 'Each billed service has at least one coded diagnosis on the claim.'
+            : 'No billed services to link.',
+      source: 'Claim completeness (structural)',
+    },
+    {
+      id: 'prior_auth',
+      label: 'Required prior authorization on file',
+      status: authProcs.length && !s.priorAuthApproved ? 'flag' : 'pass',
+      severity: 'blocking',
+      detail: authProcs.length
+        ? s.priorAuthApproved
+          ? `Authorization approved for ${authProcs.map((p) => p.code).join(', ')}.`
+          : `${authProcs.map((p) => `${p.label} (${p.code})`).join('; ')} require prior authorization and none is on file.`
+        : 'No billed service appears on the published prior authorization lists.',
+      source: 'CMS OPD prior authorization list; published commercial payer lists',
+    },
+    {
+      id: 'coded',
+      label: 'Encounter is coded',
+      status: dx.length === 0 && procs.length === 0 ? 'flag' : 'pass',
+      severity: 'blocking',
+      detail:
+        dx.length === 0 && procs.length === 0
+          ? 'No coded diagnoses or procedures remain on the claim.'
+          : `${dx.length} diagnosis and ${procs.length} procedure code${procs.length === 1 ? '' : 's'} on the claim.`,
+      source: 'Claim completeness (structural)',
+    },
+    // Note stated advisory flags carry over unchanged from the pipeline result.
+    ...s.base.readiness.checks.filter((c) => c.severity === 'advisory'),
+  ]
+  return out
+}
+
 export function derive(s: EncounterState): Derived {
   const activeProc = s.procedures.filter((p) => p.accepted)
   const billedDx = s.diagnoses.filter((d) => d.accepted)
-  const allowed = activeProc.reduce((a, p) => a + p.price, 0)
-  const coins = 0.2
 
-  const anyAuthNeeded = s.procedures.some((p) => p.accepted && p.authNeeded)
+  const checks = recomputeChecks(s)
+  const flagged = checks.filter((c) => c.status === 'flag')
+  const route: Derived['route'] = flagged.some((c) => c.severity === 'blocking') ? 'frontier' : 'standard'
+  const reviewRisk = Math.round((100 * flagged.length) / checks.length)
+
+  const anyAuthNeeded = activeProc.some((p) => p.authNeeded)
   const authorizedAll = !anyAuthNeeded || s.priorAuthApproved
 
-  // Claim readiness recomputed from the current claim state, not a denial model.
-  // Readiness improves when the required authorization is approved or an
-  // authorization sensitive procedure is dropped, both auditable changes.
-  let review = s.base.reviewRisk
-  if (s.priorAuthApproved && anyAuthNeeded) review = Math.max(5, review - 35)
-  const removed = s.procedures.length - activeProc.length
-  review -= removed * 4
-  if (s.claimStatus === 'submitted' || s.claimStatus === 'reimbursed') review -= 4
-  review = Math.max(5, Math.min(95, Math.round(review)))
-  const route: Derived['route'] = review > 60 ? 'frontier' : 'standard'
+  // Dollars: published amounts only. A service is "at risk" when a flagged
+  // blocking check applies to it; fixing the check moves the dollars, not a
+  // hidden multiplier.
+  const noDx = billedDx.length === 0
+  const services: DerivedService[] = activeProc.map((p) => {
+    const authRisk = p.authNeeded && !s.priorAuthApproved
+    const atRisk = authRisk || noDx
+    return {
+      code: p.code,
+      label: p.label,
+      price: p.price,
+      patient: null, // filled below once benefit math runs over the total
+      atRisk,
+      atRiskWhy: authRisk
+        ? 'Prior authorization required and not on file'
+        : noDx
+          ? 'No supporting diagnosis on the claim'
+          : null,
+    }
+  })
+  const priced = services.filter((x) => x.price != null)
+  const allowed = priced.reduce((a, x) => a + (x.price as number), 0)
+  const atRisk = priced.filter((x) => x.atRisk).reduce((a, x) => a + (x.price as number), 0)
+  const expectedReimb = allowed - atRisk
+  const unpriced = services.length - priced.length
 
-  const expectedReimb = Math.round(allowed * (1 - (review / 100) * 0.35))
+  // Benefit arithmetic over the visible plan design: deductible first, then
+  // coinsurance, capped by the remaining out of pocket maximum.
+  let patientEst: number | null = null
+  const assumptions: string[] = [PLAN_SOURCE]
+  if (allowed > 0) {
+    const ded = Math.min(s.plan.deductibleRemaining, allowed)
+    const coins = (allowed - ded) * s.plan.coinsurance
+    patientEst = Math.round(Math.min(ded + coins, s.plan.oopMaxRemaining))
+    assumptions.push(
+      `Deductible remaining ${fmt$(s.plan.deductibleRemaining)}, coinsurance ${Math.round(s.plan.coinsurance * 100)}%, out of pocket max remaining ${fmt$(s.plan.oopMaxRemaining)}`,
+      'Amounts are CMS national published amounts; a plan’s contracted rates differ',
+    )
+    if (unpriced) assumptions.push(`${unpriced} service${unpriced === 1 ? ' has' : 's have'} no published CMS amount and ${unpriced === 1 ? 'is' : 'are'} excluded`)
+    if (s.financialAssistance)
+      assumptions.push('Financial assistance screening requested; the final amount depends on the hospital’s policy')
+    // Apportion the estimate across priced services for the line item view.
+    for (const x of priced) x.patient = Math.round((patientEst * (x.price as number)) / allowed)
+  }
 
-  const faFactor = s.financialAssistance ? 0.4 : 1
-  const services: DerivedService[] = activeProc.map((p) => ({
-    code: p.code,
-    label: p.label,
-    price: p.price,
-    patient: Math.round(p.price * coins * faFactor),
-  }))
-  const medMonthly = s.medications.filter((m) => m.active).length * 10
-  let patient = services.reduce((a, x) => a + x.patient, 0) + Math.round(medMonthly * faFactor)
-  patient = Math.max(0, patient)
-  const patientLow = Math.round(patient * 0.6)
-  const patientHigh = Math.round(patient * 1.4)
-
-  const cohort: Derived['cohort'] =
-    billedDx.some((c) => /^E1[01]/.test(c.code)) || billedDx.some((c) => icdKey(c.code).startsWith('I'))
-      ? 'cardiometabolic'
-      : 'chronic care'
-
-  const slope = 1.5 + (review / 100) * 4
-  const trend = Array.from({ length: 8 }, (_, i) => Math.round(100 + slope * i + (i % 2 === 0 ? 1.5 : -1)))
-
+  const cohorts = s.base.cohorts
   return {
-    reviewRisk: review,
-    readmissionRisk: s.base.readmissionRisk,
+    checks,
+    reviewRisk,
     route,
+    readmissionRisk: s.base.readmissionRisk,
+    readmissionDriver: s.base.readmissionDriver,
+    readmissionCalibrated: s.base.readmissionCalibrated,
     allowed,
+    unpriced,
     expectedReimb,
-    patientLow,
-    patientHigh,
-    estPay: allowed || medMonthly ? `${fmt$(patientLow)} to ${fmt$(patientHigh)}` : 'Low',
-    medMonthly: Math.round(medMonthly * faFactor),
+    atRisk,
+    patientEst,
+    estPay: patientEst != null ? `about ${fmt$(patientEst)}` : 'Depends on your plan',
+    assumptions,
     services,
-    cohort,
-    cohortLabel: cohort === 'cardiometabolic' ? 'Cardiometabolic' : 'Chronic care',
-    costTier: activeProc.length && anyAuthNeeded ? 'Higher' : 'Moderate',
+    medsActive: s.medications.filter((m) => m.active).length,
+    cohorts,
+    cohortLabel: cohorts[0]?.label ?? 'Uncategorized',
     pipeline: pipelineFor(s.claimStatus),
     anyAuthNeeded,
     authorizedAll,
     acceptedCodes: billedDx.length + activeProc.length,
     totalCodes: s.diagnoses.length + s.procedures.length,
-    inNetwork: 100,
-    trend,
+    plan: s.plan,
   }
 }
 
@@ -215,6 +334,7 @@ export type EncAction =
   | { type: 'approvePriorAuth' }
   | { type: 'submitClaim' }
   | { type: 'applyFinancialAssistance' }
+  | { type: 'setPlan'; plan: PlanDesign }
   | { type: 'sendMessage'; from: Portal; to: Portal[]; body: string }
   | { type: 'markRead'; portal: Portal }
 
@@ -228,7 +348,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         diagnoses: s.diagnoses.map((d) => (d.code === a.code ? { ...d, accepted: on } : d)),
         events: [
-          ev('physician', ['hospital', 'employer'], 'action', `Diagnosis ${on ? 'confirmed' : 'removed'}: ${dx.code}`, `${dx.name} ${on ? 'added to' : 'removed from'} the billed diagnosis set. Cohort and claim updated.`),
+          ev('physician', ['hospital', 'employer'], 'action', `Diagnosis ${on ? 'confirmed' : 'removed'}: ${dx.code}`, `${dx.name} ${on ? 'added to' : 'removed from'} the billed diagnosis set. Readiness and claim updated.`),
           ...s.events,
         ],
       }
@@ -254,7 +374,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         medications: s.medications.map((m) => (m.name === a.name ? { ...m, active: on } : m)),
         events: [
-          ev('physician', ['patient'], 'action', `Medication ${on ? 'resumed' : 'paused'}: ${md.name}`, `Your medication list and monthly cost estimate were updated.`),
+          ev('physician', ['patient'], 'action', `Medication ${on ? 'resumed' : 'paused'}: ${md.name}`, 'Your medication list was updated.'),
           ...s.events,
         ],
       }
@@ -266,7 +386,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         priorAuthApproved: true,
         claimStatus: s.claimStatus === 'review' ? 'ready' : s.claimStatus,
         events: [
-          ev('physician', ['patient', 'hospital'], 'action', 'Prior authorization approved', 'The flagged procedures are authorized. Claim readiness improved and the claim is cleared for submission. The patient now sees the procedure as covered.'),
+          ev('physician', ['patient', 'hospital'], 'action', 'Prior authorization approved', 'The flagged procedures are authorized. The readiness check now passes, the at risk dollars moved to expected reimbursement, and the patient sees the procedure as covered.'),
           ...s.events,
         ],
       }
@@ -288,7 +408,17 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         financialAssistance: true,
         events: [
-          ev('patient', ['hospital'], 'action', 'Financial assistance requested', 'The patient applied for assistance. Their out of pocket estimate dropped and the request was routed to revenue cycle for screening.'),
+          ev('patient', ['hospital'], 'action', 'Financial assistance requested', 'The patient requested assistance screening. The request was routed to revenue cycle; eligibility depends on the hospital policy and household income.'),
+          ...s.events,
+        ],
+      }
+    }
+    case 'setPlan': {
+      return {
+        ...s,
+        plan: a.plan,
+        events: [
+          ev('patient', ['hospital'], 'action', 'Plan design updated', 'The cost estimate was recalculated with the new deductible, coinsurance, and out of pocket values.'),
           ...s.events,
         ],
       }

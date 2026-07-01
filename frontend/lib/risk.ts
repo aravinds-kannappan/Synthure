@@ -94,50 +94,115 @@ export function priorAuthFor(cpt: { code: string; label?: string }[]): PriorAuth
   return out
 }
 
-// ── Claim readiness: deterministic, sourced, explainable ─────────────────────
+// ── Claim readiness: a sourced checklist, not a probability ──────────────────
+// Every check reads a published rule or a fact stated in the note. There are no
+// tuned weights: the summary number is simply the share of checks flagged, and
+// the review lane goes to frontier when any blocking check fails.
+
+import type { ReadinessCheck } from './synthure'
+
 export interface ClaimReadiness {
-  reviewRisk: number // 0-100 aggregate of sourced review factors (not a model output)
+  checks: ReadinessCheck[]
+  lane: 'standard' | 'frontier'
+  reviewRisk: number // share of checks flagged, 0-100 (count based, documented)
   priorAuth: PriorAuthItem[]
-  factors: { label: string; detail: string; weight: number }[]
-  validityIssues: string[]
+  factors: { label: string; detail: string }[] // the flagged checks, for report context
 }
 
 const PRIOR_DENIAL_RE = /\b(prior denial|previously denied|denied before|appeal)\b/i
 const OON_RE = /\b(out of network|out-of-network|\boon\b|non[- ]participating)\b/i
 
-export function assessClaim(
+export function assessReadiness(
   note: string,
-  icd10: { code: string }[],
+  icd10: { code: string; billable?: boolean }[],
   cpt: { code: string; label?: string }[],
+  priorAuthApproved = false,
 ): ClaimReadiness {
   const priorAuth = priorAuthFor(cpt)
-  const factors: ClaimReadiness['factors'] = []
-  const validityIssues: string[] = []
+  const checks: ReadinessCheck[] = []
 
-  // 1) Claim validity (auditable, structural).
-  if (cpt.length > 0 && icd10.length === 0)
-    validityIssues.push('Procedures are billed with no diagnosis code to establish medical necessity.')
-  if (icd10.length === 0 && cpt.length === 0)
-    validityIssues.push('No coded diagnoses or procedures were detected in the note.')
+  const nonBillable = icd10.filter((c) => c.billable === false)
+  checks.push({
+    id: 'billable',
+    label: 'Diagnosis codes are billable',
+    status: nonBillable.length ? 'flag' : 'pass',
+    severity: 'blocking',
+    detail: nonBillable.length
+      ? `${nonBillable.map((c) => c.code).join(', ')} ${nonBillable.length === 1 ? 'is a category header, not a billable code' : 'are category headers, not billable codes'} in the CMS ICD 10 CM order file. Code to the highest specificity.`
+      : icd10.length
+        ? 'Every diagnosis code is billable per the CMS ICD 10 CM FY2026 order file.'
+        : 'No diagnosis codes to validate.',
+    source: 'CMS ICD 10 CM FY2026 order file',
+  })
 
-  // 2) Prior authorization (published payer policy lookup).
-  if (priorAuth.length)
-    factors.push({
-      label: 'Prior authorization required',
-      detail: priorAuth.map((p) => `${p.procedure} (${p.code}, ${p.source})`).join('; '),
-      weight: Math.min(0.35 * priorAuth.length, 0.55),
-    })
+  checks.push({
+    id: 'linkage',
+    label: 'Procedures have a supporting diagnosis',
+    status: cpt.length > 0 && icd10.length === 0 ? 'flag' : 'pass',
+    severity: 'blocking',
+    detail:
+      cpt.length > 0 && icd10.length === 0
+        ? 'Procedures are billed with no diagnosis code to establish medical necessity.'
+        : cpt.length
+          ? 'Each billed service has at least one coded diagnosis on the claim.'
+          : 'No billed services to link.',
+    source: 'Claim completeness (structural)',
+  })
 
-  // 3) Validity issues raise review load.
-  if (validityIssues.length)
-    factors.push({ label: 'Claim validity issue', detail: validityIssues.join(' '), weight: Math.min(0.25 * validityIssues.length, 0.4) })
+  checks.push({
+    id: 'prior_auth',
+    label: 'Required prior authorization on file',
+    status: priorAuth.length && !priorAuthApproved ? 'flag' : 'pass',
+    severity: 'blocking',
+    detail: priorAuth.length
+      ? priorAuthApproved
+        ? `Authorization approved for ${priorAuth.map((p) => `${p.procedure} (${p.code})`).join('; ')}.`
+        : `${priorAuth.map((p) => `${p.procedure} (${p.code}, ${p.source})`).join('; ')} require prior authorization and none is on file.`
+      : 'No billed service appears on the published prior authorization lists.',
+    source: 'CMS OPD prior authorization list; published commercial payer lists',
+  })
 
-  // 4) Administrative flags stated in the note (facts, not inferred correlations).
-  if (OON_RE.test(note))
-    factors.push({ label: 'Out of network noted', detail: 'The note states out of network care, which payers route to manual review.', weight: 0.2 })
-  if (PRIOR_DENIAL_RE.test(note))
-    factors.push({ label: 'Prior denial / appeal noted', detail: 'The note references a prior denial or appeal for this care.', weight: 0.2 })
+  checks.push({
+    id: 'coded',
+    label: 'Encounter is coded',
+    status: icd10.length === 0 && cpt.length === 0 ? 'flag' : 'pass',
+    severity: 'blocking',
+    detail:
+      icd10.length === 0 && cpt.length === 0
+        ? 'No coded diagnoses or procedures were resolved from the note; route to a human coder.'
+        : `${icd10.length} diagnosis and ${cpt.length} procedure code${cpt.length === 1 ? '' : 's'} on the claim.`,
+    source: 'Claim completeness (structural)',
+  })
 
-  const reviewRisk = Math.round(100 * Math.min(0.95, factors.reduce((s, f) => s + f.weight, 0)))
-  return { reviewRisk, priorAuth, factors, validityIssues }
+  checks.push({
+    id: 'oon',
+    label: 'Network status',
+    status: OON_RE.test(note) ? 'flag' : 'pass',
+    severity: 'advisory',
+    detail: OON_RE.test(note)
+      ? 'The note states out of network care, which payers route to manual review.'
+      : 'The note does not state out of network care.',
+    source: 'Stated in the note',
+  })
+
+  checks.push({
+    id: 'prior_denial',
+    label: 'Prior denial or appeal history',
+    status: PRIOR_DENIAL_RE.test(note) ? 'flag' : 'pass',
+    severity: 'advisory',
+    detail: PRIOR_DENIAL_RE.test(note)
+      ? 'The note references a prior denial or appeal for this care.'
+      : 'The note does not reference a prior denial or appeal.',
+    source: 'Stated in the note',
+  })
+
+  const flagged = checks.filter((c) => c.status === 'flag')
+  const lane = flagged.some((c) => c.severity === 'blocking') ? 'frontier' : 'standard'
+  return {
+    checks,
+    lane,
+    reviewRisk: Math.round((100 * flagged.length) / checks.length),
+    priorAuth,
+    factors: flagged.map((c) => ({ label: c.label, detail: c.detail })),
+  }
 }

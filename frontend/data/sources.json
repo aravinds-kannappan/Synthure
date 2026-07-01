@@ -1,0 +1,17 @@
+{
+ "built": "2026-07-01",
+ "sources": {
+  "icd10cm-desc-2026.zip": {
+   "url": "https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/ICD10CM/2026/icd10cm-Code%20Descriptions-2026.zip",
+   "bytes": 2198159
+  },
+  "icd10cm-index-2026.zip": {
+   "url": "https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/ICD10CM/2026/icd10cm-table%20and%20index-2026.zip",
+   "bytes": 18744973
+  }
+ },
+ "notes": {
+  "cpt": "CPT descriptors are AMA licensed and are not distributed; numeric code payment amounts derive from the public CMS RVU file.",
+  "cohorts": "Readmission cohort ICD-10 prefixes transcribed from CMS/Yale condition-specific measure specifications."
+ }
+}

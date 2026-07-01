@@ -161,7 +161,7 @@ export default function HowItWorks() {
 
   const captions: Record<keyof typeof R, string> = {
     type: 'A clinician writes a note. Synthure starts reading instantly.',
-    extract: 'The NER agent scans the text and pulls out every clinical entity.',
+    extract: 'OpenMed NER models run in your browser and pull out every clinical entity with a real confidence score.',
     knowledge: 'The knowledge agent resolves each code against the medical knowledge base.',
     risk: 'Readmission is the CMS HRRP published rate; prior authorization is sourced from payer policy.',
     writers: `The ${STAKEHOLDERS[STAKEHOLDER_ORDER[activeWriter]].agent} writes the ${STAKEHOLDERS[STAKEHOLDER_ORDER[activeWriter]].label.toLowerCase()}’s report…`,
@@ -239,7 +239,7 @@ export default function HowItWorks() {
               {/* EXTRACT: entity pills fly out */}
               {phase === 'extract' && (
                 <motion.div key="extract" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                  <StageTitle color="#2dd4bf" Icon={ScanLine} title="NER Extractor" sub="pulling clinical entities" />
+                  <StageTitle color="#2dd4bf" Icon={ScanLine} title="OpenMed NER · on device" sub="entities with real confidences" />
                   <div className="flex flex-wrap gap-2 content-start">
                     {ENTITIES.slice(0, extractN).map((e, i) => (
                       <motion.div
@@ -261,7 +261,7 @@ export default function HowItWorks() {
               {/* KNOWLEDGE: code resolutions */}
               {phase === 'knowledge' && (
                 <motion.div key="knowledge" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                  <StageTitle color="#818cf8" Icon={Database} title="Knowledge Retrieval" sub="resolving codes → guidelines" />
+                  <StageTitle color="#818cf8" Icon={Database} title="Code Linking" sub="official ICD 10 index, constrained choice" />
                   <div className="space-y-2.5">
                     {CODE_RESOLVE.slice(0, knowledgeN).map((c, i) => (
                       <motion.div
@@ -283,7 +283,7 @@ export default function HowItWorks() {
               {/* RISK: gauges */}
               {phase === 'risk' && (
                 <motion.div key="risk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                  <StageTitle color="#fbbf24" Icon={Activity} title="Risk & Readiness" sub="CMS readmission · prior auth" />
+                  <StageTitle color="#fbbf24" Icon={Activity} title="Risk & Readiness" sub="CMS published rates · sourced checks" />
                   <div className="space-y-5 mt-2">
                     <Gauge label="Claim review load" value={reviewFill} color="#fbbf24" />
                     <Gauge label="Readmission (CMS HRRP)" value={readmitFill} color="#22d3ee" />

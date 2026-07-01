@@ -4,9 +4,9 @@ import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { Building2, Check, Loader2, Circle, TrendingUp, FileText, Send } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
-import { fmt$ } from '@/lib/knowledge'
+import { fmt$ } from '@/lib/engine'
 import { useEncounter } from './EncounterContext'
-import { Gauge, ReportDrawer } from './widgets'
+import { Gauge, ReportDrawer, ChecksPanel } from './widgets'
 import Inbox from './Inbox'
 
 const ACCENT = '#22d3ee'
@@ -18,12 +18,6 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
   const dxCodes = state.diagnoses.filter((x) => x.accepted).map((x) => x.code)
   const submitted = state.claimStatus === 'submitted' || state.claimStatus === 'reimbursed'
 
-  const authItems = procedures.filter((p) => p.authNeeded)
-  const drivers = [
-    authItems.length ? `Prior authorization required by published payer policy: ${authItems.map((p) => `${p.label} (${p.code})`).join(', ')}.` : 'No ordered service appears on the prior authorization lists we check.',
-    state.priorAuthApproved ? 'Prior authorization is on file, which clears the largest review item.' : authItems.length ? 'Authorization is pending; submitting it up front protects reimbursement.' : 'Eligibility and network status should be verified before the date of service.',
-    state.financialAssistance ? 'Patient financial assistance is in progress, reducing bad debt exposure.' : 'This is a sourced claim readiness scrub, not a denial prediction.',
-  ]
 
   return (
     <div className="rounded-2xl border border-cyan-400/20 bg-[#08111a]/80">
@@ -44,9 +38,9 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
 
       <div className="space-y-5 p-5">
         <div className="grid gap-3 sm:grid-cols-4">
-          <Kpi label="Allowed amount" value={fmt$(d.allowed)} tone="neutral" />
+          <Kpi label="CMS allowed" value={d.allowed ? fmt$(d.allowed) : '$0'} tone="neutral" />
           <Kpi label="Expected reimb." value={fmt$(d.expectedReimb)} tone="good" icon={<TrendingUp className="h-3.5 w-3.5" />} />
-          <Kpi label="Procedures" value={String(procedures.length)} tone="neutral" />
+          <Kpi label="At risk" value={d.atRisk ? fmt$(d.atRisk) : '$0'} tone={d.atRisk ? 'warn' : 'neutral'} />
           <Kpi label="Linked Dx" value={String(dxCodes.length)} tone="neutral" />
         </div>
 
@@ -98,14 +92,17 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
               <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 <FileText className="h-4 w-4" style={{ color: ACCENT }} /> Claim line items
               </div>
-              {procedures.length ? (
-                procedures.map((p) => (
+              {d.services.length ? (
+                d.services.map((p) => (
                   <div key={p.code} className="flex items-center justify-between border-b border-white/[0.04] px-4 py-2.5 last:border-0">
                     <div className="flex items-center gap-2.5">
                       <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-cyan-300">{p.code}</span>
                       <span className="text-[13px] text-slate-300">{p.label}</span>
+                      {p.atRisk && (
+                        <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300" title={p.atRiskWhy ?? ''}>at risk</span>
+                      )}
                     </div>
-                    <span className="font-mono text-[13px] text-slate-200">{fmt$(p.price)}</span>
+                    <span className="font-mono text-[13px] text-slate-200">{p.price != null ? fmt$(p.price) : 'no CMS amount'}</span>
                   </div>
                 ))
               ) : (
@@ -122,15 +119,8 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
             </div>
 
             <div>
-              <div className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400">Claim readiness drivers</div>
-              <ul className="space-y-1.5">
-                {drivers.map((dr, i) => (
-                  <li key={i} className="flex gap-2 text-[13px] text-slate-300">
-                    <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ background: ACCENT }} />
-                    {dr}
-                  </li>
-                ))}
-              </ul>
+              <div className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400">Claim readiness checklist</div>
+              <ChecksPanel checks={d.checks} accent={ACCENT} />
             </div>
 
             {report?.actions && report.actions.length > 0 && (
@@ -160,7 +150,7 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
             <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-3 text-center">
               <Gauge value={d.readmissionRisk} color={riskColor(d.readmissionRisk)} label="Readmission · CMS HRRP" />
               <p className="mt-1 text-[11px] text-slate-500">
-                {d.readmissionRisk >= 45 ? 'CMS published rate is elevated; care transition task opened.' : 'CMS published rate; below typical HRRP concern.'}
+                {d.readmissionCalibrated ? `CMS published rate for the ${d.readmissionDriver} cohort.` : 'National hospital wide published rate; no condition cohort matched.'}
               </p>
             </div>
           </div>
@@ -170,11 +160,11 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
   )
 }
 
-function Kpi({ label, value, tone, icon }: { label: string; value: string; tone: 'good' | 'neutral'; icon?: ReactNode }) {
+function Kpi({ label, value, tone, icon }: { label: string; value: string; tone: 'good' | 'neutral' | 'warn'; icon?: ReactNode }) {
   return (
     <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3">
       <div className="text-[11px] uppercase tracking-wider text-slate-500">{label}</div>
-      <div className={`mt-1 flex items-center gap-1.5 text-lg font-semibold ${tone === 'good' ? 'text-emerald-400' : 'text-white'}`}>
+      <div className={`mt-1 flex items-center gap-1.5 text-lg font-semibold ${tone === 'good' ? 'text-emerald-400' : tone === 'warn' ? 'text-amber-400' : 'text-white'}`}>
         {icon}
         {value}
       </div>

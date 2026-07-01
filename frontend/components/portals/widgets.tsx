@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
-import type { ReportSection } from '@/lib/synthure'
+import { CheckCircle2, AlertTriangle } from 'lucide-react'
+import type { ReadinessCheck, ReportSection } from '@/lib/synthure'
 
 // ── Semicircle gauge (0–100) ──────────────────────────────────────────────────
 export function Gauge({
@@ -188,6 +189,40 @@ export function ReportDrawer({
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Claim readiness checklist ─────────────────────────────────────────────────
+// Each line is a sourced check, pass or flag. This replaces every numeric
+// "denial risk" style score: the facts are the interface.
+export function ChecksPanel({ checks, accent }: { checks: ReadinessCheck[]; accent: string }) {
+  return (
+    <div className="space-y-1.5">
+      {checks.map((c) => (
+        <div
+          key={c.id + c.label}
+          className="rounded-lg border px-3 py-2"
+          style={{
+            borderColor: c.status === 'flag' ? 'rgba(251,191,36,0.35)' : 'rgba(255,255,255,0.07)',
+            background: c.status === 'flag' ? 'rgba(251,191,36,0.06)' : 'rgba(255,255,255,0.015)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            {c.status === 'flag' ? (
+              <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
+            ) : (
+              <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />
+            )}
+            <span className="text-[13px] font-medium text-slate-200">{c.label}</span>
+            {c.severity === 'blocking' && c.status === 'flag' && (
+              <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">blocking</span>
+            )}
+          </div>
+          <p className="mt-1 pl-5.5 text-[12px] leading-relaxed text-slate-400" style={{ paddingLeft: 22 }}>{c.detail}</p>
+          <p className="mt-0.5 text-[10px] uppercase tracking-wider" style={{ paddingLeft: 22, color: accent, opacity: 0.75 }}>{c.source}</p>
+        </div>
+      ))}
     </div>
   )
 }

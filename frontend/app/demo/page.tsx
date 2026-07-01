@@ -6,8 +6,10 @@ import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-re
 import Nav from '@/components/Nav'
 import PortalShell from '@/components/portals/PortalShell'
 import SafetyConsole from '@/components/SafetyConsole'
-import { useSynthesis, type AgentStatus } from '@/lib/useSynthesis'
+import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
+import { OPENMED_MODELS, type OpenMedStage } from '@/lib/openmed'
+import { ShieldCheck, Download } from 'lucide-react'
 
 function StatusDot({ status, accent }: { status: AgentStatus; accent: string }) {
   if (status === 'done')
@@ -29,7 +31,7 @@ function StatusDot({ status, accent }: { status: AgentStatus; accent: string }) 
   )
 }
 
-function AgentRow({ agent, status }: { agent: AgentDef; status: AgentStatus }) {
+function AgentRow({ agent, status, info }: { agent: AgentDef; status: AgentStatus; info?: StageInfo }) {
   return (
     <motion.div
       layout
@@ -44,12 +46,53 @@ function AgentRow({ agent, status }: { agent: AgentDef; status: AgentStatus }) {
         <div className="text-sm font-medium" style={{ color: status === 'idle' ? '#94a3b8' : '#e2e8f0' }}>
           {agent.name}
         </div>
-        <div className="text-xs text-slate-500 truncate">{agent.role}</div>
+        <div className="text-xs text-slate-500 truncate">
+          {status === 'done' && info ? (
+            <span className="text-slate-400">
+              {info.detail}
+              {info.ms > 0 && <span className="text-slate-600"> · {info.ms >= 1000 ? `${(info.ms / 1000).toFixed(1)}s` : `${info.ms}ms`}</span>}
+            </span>
+          ) : (
+            agent.role
+          )}
+        </div>
       </div>
       {status === 'active' && (
         <span className="ml-auto text-[10px] uppercase tracking-wider shimmer-text font-medium">working</span>
       )}
     </motion.div>
+  )
+}
+
+function ModelLoader({ progress }: { progress: Record<string, number> }) {
+  const stages = Object.keys(OPENMED_MODELS) as OpenMedStage[]
+  return (
+    <div className="mt-4 rounded-xl border border-white/[0.08] glass px-4 py-4">
+      <div className="mb-3 flex items-center gap-2 text-sm text-slate-300">
+        <Download className="h-4 w-4 text-teal-300" />
+        Downloading the OpenMed models into your browser (first run only, cached after)
+      </div>
+      <div className="space-y-2.5">
+        {stages.map((st) => {
+          const pct = progress[st] ?? 0
+          const m = OPENMED_MODELS[st]
+          return (
+            <div key={st}>
+              <div className="mb-1 flex items-center justify-between text-[11px] text-slate-500">
+                <span>{m.label}</span>
+                <span>{pct >= 100 ? 'ready' : `${Math.round(pct)}% of ~${m.mb} MB`}</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="h-full rounded-full bg-teal-400 transition-all" style={{ width: `${Math.min(100, pct)}%` }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+        These models run entirely on your device. Your note is de identified locally before anything is sent for synthesis.
+      </p>
+    </div>
   )
 }
 
@@ -63,7 +106,7 @@ const PHASES: { key: AgentDef['phase']; title: string }[] = [
 export default function DemoPage() {
   const [note, setNote] = useState('')
   const { state, start, reset } = useSynthesis()
-  const running = state.phase === 'running'
+  const running = state.phase === 'running' || state.phase === 'loading-models'
   const hasExtraction = !!state.extraction
 
   const activeAgent = useMemo(
@@ -161,6 +204,24 @@ export default function DemoPage() {
           )}
         </AnimatePresence>
 
+        {state.phase === 'loading-models' && !state.error && <ModelLoader progress={state.modelProgress} />}
+
+        {state.deid && !state.error && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 flex items-start gap-3 rounded-xl border border-teal-400/20 bg-teal-400/[0.06] px-4 py-3"
+          >
+            <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-300" />
+            <div className="text-[13px] leading-relaxed text-slate-300">
+              <span className="font-medium text-teal-200">De identified on your device.</span>{' '}
+              {state.deid.redactions > 0
+                ? `The OpenMed PII model scrubbed ${state.deid.redactions} identifier${state.deid.redactions === 1 ? '' : 's'} (${state.deid.types.slice(0, 6).join(', ').toLowerCase()}) before the note left your browser.`
+                : 'The OpenMed PII model found no identifiers to scrub. Only this de identified text leaves your browser.'}
+            </div>
+          </motion.div>
+        )}
+
         {state.error && (
           <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {state.error}
@@ -177,7 +238,7 @@ export default function DemoPage() {
                   <div className="text-xs uppercase tracking-wider text-slate-500 mb-2.5">{phase.title}</div>
                   <div className="space-y-2">
                     {PIPELINE.filter((a) => a.phase === phase.key).map((a) => (
-                      <AgentRow key={a.id} agent={a} status={state.status[a.id]} />
+                      <AgentRow key={a.id} agent={a} status={state.status[a.id]} info={state.stageInfo[a.id]} />
                     ))}
                   </div>
                 </div>
@@ -193,8 +254,9 @@ export default function DemoPage() {
                   <div className="text-xs uppercase tracking-wider text-slate-500 mb-3">Extracted facts</div>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {ex.entities.slice(0, 14).map((e, i) => (
-                      <span key={i} className="text-[11px] rounded-md border border-teal-400/20 bg-teal-400/10 text-teal-200 px-2 py-0.5">
+                      <span key={i} className="text-[11px] rounded-md border border-teal-400/20 bg-teal-400/10 text-teal-200 px-2 py-0.5" title={e.source === 'openmed' ? 'OpenMed model output' : 'Verified verbatim span'}>
                         {e.text}
+                        {typeof e.confidence === 'number' && <span className="ml-1 text-teal-400/70">{Math.round(e.confidence * 100)}%</span>}
                       </span>
                     ))}
                   </div>
@@ -218,16 +280,19 @@ export default function DemoPage() {
                 </motion.div>
               )}
 
-              {state.phase === 'complete' &&
-                (state.live ? (
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Live: Claude read the note to extract entities and wrote the four reports. Codes were validated; readmission is the CMS published rate and prior authorization is sourced from payer policy.
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Offline Synthure engine: a rules based extractor (regex plus a medication dictionary), not a trained model. Set <span className="font-mono text-slate-500">ANTHROPIC_API_KEY</span> for live Claude extraction and writing.
-                  </p>
-                ))}
+              {state.phase === 'complete' && ex && (
+                <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
+                  <div className="text-xs uppercase tracking-wider text-slate-500 mb-2">Models in this run</div>
+                  <div className="space-y-1">
+                    {Object.entries(ex.models).map(([k, v]) => (
+                      <div key={k} className="text-[11px] leading-relaxed">
+                        <span className="text-slate-500">{k}: </span>
+                        <span className="text-slate-400">{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Portals / placeholder */}

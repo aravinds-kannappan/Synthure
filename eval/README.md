@@ -76,3 +76,5 @@ We refuse to print numbers we cannot reproduce.
 **HIPAA / SOC 2 compliance** and **go to market** are not machine learning
 problems and have no training data; the de-identification component is the real,
 software shaped piece of the compliance work.
+
+> NOTE (2026-07): these evaluations measured the previous pipeline (Claude tool_use NER vs a regex baseline, dictionary knowledge). The shipped pipeline now runs OpenMed ONNX models in the browser for de identification and NER, and links codes through the official ICD 10 CM index with constrained choice (see frontend/lib/openmed.ts and frontend/app/api/synthesize/route.ts). Re benchmarking against the new pipeline is planned; the scripts here are kept as the record of the prior measurement.

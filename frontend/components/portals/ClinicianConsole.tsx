@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
 import { useEncounter } from './EncounterContext'
-import { Gauge, ReportDrawer } from './widgets'
+import { Gauge, ReportDrawer, ChecksPanel } from './widgets'
 import Inbox from './Inbox'
 
 const ACCENT = '#818cf8'
@@ -24,7 +24,7 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
     state.diagnoses.some((x) => x.accepted) ? 'Sequence the primary diagnosis first to support medical necessity.' : 'Confirm at least one diagnosis to support the services billed.',
   ]
 
-  const row = (kind: 'ICD' | 'CPT', code: string, label: string, known: boolean, on: boolean, onClick: () => void) => (
+  const row = (kind: 'ICD' | 'CPT', code: string, label: string, tag: string, tagTone: string, on: boolean, onClick: () => void) => (
     <button
       key={kind + code}
       onClick={onClick}
@@ -39,8 +39,8 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
       </span>
       <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-xs text-indigo-300">{code}</span>
       <span className="truncate text-[13px] text-slate-300">{label}</span>
-      <span className="ml-auto text-[10px] uppercase tracking-wider" style={{ color: known ? '#34d399' : '#94a3b8' }}>
-        {known ? 'mapped' : 'review'}
+      <span className="ml-auto text-[10px] uppercase tracking-wider" style={{ color: tagTone }}>
+        {tag}
       </span>
     </button>
   )
@@ -71,8 +71,28 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
               <FileCheck2 className="h-4 w-4" style={{ color: ACCENT }} /> Coding · toggle what belongs in the claim
             </div>
             <div className="space-y-1.5">
-              {state.diagnoses.map((c) => row('ICD', c.code, c.name, c.known, c.accepted, () => dispatch({ type: 'toggleDx', code: c.code })))}
-              {state.procedures.map((c) => row('CPT', c.code, c.label, c.known, c.accepted, () => dispatch({ type: 'toggleProc', code: c.code })))}
+              {state.diagnoses.map((c) =>
+                row(
+                  'ICD',
+                  c.code,
+                  c.name,
+                  !c.billable ? 'not billable' : c.source === 'linked' ? `linked: "${c.entity ?? 'entity'}"` : 'in note',
+                  !c.billable ? '#fbbf24' : c.source === 'linked' ? '#34d399' : '#94a3b8',
+                  c.accepted,
+                  () => dispatch({ type: 'toggleDx', code: c.code }),
+                ),
+              )}
+              {state.procedures.map((c) =>
+                row(
+                  'CPT',
+                  c.code,
+                  c.label,
+                  c.price != null ? `CMS ${c.schedule}` : 'no CMS price',
+                  c.price != null ? '#34d399' : '#94a3b8',
+                  c.accepted,
+                  () => dispatch({ type: 'toggleProc', code: c.code }),
+                ),
+              )}
               {state.diagnoses.length === 0 && state.procedures.length === 0 && (
                 <div className="rounded-lg border border-dashed border-white/10 px-3 py-2 text-[13px] text-slate-500">
                   No codes detected in the note. Add at least one diagnosis to support billing.
@@ -82,6 +102,13 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
             <div className="mt-2 text-[11px] text-slate-500">
               {d.acceptedCodes} of {d.totalCodes} codes in the claim · changes recompute cost, reimbursement, and claim readiness live
             </div>
+          </div>
+
+          <div>
+            <div className="mb-2.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <ShieldCheck className="h-4 w-4" style={{ color: ACCENT }} /> Claim readiness checklist
+            </div>
+            <ChecksPanel checks={d.checks} accent={ACCENT} />
           </div>
 
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
@@ -153,6 +180,9 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
           </motion.div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-3 text-center">
             <Gauge value={d.readmissionRisk} color={riskColor(d.readmissionRisk)} label="Readmission · CMS" />
+            <p className="mt-1 text-[10px] leading-snug text-slate-500">
+              {d.readmissionCalibrated ? `Published rate, ${d.readmissionDriver} cohort` : 'National hospital wide published rate'}
+            </p>
           </div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] px-3 py-2.5 text-[11px] leading-relaxed text-slate-500">
             Decision support only. Synthure never prescribes or diagnoses. Every suggestion traces to the note.

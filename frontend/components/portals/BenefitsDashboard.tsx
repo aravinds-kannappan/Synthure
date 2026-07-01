@@ -1,21 +1,24 @@
 'use client'
 
-import { Briefcase, Lock, TrendingUp, Network, BadgeCheck, Check, Target } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Briefcase, Lock, TrendingUp, BadgeCheck, Check, Target, Layers } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
+import { fmt$ } from '@/lib/engine'
 import { useEncounter } from './EncounterContext'
-import { Sparkline, Donut, ReportDrawer } from './widgets'
+import { ReportDrawer } from './widgets'
 import Inbox from './Inbox'
+import { aggregates, encounterHistory, type HistoryEntry } from '@/lib/history'
 
 const ACCENT = '#a78bfa'
 
 export default function BenefitsDashboard({ report }: { report?: StakeholderReport }) {
   const { state, d } = useEncounter()
-  const conditions = state.diagnoses.filter((x) => x.accepted && x.known).map((x) => x.name)
-  const compliance = [
-    { label: 'ACA reporting (1095 C)', ok: true },
-    { label: 'COBRA notices', ok: true },
-    { label: 'Audit readiness', ok: true },
-  ]
+  const conditions = state.diagnoses.filter((x) => x.accepted).map((x) => x.name)
+  // Real aggregates over the encounters synthesized in this browser. No
+  // fabricated trend lines: before there is history, there is an empty state.
+  const [history, setHistory] = useState<HistoryEntry[]>([])
+  useEffect(() => setHistory(encounterHistory()), [])
+  const agg = aggregates(history)
 
   return (
     <div className="rounded-2xl border border-violet-400/20 bg-[#0c0a18]/80">
@@ -39,46 +42,73 @@ export default function BenefitsDashboard({ report }: { report?: StakeholderRepo
 
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
-            <div className="text-[11px] uppercase tracking-wider text-slate-500">Cohort</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">Cohort (AHRQ CCSR)</div>
             <div className="mt-1 text-lg font-semibold text-white">{d.cohortLabel}</div>
-            <div className="mt-0.5 text-[11px] text-slate-500">A major driver of long term plan spend</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">Official clinical category of this encounter</div>
           </div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
-            <div className="text-[11px] uppercase tracking-wider text-slate-500">Cost tier</div>
-            <div className={`mt-1 text-lg font-semibold ${d.costTier === 'Higher' ? 'text-amber-400' : 'text-white'}`}>{d.costTier}</div>
-            <div className="mt-0.5 text-[11px] text-slate-500">Relative to typical maintenance care</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">Published cost</div>
+            <div className="mt-1 text-lg font-semibold text-white">{d.allowed ? fmt$(d.allowed) : 'None billed'}</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">CMS national amounts for billed services</div>
           </div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
-            <div className="text-[11px] uppercase tracking-wider text-slate-500">Network status</div>
-            <div className="mt-1 text-lg font-semibold text-emerald-400">In network</div>
-            <div className="mt-0.5 text-[11px] text-slate-500">No out of network leakage detected</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">Review lane</div>
+            <div className={`mt-1 text-lg font-semibold ${d.route === 'frontier' ? 'text-amber-400' : 'text-emerald-400'}`}>
+              {d.route === 'frontier' ? 'Frontier review' : 'Standard'}
+            </div>
+            <div className="mt-0.5 text-[11px] text-slate-500">From the claim readiness checklist</div>
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
-            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              <TrendingUp className="h-4 w-4" style={{ color: ACCENT }} /> Cohort spend trend
-            </div>
-            <div className="mb-2 text-[11px] text-slate-500">Indexed, illustrative · reacts to the encounter risk profile</div>
-            <Sparkline data={d.trend} color={ACCENT} />
-            <div className="mt-1 flex justify-between text-[10px] text-slate-600">
-              <span>8Q ago</span>
-              <span>projected</span>
-            </div>
+        {/* Real population view: this browser's synthesized encounters. */}
+        <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
+          <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <TrendingUp className="h-4 w-4" style={{ color: ACCENT }} /> Population aggregates
           </div>
-
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              <Network className="h-4 w-4" style={{ color: ACCENT }} /> Network utilization
-            </div>
-            <Donut percent={d.inNetwork} color={ACCENT} label="In network care" sub="Steering similar care in network lowers plan cost" />
+          <div className="mb-3 text-[11px] text-slate-500">
+            Real aggregates over the {agg.total || 'zero'} encounter{agg.total === 1 ? '' : 's'} synthesized in this browser. Nothing here is simulated.
           </div>
+          {agg.total === 0 ? (
+            <div className="rounded-lg border border-dashed border-white/10 px-4 py-6 text-center text-[13px] text-slate-500">
+              No population data yet. Aggregates appear as encounters are synthesized.
+            </div>
+          ) : (
+            <>
+              <div className="mb-3 grid gap-3 sm:grid-cols-3">
+                <div>
+                  <div className="text-xl font-semibold text-white">{agg.total}</div>
+                  <div className="text-[11px] text-slate-500">encounters</div>
+                </div>
+                <div>
+                  <div className="text-xl font-semibold text-white">{fmt$(agg.totalAllowed)}</div>
+                  <div className="text-[11px] text-slate-500">published CMS amounts</div>
+                </div>
+                <div>
+                  <div className="text-xl font-semibold text-white">{agg.frontierShare}%</div>
+                  <div className="text-[11px] text-slate-500">routed to frontier review</div>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                {agg.byCohort.slice(0, 6).map((c) => {
+                  const w = Math.max(6, Math.round((100 * c.encounters) / agg.total))
+                  return (
+                    <div key={c.label} className="flex items-center gap-2 text-[12px]">
+                      <span className="w-44 truncate text-slate-400">{c.label}</span>
+                      <span className="h-2 rounded-full" style={{ width: `${w}%`, background: `${ACCENT}88` }} />
+                      <span className="text-slate-500">{c.encounters}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
         </div>
 
         {conditions.length > 0 && (
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
-            <div className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400">Conditions in this cohort</div>
+            <div className="mb-2.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <Layers className="h-4 w-4" style={{ color: ACCENT }} /> Conditions in this encounter
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {conditions.map((c) => (
                 <span key={c} className="rounded-full border border-violet-400/20 bg-violet-400/10 px-2.5 py-1 text-[12px] text-violet-200">
@@ -97,9 +127,7 @@ export default function BenefitsDashboard({ report }: { report?: StakeholderRepo
             <ul className="space-y-1.5 text-[13px] text-slate-300">
               <li className="flex gap-2">
                 <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ background: ACCENT }} />
-                {d.cohort === 'cardiometabolic'
-                  ? 'A cardiometabolic or diabetes prevention program directly targets this cohort.'
-                  : 'A chronic care management benefit would support this population.'}
+                The Benefits Analyst report below recommends plan design changes targeted at the {d.cohortLabel.toLowerCase()} category.
               </li>
               <li className="flex gap-2">
                 <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ background: ACCENT }} />
@@ -110,18 +138,11 @@ export default function BenefitsDashboard({ report }: { report?: StakeholderRepo
 
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
             <div className="mb-2.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              <BadgeCheck className="h-4 w-4" style={{ color: ACCENT }} /> Compliance posture
+              <BadgeCheck className="h-4 w-4" style={{ color: ACCENT }} /> Compliance
             </div>
-            <div className="space-y-2">
-              {compliance.map((c) => (
-                <div key={c.label} className="flex items-center justify-between text-[13px]">
-                  <span className="text-slate-300">{c.label}</span>
-                  <span className="flex items-center gap-1.5 text-emerald-400">
-                    <Check className="h-3.5 w-3.5" /> {c.ok ? 'Clear' : 'Action'}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <p className="text-[13px] leading-relaxed text-slate-400">
+              ACA and COBRA obligations depend on plan enrollment data this demo does not hold, so no compliance verdict is shown. The Benefits Analyst report lists what to review with your administrator.
+            </p>
           </div>
         </div>
 

@@ -8,17 +8,19 @@ import HowItWorks from '@/components/HowItWorks'
 import { STAKEHOLDERS, STAKEHOLDER_ORDER } from '@/lib/synthure'
 
 const STATS = [
-  { n: '1', label: 'note in' },
-  { n: '10', label: 'specialized agents' },
-  { n: '4', label: 'tailored portals' },
-  { n: '~6s', label: 'end to end' },
+  { n: '3', label: 'OpenMed models running in your browser' },
+  { n: '98,186', label: 'ICD 10 CM FY2026 codes in the knowledge layer' },
+  { n: '9,724', label: 'services priced from CMS fee schedules' },
+  { n: '0', label: 'identifiers leave your device' },
 ]
 
 const TRUST = [
-  { icon: ShieldCheck, title: 'Grounded & verified', body: 'A dedicated verifier audits every claim against the extracted facts before you see it.' },
-  { icon: GitBranch, title: 'Fully traceable', body: 'Every report links back to the entities and codes pulled from your note, with no black box.' },
-  { icon: Gauge, title: 'Real time', body: 'Watch each agent activate, write, and finish, the whole team in a single pass.' },
+  { icon: ShieldCheck, title: 'De identified on your device', body: 'An OpenMed PII model runs in your browser and scrubs identifiers before the note leaves it. The raw note is never sent anywhere.' },
+  { icon: GitBranch, title: 'Codes cannot be invented', body: 'Diagnosis codes are retrieved from the official ICD 10 CM index; the language model only chooses among retrieved candidates, and a verifier plus constitution critic audit and revise every report.' },
+  { icon: Gauge, title: 'Every number is sourced', body: 'Prices are CMS fee schedule amounts, readmission is the CMS published rate, cohorts are AHRQ CCSR categories, and readiness is a checklist that cites its rule. No invented probabilities.' },
 ]
+
+const SOURCES = ['CDC/NCHS ICD 10 CM FY2026', 'CMS Physician Fee Schedule 2026', 'CMS Clinical Lab Fee Schedule 2026', 'CMS OPD prior authorization list', 'CMS readmission measures (data.cms.gov)', 'AHRQ HCUP CCSR v2025', 'NLM RxNorm', 'MedlinePlus Connect']
 
 export default function Landing() {
   return (
@@ -43,7 +45,7 @@ export default function Landing() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/[0.07] px-3.5 py-1.5 text-xs font-medium text-teal-300 mb-7">
             <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
-            Multi agent clinical AI, live on any note
+            OpenMed models on your device · Claude agents in the loop
           </div>
           <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[1.04] text-white">
             One clinical note.
@@ -51,9 +53,9 @@ export default function Landing() {
             <span className="gradient-text">Four intelligent reports.</span>
           </h1>
           <p className="mt-7 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Synthure is a team of AI agents that read a single clinical note and open a tailored,
-            verified portal for everyone it touches: the patient, the physician, the hospital,
-            and the employer. Watch them work in real time.
+            Synthure reads one clinical note and opens a tailored, verified portal for everyone it
+            touches: the patient, the physician, the hospital, and the employer. De identification
+            and clinical NER run as open models in your browser; nothing identifiable ever leaves it.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -140,6 +142,18 @@ export default function Landing() {
         </motion.div>
       </section>
 
+      {/* ── Data sources strip ─────────────────────────────────────── */}
+      <section className="relative px-6 pb-10">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="text-xs uppercase tracking-wider text-slate-600 mb-3">Built on primary public data, rebuilt from source</div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {SOURCES.map((src) => (
+              <span key={src} className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[11px] text-slate-400">{src}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Trust strip ────────────────────────────────────────────── */}
       <section className="relative px-6 pb-20">
         <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-4">
@@ -180,6 +194,7 @@ export default function Landing() {
             <Link href="/research" className="hover:text-slate-300 transition-colors">Research</Link>
             <Link href="/demo" className="hover:text-slate-300 transition-colors">Demo</Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer" className="hover:text-slate-300 transition-colors">GitHub</a>
+            <a href="https://github.com/maziyarpanahi/openmed" target="_blank" rel="noopener noreferrer" className="hover:text-slate-300 transition-colors">NER & PII: OpenMed (Apache 2.0)</a>
           </div>
         </div>
       </footer>
