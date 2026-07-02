@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, ShieldCheck, GitBranch, Gauge, Zap } from 'lucide-react'
 import Nav from '@/components/Nav'
-import HowItWorks from '@/components/HowItWorks'
+import AgentFloor from '@/components/AgentFloor'
 import { STAKEHOLDERS, STAKEHOLDER_ORDER } from '@/lib/synthure'
 
 const STATS = [
@@ -116,7 +116,7 @@ export default function Landing() {
       </section>
 
       {/* ── Scrollytelling (all agents revealed here) ──────────────── */}
-      <HowItWorks />
+      <AgentFloor />
 
       {/* ── Try demo CTA — sits right after the animation ──────────── */}
       <section className="relative px-6 pt-10 pb-16">
