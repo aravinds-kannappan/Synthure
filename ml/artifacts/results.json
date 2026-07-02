@@ -1,0 +1,62 @@
+{
+ "built": "2026-07-02",
+ "corpus": {
+  "note": "Synthetic clinical notes constructed from curated conditions with real ICD 10 CM codes. Labels are exact gold. Absolute numbers reflect a controlled synthetic distribution and will be lower on real clinical text.",
+  "test_notes": 360
+ },
+ "note_type": {
+  "accuracy": 1.0,
+  "n": 360,
+  "ms_per_note": 0.05
+ },
+ "sections": {
+  "precision": 1.0,
+  "recall": 0.696,
+  "f1": 0.821,
+  "type": "rule-based"
+ },
+ "coding": {
+  "top1_accuracy": 0.741,
+  "top3_accuracy": 0.816,
+  "n": 727,
+  "hallucinated_codes": 0,
+  "hallucination_rate": 0.0
+ },
+ "missing_info": {
+  "micro_f1": 0.749,
+  "per_field_f1": {
+   "laterality": 0.7,
+   "acuity": 0.639,
+   "supporting_diagnosis": 1.0,
+   "tobacco_status": 0.624,
+   "medication_dose": 0.87
+  }
+ },
+ "readiness": {
+  "auroc": 0.839,
+  "auprc": 0.904,
+  "ece_raw": 0.055,
+  "ece_calibrated": 0.054,
+  "abstain_frac": 0.2,
+  "accuracy_all": 0.883,
+  "accuracy_confident": 0.917,
+  "n": 360
+ },
+ "openmed": {
+  "available": true,
+  "n_notes": 60,
+  "ner_disease": {
+   "precision": 0.435,
+   "recall": 0.83,
+   "f1": 0.571
+  },
+  "ner_pharma": {
+   "precision": 0.218,
+   "recall": 0.944,
+   "f1": 0.354
+  },
+  "deid_recall": 1.0,
+  "deid_seeded_spans": 90
+ },
+ "eval_wall_seconds": 9.6
+}
