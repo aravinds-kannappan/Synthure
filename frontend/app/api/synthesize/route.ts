@@ -39,7 +39,7 @@ import {
   type IcdCandidate,
 } from '@/lib/knowledge.server'
 import { OPENMED_MODELS } from '@/lib/openmedModels'
-import { classifyNoteType, detectMissing, predictReadiness } from '@/lib/models/synthure'
+import { classifyNoteType, detectMissing, predictReadiness, rerankScore } from '@/lib/models/synthure'
 import { parseSections } from '@/lib/models/sections'
 import { NOTE_TYPE_LABELS } from '@/lib/schema'
 
@@ -137,74 +137,40 @@ async function tagSpans(client: Anthropic, note: string): Promise<Entity[]> {
   return out
 }
 
-// ── Constrained diagnosis linking ─────────────────────────────────────────────
-// Candidates come from the official ICD 10 CM alphabetic index. Claude returns
-// an option number per entity (or abstains); anything outside the retrieved
-// candidate set is impossible by construction.
-const LINK_TOOL: Anthropic.Tool = {
-  name: 'select_codes',
-  description: 'For each entity, select the best candidate code by its option number, or abstain.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      selections: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            entity: { type: 'number', description: 'The entity number' },
-            option: { type: 'number', description: 'The chosen option number, or -1 to abstain when no candidate fits' },
-          },
-          required: ['entity', 'option'],
-        },
-      },
-    },
-    required: ['selections'],
-  },
-}
-
+// ── Diagnosis linking via the trained Synthure reranker ──────────────────────
+// Candidates come from the official ICD 10 CM alphabetic index (so a code
+// outside the index is impossible by construction). The Synthure reranker (a
+// logistic regression trained in ml/) scores each candidate from lexical
+// features and picks the top one above a confidence floor, or abstains. This is
+// a Synthure owned model, not Claude: it runs in process, so ANY note (including
+// messy prose with no literal codes) gets coded without an API call.
 interface LinkedCode {
   code: string
   label: string
   billable: boolean
   source: 'linked'
   entity: string
+  score: number
 }
 
-async function linkDiagnoses(
-  client: Anthropic,
-  note: string,
-  diagnoses: Entity[],
-): Promise<LinkedCode[]> {
-  const withCands = diagnoses
-    .map((e) => ({ e, cands: icdCandidates(e.text, 8) }))
-    .filter((x) => x.cands.length > 0)
-  if (!withCands.length) return []
-  const listing = withCands
-    .map(
-      ({ e, cands }, i) =>
-        `ENTITY ${i}: "${e.text}"\n` +
-        cands.map((c, j) => `  option ${j}: ${c.code} ${c.description}${c.billable ? '' : ' [category header, not billable]'}`).join('\n'),
-    )
-    .join('\n')
-  const msg = await client.messages.create({
-    model: HAIKU,
-    max_tokens: 700,
-    tools: [LINK_TOOL],
-    tool_choice: { type: 'tool', name: 'select_codes' },
-    system:
-      'You map extracted diagnosis entities to ICD 10 CM codes. For each entity choose the single best option from its retrieved candidates (from the official ICD 10 CM alphabetic index), using the note for context. Prefer billable codes at the highest specificity the note supports. If no candidate correctly describes the entity, abstain with -1. You cannot propose codes outside the candidates.',
-    messages: [{ role: 'user', content: `NOTE (context):\n${note}\n\nCANDIDATES:\n${listing}` }],
-  })
-  const block = msg.content.find((b) => b.type === 'tool_use')
-  if (!block || block.type !== 'tool_use') throw new Error('no tool_use from linker')
-  const inp = block.input as { selections?: { entity: number; option: number }[] }
+const LINK_FLOOR = 0.15 // reranker probability below which we abstain
+
+function linkDiagnoses(diagnoses: Entity[]): LinkedCode[] {
   const out: LinkedCode[] = []
-  for (const sel of inp.selections ?? []) {
-    const row = withCands[sel.entity]
-    if (!row || sel.option < 0 || sel.option >= row.cands.length) continue // abstain or invalid -> uncoded
-    const c: IcdCandidate = row.cands[sel.option]
-    out.push({ code: c.code, label: c.description, billable: c.billable, source: 'linked', entity: row.e.text })
+  const usedCodes = new Set<string>()
+  for (const e of diagnoses) {
+    const cands = icdCandidates(e.text, 8)
+    if (!cands.length) continue
+    let best: { c: IcdCandidate; s: number } | null = null
+    for (const c of cands) {
+      const s = rerankScore({ overlap: c.overlap, termlen: c.termLen, billable: c.billable ? 1 : 0, rank: c.rank })
+      if (!best || s > best.s) best = { c, s }
+    }
+    if (!best || best.s < LINK_FLOOR) continue // abstain -> entity stays uncoded
+    const key = best.c.code.replace('.', '').toUpperCase()
+    if (usedCodes.has(key)) continue
+    usedCodes.add(key)
+    out.push({ code: best.c.code, label: best.c.description, billable: best.c.billable, source: 'linked', entity: e.text, score: Number(best.s.toFixed(3)) })
   }
   return out
 }
@@ -553,7 +519,7 @@ export async function POST(req: Request) {
         const litIcd = literalIcd(note)
         const cpt = literalProcs(note)
         const diagEnts = entities.filter((e) => e.type === 'DIAGNOSIS')
-        const linked = await linkDiagnoses(client, note, diagEnts)
+        const linked = linkDiagnoses(diagEnts)
         const icdMap = new Map<string, ExtractionResult['icd10'][number]>()
         for (const l of linked) icdMap.set(l.code, l)
         for (const l of litIcd) icdMap.set(l.code, l) // literal codes win

@@ -86,6 +86,9 @@ function ensureTokenIndex() {
 
 export interface IcdCandidate extends IcdInfo {
   indexTerm: string // the official index term that produced this candidate
+  overlap: number // query tokens covered by the index term (reranker feature)
+  termLen: number // index term length in tokens (reranker feature)
+  rank: number // retrieval position (reranker feature)
 }
 
 // Common clinical abbreviations and shorthand expanded to the wording used in
@@ -195,7 +198,15 @@ export function icdCandidates(phrase: string, limit = 8): IcdCandidate[] {
       const info = tab()[undot(code)]
       if (!info || seen.has(undot(code))) continue
       seen.add(undot(code))
-      out.push({ code: dotted(code), description: info[1], billable: info[0] === 1, indexTerm: s.term })
+      out.push({
+        code: dotted(code),
+        description: info[1],
+        billable: info[0] === 1,
+        indexTerm: s.term,
+        overlap: s.overlap,
+        termLen: tokens(s.term).length,
+        rank: out.length,
+      })
       if (out.length >= limit) return out
     }
   }
