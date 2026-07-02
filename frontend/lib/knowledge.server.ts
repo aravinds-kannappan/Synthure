@@ -88,26 +88,106 @@ export interface IcdCandidate extends IcdInfo {
   indexTerm: string // the official index term that produced this candidate
 }
 
+// Common clinical abbreviations and shorthand expanded to the wording used in
+// the official ICD 10 CM index. These are standard medical abbreviations, not
+// invented content; they only widen the search so an entity like "COPD" or
+// "UTI" reaches the same codes the spelled out phrase would.
+const ABBREV: Record<string, string> = {
+  copd: 'chronic obstructive pulmonary disease',
+  uti: 'urinary tract infection',
+  mi: 'myocardial infarction',
+  nstemi: 'non st elevation myocardial infarction',
+  stemi: 'st elevation myocardial infarction',
+  chf: 'congestive heart failure',
+  hf: 'heart failure',
+  cad: 'coronary artery disease',
+  afib: 'atrial fibrillation',
+  htn: 'hypertension',
+  dm: 'diabetes mellitus',
+  t2dm: 'type 2 diabetes mellitus',
+  t1dm: 'type 1 diabetes mellitus',
+  ckd: 'chronic kidney disease',
+  esrd: 'end stage renal disease',
+  aki: 'acute kidney injury',
+  cva: 'cerebral infarction',
+  tia: 'transient cerebral ischemic attack',
+  dvt: 'deep vein thrombosis',
+  pe: 'pulmonary embolism',
+  gerd: 'gastro esophageal reflux',
+  copd_exac: 'chronic obstructive pulmonary disease with acute exacerbation',
+  gi: 'gastrointestinal',
+  sob: 'shortness of breath',
+  ams: 'altered mental status',
+  osa: 'obstructive sleep apnea',
+  bph: 'benign prostatic hyperplasia',
+  ra: 'rheumatoid arthritis',
+  oa: 'osteoarthritis',
+  gout: 'gout',
+  copd_abbrev: 'chronic obstructive pulmonary disease',
+  mdd: 'major depressive disorder',
+  gad: 'generalized anxiety disorder',
+  ptsd: 'post traumatic stress disorder',
+  adhd: 'attention deficit hyperactivity disorder',
+  afib_rvr: 'atrial fibrillation',
+  copd_flare: 'chronic obstructive pulmonary disease',
+}
+
+// Query words that carry no diagnostic weight on their own, so a single token
+// fallback should never anchor on them.
+const WEAK = new Set(['acute', 'chronic', 'severe', 'mild', 'moderate', 'left', 'right',
+  'bilateral', 'exacerbation', 'disorder', 'disease', 'syndrome', 'productive', 'dry',
+  'unspecified', 'history', 'stage', 'type', 'primary', 'secondary', 'possible', 'suspected'])
+
+function expand(phrase: string): string {
+  return phrase
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => ABBREV[w.replace(/[^a-z0-9]/g, '')] ?? w)
+    .join(' ')
+}
+
 export function icdCandidates(phrase: string, limit = 8): IcdCandidate[] {
   ensureTokenIndex()
-  const q = tokens(phrase)
+  const q = tokens(expand(phrase))
   if (!q.length) return []
-  // Terms containing every query token; fall back to all-but-one for longer queries.
-  const gather = (need: number): number[] => {
+  // Terms containing at least `need` of the query tokens.
+  const gather = (toks: string[], need: number): number[] => {
     const counts = new Map<number, number>()
-    for (const t of new Set(q)) {
+    for (const t of new Set(toks)) {
       for (const id of _tokenIndex!.get(t) ?? []) counts.set(id, (counts.get(id) ?? 0) + 1)
     }
     return [...counts.entries()].filter(([, n]) => n >= need).map(([id]) => id)
   }
-  let ids = gather(new Set(q).size)
-  if (!ids.length && q.length >= 3) ids = gather(new Set(q).size - 1)
+
+  // Back off from "every token" toward the head noun so a phrase like
+  // "productive cough" still reaches "cough" and "COPD exacerbation" (expanded)
+  // still reaches the COPD codes. Over retrieval is fine: the caller lets Claude
+  // pick among candidates with the note as context, or abstain.
+  const uniq = [...new Set(q)]
+  let ids = gather(uniq, uniq.length)
+  if (!ids.length && uniq.length >= 2) ids = gather(uniq, uniq.length - 1)
+  if (!ids.length) {
+    // Single strong tokens, longest first, skipping weak modifiers.
+    const strong = uniq.filter((t) => !WEAK.has(t)).sort((a, b) => b.length - a.length)
+    for (const t of strong.length ? strong : uniq) {
+      ids = gather([t], 1)
+      if (ids.length) break
+    }
+  }
+
+  const qset = new Set(q)
   const scored = ids
     .map((id) => {
       const { term, codes } = _terms![id]
-      return { term, codes, extra: tokens(term).length - q.length }
+      const tt = tokens(term)
+      const overlap = tt.filter((t) => qset.has(t)).length
+      // Head match: the index term leads with a query word (for example the main
+      // term "Fever" rather than "Malaria" which merely mentions fever). This
+      // keeps the primary meaning of a symptom or disease ranked first.
+      const head = tt.length && qset.has(tt[0]) ? 1 : 0
+      return { term, codes, overlap, head, extra: tt.length - overlap }
     })
-    .sort((a, b) => a.extra - b.extra || a.term.length - b.term.length)
+    .sort((a, b) => b.overlap - a.overlap || b.head - a.head || a.extra - b.extra || a.term.length - b.term.length)
   const out: IcdCandidate[] = []
   const seen = new Set<string>()
   for (const s of scored) {

@@ -152,12 +152,14 @@ export function ReportDrawer({
   sections,
   accent,
   tone = 'dark',
+  defaultOpen = true,
 }: {
   sections: ReportSection[]
   accent: string
   tone?: 'dark' | 'light'
+  defaultOpen?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(defaultOpen)
   if (!sections.length) return null
   const isLight = tone === 'light'
   return (
@@ -166,7 +168,7 @@ export function ReportDrawer({
         onClick={() => setOpen((o) => !o)}
         className={`flex w-full items-center justify-between px-4 py-3 text-sm font-medium ${isLight ? 'text-slate-700' : 'text-slate-300'}`}
       >
-        <span>The agent’s full written report</span>
+        <span>The agent’s full written report · {sections.length} sections</span>
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: accent }} />
       </button>
       {open && (

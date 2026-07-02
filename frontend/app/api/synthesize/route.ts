@@ -275,7 +275,7 @@ const REPORT_TOOL: Anthropic.Tool = {
 }
 
 const STYLE =
-  'Produce a thorough, detailed report: 5 to 7 sections, each with a short body and 2 to 5 specific bullets, plus 3 to 5 concrete actions the agent has taken. Be specific and reference the actual conditions, codes, medications, labs, and the readiness checklist. Ground every statement strictly in the extracted facts and the note; never invent clinical values or codes. Critically: write with NO hyphens and NO dashes of any kind (do not use the characters "-", "—", or "–"); rephrase using spaces, commas, or parentheses instead (for example write "ICD 10", "out of network", "follow up", "one tap").'
+  'Produce a thorough, detailed report: 6 to 8 sections, each with a substantive 2 to 3 sentence body and 3 to 5 specific bullets, plus 4 to 6 concrete actions the agent has taken. Name every relevant condition, code, medication, lab, price, and readiness check explicitly; do not speak in generalities when a specific fact is available. Every diagnosis and every medication in the extracted facts should be addressed somewhere in the report. Ground every statement strictly in the extracted facts and the note; never invent clinical values or codes. Critically: write with NO hyphens and NO dashes of any kind (do not use the characters "-", "—", or "–"); rephrase using spaces, commas, or parentheses instead (for example write "ICD 10", "out of network", "follow up", "one tap").'
 
 const ROLE_BRIEF: Record<Stakeholder, string> = {
   patient:
@@ -301,7 +301,7 @@ async function claudeReport(
 ): Promise<StakeholderReport> {
   const msg = await client.messages.create({
     model: writerModel(s, ex),
-    max_tokens: 2600,
+    max_tokens: 3200,
     tools: [{ ...REPORT_TOOL, cache_control: { type: 'ephemeral' } }],
     tool_choice: { type: 'tool', name: 'write_report' },
     system: [
