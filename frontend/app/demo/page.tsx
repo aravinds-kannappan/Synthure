@@ -251,7 +251,40 @@ export default function DemoPage() {
                   animate={{ opacity: 1 }}
                   className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4"
                 >
-                  <div className="text-xs uppercase tracking-wider text-slate-500 mb-3">Extracted facts</div>
+                  <div className="text-xs uppercase tracking-wider text-slate-500 mb-3">Synthure model predictions</div>
+                  {ex.noteType && (
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px]">
+                      <span className="rounded-md border border-sky-400/30 bg-sky-400/10 px-2 py-0.5 text-sky-200">
+                        {ex.noteType.label} · {Math.round(ex.noteType.confidence * 100)}%
+                      </span>
+                      {ex.modelReadiness && (
+                        <span
+                          className={`rounded-md border px-2 py-0.5 ${ex.modelReadiness.band === 'ready' ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : ex.modelReadiness.band === 'needs_work' ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-rose-400/30 bg-rose-400/10 text-rose-300'}`}
+                          title="Gradient boosted readiness model, isotonic calibrated"
+                        >
+                          readiness {Math.round(ex.modelReadiness.calibrated * 100)}%
+                        </span>
+                      )}
+                      {ex.sections && ex.sections.length > 0 && (
+                        <span className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 text-slate-400">
+                          {ex.sections.length} sections
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {ex.missing && ex.missing.length > 0 && (
+                    <div className="mb-3 rounded-lg border border-amber-400/15 bg-amber-400/[0.05] px-3 py-2">
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">Missing information detected</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {ex.missing.map((mm) => (
+                          <span key={mm.field} className="text-[11px] text-amber-100/80">
+                            {mm.field.replace(/_/g, ' ')} ({Math.round(mm.probability * 100)}%)
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="text-xs uppercase tracking-wider text-slate-500 mb-2">Entities and evidence</div>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {ex.entities.slice(0, 14).map((e, i) => (
                       <span key={i} className="text-[11px] rounded-md border border-teal-400/20 bg-teal-400/10 text-teal-200 px-2 py-0.5" title={e.source === 'openmed' ? 'OpenMed model output' : 'Verified verbatim span'}>

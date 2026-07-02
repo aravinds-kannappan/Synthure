@@ -39,6 +39,11 @@ export interface ExtractionResult {
     price?: number // CMS PFS/CLFS national amount, when published
     schedule?: string // which fee schedule priced it
   }[]
+  // Synthure owned model outputs (decisions, not Claude)
+  noteType?: { type: string; label: string; confidence: number }
+  sections?: { name: string; label: string }[]
+  missing?: { field: string; probability: number }[]
+  modelReadiness?: { raw: number; calibrated: number; band: 'ready' | 'needs_work' | 'not_ready' }
   readiness: { checks: ReadinessCheck[]; lane: 'standard' | 'frontier' }
   reviewRisk: number // share of readiness checks flagged (count based, not a model)
   readmissionRisk: number // the CMS published 30 day rate for the matched cohort
@@ -212,8 +217,9 @@ export interface AgentDef {
 export const PIPELINE: AgentDef[] = [
   { id: 'deid', name: 'De identification', role: 'OpenMed PII model scrubs identifiers on your device before anything leaves it', phase: 'intake', accent: '#2dd4bf' },
   { id: 'ner', name: 'Biomedical NER', role: 'OpenMed disease and pharma models extract entities with real confidences', phase: 'intake', accent: '#2dd4bf' },
-  { id: 'rag', name: 'Code Linking', role: 'ICD 10 CM alphabetic index retrieval; Claude picks only among retrieved codes', phase: 'intake', accent: '#2dd4bf' },
-  { id: 'risk', name: 'Risk & Readiness', role: 'CMS published readmission rates and a sourced claim readiness checklist', phase: 'intake', accent: '#f59e0b' },
+  { id: 'classify', name: 'Note type + sections', role: 'Synthure classifier labels the note type and parses clinical sections', phase: 'intake', accent: '#38bdf8' },
+  { id: 'rag', name: 'Code Linking', role: 'ICD 10 CM index retrieval; Synthure reranker scores candidates', phase: 'intake', accent: '#2dd4bf' },
+  { id: 'risk', name: 'Readiness + missing info', role: 'Synthure missing info detector and calibrated readiness model, plus sourced checklist', phase: 'intake', accent: '#f59e0b' },
   { id: 'patient', name: 'Patient Advocate', role: 'Writes a plain language patient report', phase: 'write', accent: '#2dd4bf', stakeholder: 'patient' },
   { id: 'physician', name: 'Care Navigator', role: 'Writes the physician workflow report', phase: 'write', accent: '#818cf8', stakeholder: 'physician' },
   { id: 'hospital', name: 'Revenue Cycle', role: 'Writes the hospital revenue report', phase: 'write', accent: '#22d3ee', stakeholder: 'hospital' },

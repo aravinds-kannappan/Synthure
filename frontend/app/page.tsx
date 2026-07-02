@@ -8,9 +8,9 @@ import HowItWorks from '@/components/HowItWorks'
 import { STAKEHOLDERS, STAKEHOLDER_ORDER } from '@/lib/synthure'
 
 const STATS = [
-  { n: '3', label: 'OpenMed models running in your browser' },
-  { n: '98,186', label: 'ICD 10 CM FY2026 codes in the knowledge layer' },
-  { n: '9,724', label: 'services priced from CMS fee schedules' },
+  { n: '5', label: 'Synthure trained models, evaluated' },
+  { n: '0.84', label: 'readiness AUROC (synthetic test split)' },
+  { n: '0.0', label: 'code hallucination rate, by construction' },
   { n: '0', label: 'identifiers leave your device' },
 ]
 
@@ -45,17 +45,18 @@ export default function Landing() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/[0.07] px-3.5 py-1.5 text-xs font-medium text-teal-300 mb-7">
             <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
-            OpenMed models on your device · Claude agents in the loop
+            Research prototype · OpenMed backbone · Synthure trained models · measurable evals
           </div>
           <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[1.04] text-white">
-            One clinical note.
+            Messy clinical notes,
             <br />
-            <span className="gradient-text">Four intelligent reports.</span>
+            <span className="gradient-text">normalized and claim ready.</span>
           </h1>
           <p className="mt-7 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Synthure reads one clinical note and opens a tailored, verified portal for everyone it
-            touches: the patient, the physician, the hospital, and the employer. De identification
-            and clinical NER run as open models in your browser; nothing identifiable ever leaves it.
+            Synthure is a clinical note normalization and claim readiness copilot. It takes any note,
+            de identifies it on your device with OpenMed, then runs Synthure trained models to
+            classify, structure, code, and score it into one auditable record with human review. The
+            patient, physician, hospital, and employer views are projections of that record.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -128,9 +129,9 @@ export default function Landing() {
         >
           <div className="absolute inset-0 blur-3xl opacity-30" style={{ background: 'linear-gradient(135deg, rgba(45,212,191,0.2), rgba(129,140,248,0.2))' }} />
           <div className="relative">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Type your own note. See the magic.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Paste any note. See it normalized.</h2>
             <p className="mt-4 text-slate-400 max-w-md mx-auto">
-              No fixed patients, no canned demo. Paste any clinical note and watch the agents go to work.
+              No fixed patients, no canned demo. Paste any clinical note and watch the models classify, structure, code, and score it into one record.
             </p>
             <Link
               href="/demo"
@@ -171,9 +172,9 @@ export default function Landing() {
       <section className="relative px-6 py-24 border-t border-white/[0.06]">
         <div className="max-w-3xl mx-auto text-center">
           <Zap className="h-7 w-7 text-teal-400 mx-auto mb-5" />
-          <h2 className="text-4xl sm:text-5xl font-bold text-white">Healthcare’s busywork, handled.</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-white">From unstructured note to auditable record.</h2>
           <p className="mt-5 text-slate-400 max-w-lg mx-auto">
-            One note used to mean four people doing four jobs in four systems. Synthure does it in one pass.
+            One note used to mean four people doing four jobs in four systems. Synthure normalizes it once, with model confidence, missing information flags, and a human review step before anything is used.
           </p>
           <Link
             href="/demo"
@@ -188,7 +189,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
           <div className="flex items-center gap-2">
             <span className="gradient-text font-bold">◈</span>
-            <span>Synthure, Multi Agent Clinical AI</span>
+            <span>Synthure, clinical note normalization and claim readiness (research prototype)</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/research" className="hover:text-slate-300 transition-colors">Research</Link>

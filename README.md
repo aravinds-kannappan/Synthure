@@ -2,11 +2,13 @@
 
 # ◈ Synthure
 
-**One clinical note. Four intelligent reports. Nothing identifiable leaves your device.**
+**A clinical note normalization and claim readiness copilot.**
 
-Synthure reads a single clinical note and opens a tailored, verified portal for everyone the note touches: the **patient**, the **physician**, the **hospital**, and the **employer**. De identification and clinical NER run as open models inside your browser, every code and price and rate traces to a public primary source, and a verifier plus a constitution critic audit and revise every report before you see it.
+Synthure accepts a messy clinical note (SOAP, discharge summary, referral, ER note, radiology report, intake form, or pasted physician text), uses **OpenMed** as the clinical NLP backbone for de identification and biomedical entity extraction, then runs **Synthure trained task specific models** on top to classify the note, parse its sections, rank ICD candidates, detect missing documentation, and score claim and prior authorization readiness with calibrated confidence and an abstention layer. The output is one auditable, structured record with a human review step. The patient, physician, hospital, and employer views are projections of that record, not separate dashboards.
 
-[Live demo](https://synthure.vercel.app) · [Research notes](https://synthure.vercel.app/research)
+This is a **research and prototype grade** ML workflow system with auditable outputs, human review, and measurable evals. It is not a production medical device.
+
+[Live demo](https://synthure.vercel.app) · [Model evaluations](https://synthure.vercel.app/evals) · [Research notes](https://synthure.vercel.app/research)
 
 </div>
 
@@ -33,6 +35,26 @@ Synthure reads a single clinical note and opens a tailored, verified portal for 
 17. [Attribution and licenses](#attribution-and-licenses)
 
 ---
+
+## The ML architecture
+
+The pipeline is: **raw note → OpenMed de identification and entity extraction → note type classifier → section parser → clinical schema builder → ICD candidate ranker → missing information detector → claim and prior authorization readiness predictor → calibration and abstention layer → human approval → downstream portal views.**
+
+**OpenMed is the clinical NLP backbone** (de identification, PII detection, biomedical NER, medical embeddings), used as provided.
+
+**Synthure owns and trains the task specific models** (`ml/`, exported to `frontend/lib/models/`, run in process):
+
+| Model | Type | Purpose |
+|---|---|---|
+| note type | TF IDF + logistic regression | classify the note type |
+| section parser | rule based | detect and span clinical sections |
+| ICD reranker | logistic regression | rank candidates from the official ICD 10 CM index |
+| missing info | per field logistic regression | flag absent required documentation |
+| readiness | gradient boosted trees + isotonic calibration | calibrated claim / prior auth readiness |
+
+**Claude is never the runtime decision maker.** It is used only for synthetic note augmentation, weak labeling, adversarial test cases, rubric based evaluation, and plain language narration of the finished record.
+
+Every model is trained and evaluated in a reproducible harness. Measured on a held out synthetic test split (labels are exact gold; absolute numbers will be lower on real clinical text, which is stated plainly): note type accuracy 1.00, section F1 0.82, ICD top 3 accuracy 0.82 with a 0.0 hallucination rate, missing info micro F1 0.75, readiness AUROC 0.84 and AUPRC 0.90 with ECE 0.054, abstention lifting accuracy from 0.88 to 0.92, and OpenMed de identification recall 1.00 with disease NER recall 0.83. See the [evaluations page](https://synthure.vercel.app/evals) and [`ml/README.md`](ml/README.md).
 
 ## Why Synthure exists
 

@@ -22,6 +22,7 @@ export type Phase = 'idle' | 'loading-models' | 'running' | 'complete'
 const MIN_MS: Record<string, number> = {
   deid: 500,
   ner: 500,
+  classify: 450,
   rag: 550,
   risk: 500,
   patient: 700,

@@ -39,6 +39,9 @@ import {
   type IcdCandidate,
 } from '@/lib/knowledge.server'
 import { OPENMED_MODELS } from '@/lib/openmedModels'
+import { classifyNoteType, detectMissing, predictReadiness } from '@/lib/models/synthure'
+import { parseSections } from '@/lib/models/sections'
+import { NOTE_TYPE_LABELS } from '@/lib/schema'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -580,10 +583,21 @@ export async function POST(req: Request) {
           ? Number(Math.min(...modelConfs.map((e) => e.confidence as number)).toFixed(2))
           : 1 // purely literal extraction: nothing model generated to doubt
 
+        // Synthure owned models run in process. These are the decision making
+        // predictions; Claude is not consulted for any of them.
+        const nt = classifyNoteType(note)
+        const sections = parseSections(note)
+        const missingPreds = detectMissing(note, nt.type, icd10.length, cpt.length).filter((m) => m.present)
+        const readyModel = predictReadiness(note, nt.type, icd10.length, cpt.length)
+
         const ex: ExtractionResult = dehyphen({
           entities,
           icd10,
           cpt,
+          noteType: { type: nt.type, label: NOTE_TYPE_LABELS[nt.type], confidence: nt.confidence },
+          sections: sections.map((s) => ({ name: s.name, label: s.label })),
+          missing: missingPreds.map((m) => ({ field: m.field, probability: m.probability })),
+          modelReadiness: readyModel,
           readiness: { checks: readiness.checks, lane: readiness.lane },
           reviewRisk: readiness.reviewRisk,
           readmissionRisk: readm.risk,
@@ -598,13 +612,17 @@ export async function POST(req: Request) {
             'De identification (on device)': OPENMED_MODELS.deid.label,
             'Disease NER (on device)': OPENMED_MODELS.disease.label,
             'Pharma NER (on device)': OPENMED_MODELS.pharma.label,
+            'Note type classifier (Synthure)': 'TF IDF + logistic regression',
+            'Section parser (Synthure)': 'rule based header detection',
+            'Missing info detector (Synthure)': 'per field logistic regression',
+            'Readiness predictor (Synthure)': 'gradient boosted trees + isotonic calibration',
+            'Code reranker (Synthure)': 'logistic regression over index candidates',
             'Span tagging': 'Claude Haiku 4.5 (verbatim spans, verified server side)',
-            'Code linking': 'ICD 10 CM FY2026 index retrieval + Claude Haiku 4.5 (constrained choice)',
-            Writers: 'Claude Haiku 4.5 / Sonnet 4.6 (frontier lane)',
-            'Verifier / Critic / Orchestrator': 'Claude Sonnet 4.6',
+            Writers: 'Claude Haiku 4.5 / Sonnet 4.6 (narration of the record, not decisions)',
           },
         })
-        stage('risk', `readiness ${readiness.checks.filter((c) => c.status === 'pass').length}/${readiness.checks.length} checks passing, lane ${readiness.lane}`, t0)
+        stage('classify', `note type ${NOTE_TYPE_LABELS[nt.type]} (${Math.round(nt.confidence * 100)}%), ${sections.length} sections parsed`, t0)
+        stage('risk', `model readiness ${Math.round(readyModel.calibrated * 100)}% (${readyModel.band}), ${missingPreds.length} missing fields, ${readiness.checks.filter((c) => c.status === 'pass').length}/${readiness.checks.length} checks passing`, t0)
         send({ type: 'extracted', extraction: ex })
 
         // 7) Writers in parallel.
