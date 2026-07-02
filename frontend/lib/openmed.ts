@@ -39,12 +39,13 @@ type TcPipeline = (text: string, opts?: Record<string, unknown>) => Promise<RawT
 // The transformers.js web bundle and the ONNX wasm runtime are vendored under
 // /public/vendor and loaded at runtime, so webpack never parses them and the
 // whole stack still deploys as static Vercel assets.
-const TRANSFORMERS_URL = '/vendor/transformers/transformers.web.min.js'
+const TRANSFORMERS_URL = '/vendor/transformers/transformers.min.js'
 const ORT_WASM_PATH = '/vendor/transformers/ort/'
 
 interface TransformersModule {
   pipeline: (task: string, model: string, opts?: Record<string, unknown>) => Promise<unknown>
   env: {
+    allowLocalModels: boolean
     allowRemoteModels: boolean
     localModelPath: string
     backends: { onnx: { wasm: { wasmPaths: string } } }
@@ -57,6 +58,10 @@ let _envReady = false
 async function lib(): Promise<TransformersModule> {
   const mod = (await import(/* webpackIgnore: true */ TRANSFORMERS_URL)) as TransformersModule
   if (!_envReady) {
+    // The self contained web build defaults allowLocalModels to false outside a
+    // recognized bundler; we serve the models ourselves, so enable local and
+    // disable any remote (Hugging Face Hub) fetch.
+    mod.env.allowLocalModels = true
     mod.env.allowRemoteModels = false
     mod.env.localModelPath = '/models/'
     mod.env.backends.onnx.wasm.wasmPaths = ORT_WASM_PATH
