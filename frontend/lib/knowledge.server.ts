@@ -67,7 +67,9 @@ function tokens(s: string): string[] {
     .toLowerCase()
     .replace(/[^a-z0-9 ]+/g, ' ')
     .split(/\s+/)
-    .filter((t) => t.length > 1 && !STOP.has(t))
+    // Keep single digits (type 2, stage 3) so the reranker can distinguish
+    // diabetes types and CKD stages; drop other single characters and stopwords.
+    .filter((t) => (t.length > 1 || /^\d$/.test(t)) && !STOP.has(t))
 }
 
 function ensureTokenIndex() {

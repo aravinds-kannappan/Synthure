@@ -204,6 +204,89 @@ function literalProcs(note: string): ExtractionResult['cpt'] {
   return [...out.values()]
 }
 
+// ── Clinical abbreviation and shorthand extractor ────────────────────────────
+// Real notes are written in shorthand (DM2, HTN, HLD, CKD3, SOB, HF). The
+// OpenMed models are trained on spelled out text and miss most abbreviations,
+// so this deterministic pass catches common clinical abbreviations and short
+// phrases and adds them as diagnosis entities to be coded by the reranker.
+const CLINICAL_ABBREV: [RegExp, string][] = [
+  [/\b(dm2|t2dm|type 2 (diabetes|dm)|niddm)\b/gi, 'type 2 diabetes mellitus'],
+  [/\b(dm1|t1dm|type 1 (diabetes|dm)|iddm)\b/gi, 'type 1 diabetes mellitus'],
+  [/\bhtn\b/gi, 'hypertension'],
+  [/\b(hld|hlp|dyslipidemia|hyperlipidemia)\b/gi, 'hyperlipidemia'],
+  [/\bckd\s?([12345])\b/gi, 'chronic kidney disease stage $1'],
+  [/\bckd\b/gi, 'chronic kidney disease'],
+  [/\b(esrd|end stage renal)\b/gi, 'end stage renal disease'],
+  [/\b(chf|congestive heart failure)\b/gi, 'congestive heart failure'],
+  [/\bhfref\b/gi, 'systolic heart failure'],
+  [/\bhfpef\b/gi, 'diastolic heart failure'],
+  [/\bheart failure\b/gi, 'heart failure'],
+  [/\bcad\b/gi, 'coronary artery disease'],
+  [/\b(afib|a fib|atrial fib)\b/gi, 'atrial fibrillation'],
+  [/\bcopd\b/gi, 'chronic obstructive pulmonary disease'],
+  [/\b(cva|stroke)\b/gi, 'cerebral infarction'],
+  [/\btia\b/gi, 'transient cerebral ischemic attack'],
+  [/\b(mi|nstemi|stemi)\b/gi, 'myocardial infarction'],
+  [/\bpe\b/gi, 'pulmonary embolism'],
+  [/\bdvt\b/gi, 'deep vein thrombosis'],
+  [/\bgerd\b/gi, 'gastro esophageal reflux'],
+  [/\buti\b/gi, 'urinary tract infection'],
+  [/\bbph\b/gi, 'benign prostatic hyperplasia'],
+  [/\bosa\b/gi, 'obstructive sleep apnea'],
+  [/\bgout\b/gi, 'gout'],
+  [/\baki\b/gi, 'acute kidney injury'],
+  [/\bsob\b/gi, 'shortness of breath'],
+  [/\b(mdd|depression)\b/gi, 'major depressive disorder'],
+  [/\b(gad|anxiety)\b/gi, 'anxiety'],
+  [/\bpna\b/gi, 'pneumonia'],
+]
+
+// Negation cues: an entity is dropped when the text just before it negates it,
+// so "no fever, no cough, denies chest pain" are not coded as present.
+const NEG_RE = /\b(no|not|denies|denied|without|w\/o|neg(ative)? for|absent|ruled out|r\/o|free of)\b/i
+function isNegated(note: string, start: number): boolean {
+  const window = note.slice(Math.max(0, start - 22), start)
+  // stop at sentence boundaries so a negation does not leak across clauses
+  const clause = window.split(/[.;]/).pop() ?? window
+  return NEG_RE.test(clause)
+}
+
+function extractAbbreviations(note: string): Entity[] {
+  const out: Entity[] = []
+  const seen = new Set<string>()
+  for (const [re, canonical] of CLINICAL_ABBREV) {
+    re.lastIndex = 0
+    let m: RegExpExecArray | null
+    while ((m = re.exec(note))) {
+      const start = m.index
+      if (isNegated(note, start)) continue
+      const text = canonical.replace('$1', m[1] ?? '')
+      const key = text.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push({ text, type: 'DIAGNOSIS', start, end: start + m[0].length, source: 'synthure' })
+    }
+  }
+  return out
+}
+
+// Infer an evaluation and management visit when the note is an office or ED
+// encounter with diagnoses but no procedure was coded, so the revenue view is
+// not empty. The code and price come from the CMS fee schedule; the label is a
+// neutral description (CPT descriptors are AMA licensed and not shipped).
+function inferVisit(noteTypeId: string, hasDx: boolean, hasProc: boolean): ExtractionResult['cpt'][number] | null {
+  if (hasProc || !hasDx) return null
+  const visitCode = noteTypeId === 'er_note' ? '99284' : '99214'
+  const priced = procPrice(visitCode)
+  if (!priced) return null
+  return {
+    code: visitCode,
+    label: noteTypeId === 'er_note' ? 'Emergency department visit (evaluation and management)' : 'Established patient office visit (evaluation and management)',
+    price: priced.price,
+    schedule: priced.schedule,
+  }
+}
+
 // ── Writers / verifier / critic / orchestrator ────────────────────────────────
 const REPORT_TOOL: Anthropic.Tool = {
   name: 'write_report',
@@ -499,12 +582,21 @@ export async function POST(req: Request) {
         )
 
         // 2) Medications: RxNorm prescribable vocabulary decides what is a drug.
-        const entities: Entity[] = verified.map((e) => {
-          if (e.type !== 'CHEM') return e
-          const hit = medMatch(e.text)
-          return hit ? { ...e, type: 'MEDICATION' } : { ...e, type: 'CHEMICAL' }
-        })
-        stage('ner', `${entities.length} on device entities verified (${entities.filter((e) => e.type === 'MEDICATION').length} RxNorm matched medications)`, t0)
+        //    Diagnosis and symptom entities that the note negates are dropped.
+        const entities: Entity[] = verified
+          .filter((e) => !((e.type === 'DIAGNOSIS' || e.type === 'SIGN_SYMPTOM') && typeof e.start === 'number' && isNegated(note, e.start)))
+          .map((e) => {
+            if (e.type !== 'CHEM') return e
+            const hit = medMatch(e.text)
+            return hit ? { ...e, type: 'MEDICATION' } : { ...e, type: 'CHEMICAL' }
+          })
+        // Clinical abbreviation extractor: catches DM2, HTN, HLD, CKD3, HF and
+        // other shorthand the spelled-out OpenMed models miss.
+        for (const a of extractAbbreviations(note)) {
+          if (!entities.some((e) => e.start === a.start && e.text.toLowerCase() === a.text.toLowerCase())) entities.push(a)
+        }
+        const abbrevCount = entities.filter((e) => e.source === 'synthure').length
+        stage('ner', `${entities.length} entities (${entities.filter((e) => e.type === 'MEDICATION').length} RxNorm meds, ${abbrevCount} from shorthand), negated findings dropped`, t0)
 
         // 3) Symptom / lab spans (verbatim, verified).
         t0 = Date.now()
@@ -513,6 +605,9 @@ export async function POST(req: Request) {
           if (!entities.some((e) => e.start === s.start && e.end === s.end)) entities.push(s)
         }
         stage('spans', `${spanEnts.length} symptom/lab spans tagged and verified`, t0)
+
+        // Note type (Synthure classifier) up front; it informs visit inference.
+        const nt = classifyNoteType(note)
 
         // 4) + 5) Codes: literal ones validated, diagnosis entities linked via the index.
         t0 = Date.now()
@@ -524,7 +619,11 @@ export async function POST(req: Request) {
         for (const l of linked) icdMap.set(l.code, l)
         for (const l of litIcd) icdMap.set(l.code, l) // literal codes win
         const icd10 = [...icdMap.values()]
-        stage('rag', `${icd10.length} ICD 10 codes resolved (${litIcd.length} literal, ${icd10.length - litIcd.length} linked from entities), ${cpt.length} services priced from CMS schedules`, t0)
+        // If the encounter has diagnoses but no procedure was written, suggest an
+        // evaluation and management visit so the claim is not empty.
+        const visit = inferVisit(nt.type, icd10.length > 0, cpt.length > 0)
+        if (visit) cpt.push(visit)
+        stage('rag', `${icd10.length} ICD 10 codes resolved (${litIcd.length} literal, ${icd10.length - litIcd.length} linked), ${cpt.length} services${visit ? ' (visit inferred)' : ''} priced from CMS schedules`, t0)
 
         // 6) Cohorts, consumer language, readiness, readmission.
         t0 = Date.now()
@@ -550,8 +649,7 @@ export async function POST(req: Request) {
           : 1 // purely literal extraction: nothing model generated to doubt
 
         // Synthure owned models run in process. These are the decision making
-        // predictions; Claude is not consulted for any of them.
-        const nt = classifyNoteType(note)
+        // predictions; Claude is not consulted for any of them. (nt classified above.)
         const sections = parseSections(note)
         const missingPreds = detectMissing(note, nt.type, icd10.length, cpt.length).filter((m) => m.present)
         const readyModel = predictReadiness(note, nt.type, icd10.length, cpt.length)

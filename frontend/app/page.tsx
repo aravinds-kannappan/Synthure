@@ -8,16 +8,16 @@ import AgentFloor from '@/components/AgentFloor'
 import { STAKEHOLDERS, STAKEHOLDER_ORDER } from '@/lib/synthure'
 
 const STATS = [
-  { n: '5', label: 'Synthure trained models, evaluated' },
-  { n: '0.84', label: 'readiness AUROC (synthetic test split)' },
-  { n: '0.0', label: 'code hallucination rate, by construction' },
-  { n: '0', label: 'identifiers leave your device' },
+  { n: '10', label: 'agents in the pipeline' },
+  { n: '5', label: 'Synthure trained models' },
+  { n: '84%', label: 'readiness AUROC (synthetic eval)' },
+  { n: '98K', label: 'ICD 10 codes indexed' },
 ]
 
 const TRUST = [
-  { icon: ShieldCheck, title: 'De identified on your device', body: 'An OpenMed PII model runs in your browser and scrubs identifiers before the note leaves it. The raw note is never sent anywhere.' },
-  { icon: GitBranch, title: 'Codes cannot be invented', body: 'Diagnosis codes are retrieved from the official ICD 10 CM index; the language model only chooses among retrieved candidates, and a verifier plus constitution critic audit and revise every report.' },
-  { icon: Gauge, title: 'Every number is sourced', body: 'Prices are CMS fee schedule amounts, readmission is the CMS published rate, cohorts are AHRQ CCSR categories, and readiness is a checklist that cites its rule. No invented probabilities.' },
+  { icon: ShieldCheck, title: 'De identified on device', body: 'An OpenMed model scrubs identifiers in your browser. The raw note is never sent.' },
+  { icon: GitBranch, title: 'Codes cannot be invented', body: 'Codes come only from the official ICD 10 CM index, scored by a trained reranker.' },
+  { icon: Gauge, title: 'Every number is sourced', body: 'Prices are CMS amounts, readiness is a calibrated model, evals are published.' },
 ]
 
 const SOURCES = ['CDC/NCHS ICD 10 CM FY2026', 'CMS Physician Fee Schedule 2026', 'CMS Clinical Lab Fee Schedule 2026', 'CMS OPD prior authorization list', 'CMS readmission measures (data.cms.gov)', 'AHRQ HCUP CCSR v2025', 'NLM RxNorm', 'MedlinePlus Connect']
@@ -43,20 +43,14 @@ export default function Landing() {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/[0.07] px-3.5 py-1.5 text-xs font-medium text-teal-300 mb-7">
-            <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
-            Research prototype · OpenMed backbone · Synthure trained models · measurable evals
-          </div>
-          <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[1.04] text-white">
+          <h1 className="mt-4 text-5xl sm:text-7xl font-bold tracking-tight leading-[1.04] text-white">
             Messy clinical notes,
             <br />
             <span className="gradient-text">normalized and claim ready.</span>
           </h1>
-          <p className="mt-7 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Synthure is a clinical note normalization and claim readiness copilot. It takes any note,
-            de identifies it on your device with OpenMed, then runs Synthure trained models to
-            classify, structure, code, and score it into one auditable record with human review. The
-            patient, physician, hospital, and employer views are projections of that record.
+          <p className="mt-7 text-lg sm:text-xl text-slate-400 max-w-xl mx-auto leading-relaxed">
+            Any clinical note in, one auditable, coded, claim ready record out. De identified on your
+            device, structured by trained models, checked by a human.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link

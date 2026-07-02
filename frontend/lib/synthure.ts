@@ -10,7 +10,7 @@ export interface Entity {
   start?: number // character span in the de-identified note
   end?: number
   confidence?: number // real softmax score when source is an OpenMed model
-  source?: 'openmed' | 'claude' | 'literal' // which stage produced this entity
+  source?: 'openmed' | 'claude' | 'literal' | 'synthure' // which stage produced this entity
 }
 
 export interface ReadinessCheck {

@@ -45,8 +45,13 @@ export default function PortalShell(props: {
   synthesis: Synthesis | null
   complete: boolean
 }) {
+  // Key the provider on the actual codes so a NEW note rebuilds the encounter
+  // instead of reusing the reducer's first initial state (which showed stale
+  // content from a previous run).
+  const encKey =
+    props.extraction.icd10.map((c) => c.code).join('|') + '::' + props.extraction.cpt.map((c) => c.code).join('|')
   return (
-    <EncounterProvider extraction={props.extraction}>
+    <EncounterProvider key={encKey} extraction={props.extraction}>
       <PortalShellInner {...props} />
     </EncounterProvider>
   )

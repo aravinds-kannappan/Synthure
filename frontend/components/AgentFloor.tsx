@@ -139,10 +139,9 @@ export default function AgentFloor() {
           <Sparkles className="h-4 w-4" /> Ten agents, trained to act
         </div>
         <h2 className="text-center text-3xl font-bold text-white sm:text-4xl">Watch the pipeline run itself</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center leading-relaxed text-slate-400">
-          One note flows through ten agents. The Synthure trained models below run live in your browser,
-          so the note type, sections, missing information, and readiness you see are real model output, not
-          a scripted animation.
+        <p className="mx-auto mt-3 max-w-xl text-center leading-relaxed text-slate-400">
+          One note, ten agents. The Synthure models run live in your browser, so what you see is real
+          model output, not animation.
         </p>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_340px]">
