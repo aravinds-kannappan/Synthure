@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
 import { fmt$ } from '@/lib/engine'
+import { PAYERS, PAYER_ORDER, type Payer } from '@/lib/pricing'
 import { useEncounter } from './EncounterContext'
 import { ReportDrawer } from './widgets'
 import Inbox from './Inbox'
@@ -78,8 +79,8 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
             {d.services.map((s) => (
               <div key={s.code} className="flex items-center justify-between text-[13px]">
                 <span className="text-slate-600">{s.label}</span>
-                {s.price != null ? (
-                  <span className="text-slate-500">{fmt$(s.price)} CMS amount{s.patient != null && <> · <span className="font-medium text-teal-700">~{fmt$(s.patient)} you</span></>}</span>
+                {s.payerPrice != null ? (
+                  <span className="text-slate-500">{fmt$(s.payerPrice)} {PAYERS[state.plan.payer].label}{s.patient != null && <> · <span className="font-medium text-teal-700">~{fmt$(s.patient)} you</span></>}</span>
                 ) : (
                   <span className="text-slate-400">no published amount</span>
                 )}
@@ -272,7 +273,19 @@ function PlanEditor() {
     dispatch({ type: 'setPlan', plan: { ...p, [k]: v } })
   return (
     <div className="mt-3 rounded-lg border border-teal-200/70 bg-white/70 p-3">
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-teal-700">Your plan design (editable)</div>
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-teal-700">Your coverage (editable)</div>
+      <select
+        value={p.payer}
+        onChange={(e) => {
+          const payer = e.target.value as Payer
+          dispatch({ type: 'setPlan', plan: { ...p, payer, coinsurance: PAYERS[payer].coinsurance } })
+        }}
+        className="mb-2 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-[13px] text-slate-800"
+      >
+        {PAYER_ORDER.map((k) => (
+          <option key={k} value={k}>{PAYERS[k].label}</option>
+        ))}
+      </select>
       <div className="grid grid-cols-3 gap-2">
         <label className="text-[11px] text-slate-500">
           Deductible left

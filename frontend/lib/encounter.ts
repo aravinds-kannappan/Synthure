@@ -13,6 +13,7 @@
 import type { ExtractionResult, ReadinessCheck, Stakeholder } from './synthure'
 import priorAuthList from './models/prior_auth.json'
 import { fmt$ } from './engine'
+import { PAYERS, type Payer } from './pricing'
 
 export type Portal = Stakeholder
 export const PORTALS: Portal[] = ['patient', 'physician', 'hospital', 'employer']
@@ -45,11 +46,12 @@ export interface EncLab { label: string }
 // single coverage. The user can change them in the plan panel; the math below
 // is ordinary benefit arithmetic over whatever is set here.
 export interface PlanDesign {
+  payer: Payer // sets the price basis over the Medicare allowed amount
   deductibleRemaining: number
   coinsurance: number // plan's member share after deductible, e.g. 0.2
   oopMaxRemaining: number
 }
-export const DEFAULT_PLAN: PlanDesign = { deductibleRemaining: 1886, coinsurance: 0.2, oopMaxRemaining: 4500 }
+export const DEFAULT_PLAN: PlanDesign = { payer: 'commercial', deductibleRemaining: 1886, coinsurance: 0.2, oopMaxRemaining: 4500 }
 export const PLAN_SOURCE =
   'Defaults: KFF Employer Health Benefits Survey averages for single coverage (editable)'
 
@@ -137,7 +139,8 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
 export interface DerivedService {
   code: string
   label: string
-  price: number | null
+  price: number | null // Medicare (CMS) allowed amount
+  payerPrice: number | null // priced for the selected payer (price * payer multiplier)
   patient: number | null
   atRisk: boolean
   atRiskWhy: string | null
@@ -257,6 +260,7 @@ export function derive(s: EncounterState): Derived {
   // blocking check applies to it; fixing the check moves the dollars, not a
   // hidden multiplier.
   const noDx = billedDx.length === 0
+  const mult = PAYERS[s.plan.payer].multiplier
   const services: DerivedService[] = activeProc.map((p) => {
     const authRisk = p.authNeeded && !s.priorAuthApproved
     const atRisk = authRisk || noDx
@@ -264,6 +268,7 @@ export function derive(s: EncounterState): Derived {
       code: p.code,
       label: p.label,
       price: p.price,
+      payerPrice: p.price == null ? null : Math.round(p.price * mult),
       patient: null, // filled below once benefit math runs over the total
       atRisk,
       atRiskWhy: authRisk
@@ -273,9 +278,9 @@ export function derive(s: EncounterState): Derived {
           : null,
     }
   })
-  const priced = services.filter((x) => x.price != null)
-  const allowed = priced.reduce((a, x) => a + (x.price as number), 0)
-  const atRisk = priced.filter((x) => x.atRisk).reduce((a, x) => a + (x.price as number), 0)
+  const priced = services.filter((x) => x.payerPrice != null)
+  const allowed = priced.reduce((a, x) => a + (x.payerPrice as number), 0)
+  const atRisk = priced.filter((x) => x.atRisk).reduce((a, x) => a + (x.payerPrice as number), 0)
   const expectedReimb = allowed - atRisk
   const unpriced = services.length - priced.length
 
@@ -289,13 +294,13 @@ export function derive(s: EncounterState): Derived {
     patientEst = Math.round(Math.min(ded + coins, s.plan.oopMaxRemaining))
     assumptions.push(
       `Deductible remaining ${fmt$(s.plan.deductibleRemaining)}, coinsurance ${Math.round(s.plan.coinsurance * 100)}%, out of pocket max remaining ${fmt$(s.plan.oopMaxRemaining)}`,
-      'Amounts are CMS national published amounts; a plan’s contracted rates differ',
+      `Priced as ${PAYERS[s.plan.payer].label}: ${PAYERS[s.plan.payer].source}`,
     )
     if (unpriced) assumptions.push(`${unpriced} service${unpriced === 1 ? ' has' : 's have'} no published CMS amount and ${unpriced === 1 ? 'is' : 'are'} excluded`)
     if (s.financialAssistance)
       assumptions.push('Financial assistance screening requested; the final amount depends on the hospital’s policy')
     // Apportion the estimate across priced services for the line item view.
-    for (const x of priced) x.patient = Math.round((patientEst * (x.price as number)) / allowed)
+    for (const x of priced) x.patient = Math.round((patientEst * (x.payerPrice as number)) / allowed)
   }
 
   const cohorts = s.base.cohorts
