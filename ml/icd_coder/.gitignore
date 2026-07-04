@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# training outputs land in config.out_dir (default /content/... on Colab)
+out/
+*.npz

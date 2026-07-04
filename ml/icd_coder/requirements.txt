@@ -1,0 +1,6 @@
+# Colab already ships torch. These pin the rest of the ICD-coder stack.
+torch>=2.1
+transformers>=4.44
+accelerate>=0.33
+scikit-learn>=1.3
+numpy>=1.24
