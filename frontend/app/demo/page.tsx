@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-react'
 import Nav from '@/components/Nav'
@@ -9,6 +9,7 @@ import SafetyConsole from '@/components/SafetyConsole'
 import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
 import { OPENMED_MODELS, type OpenMedStage } from '@/lib/openmed'
+import { logRun } from '@/lib/runlog'
 import { ShieldCheck, Download } from 'lucide-react'
 
 function StatusDot({ status, accent }: { status: AgentStatus; accent: string }) {
@@ -115,6 +116,23 @@ export default function DemoPage() {
   )
 
   const ex = state.extraction
+
+  // Append one record to the local continuous eval feed when a run completes.
+  const loggedRef = useRef<object | null>(null)
+  useEffect(() => {
+    if (state.phase === 'complete' && ex && loggedRef.current !== ex) {
+      loggedRef.current = ex
+      logRun({
+        ts: Date.now(),
+        noteType: ex.noteType?.label ?? 'note',
+        codes: ex.icd10.length,
+        trainedCodes: ex.icd10.filter((c) => c.trained).length,
+        readiness: ex.modelReadiness?.calibrated ?? null,
+        reviewRisk: ex.reviewRisk,
+        entities: ex.entities.length,
+      })
+    }
+  }, [state.phase, ex])
 
   function onRun() {
     if (!note.trim() || running) return

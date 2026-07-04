@@ -2,6 +2,7 @@ import Nav from '@/components/Nav'
 import evals from '@/data/evals.json'
 import modelEvals from '@/data/model_evals.json'
 import { Bars } from '@/components/Charts'
+import RunFeed from '@/components/RunFeed'
 
 export const metadata = { title: 'Synthure — Model evaluations' }
 
@@ -100,6 +101,12 @@ export default function EvalsPage() {
               </p>
             )}
           </section>
+        </div>
+
+        {/* Continuous eval: this browser's demo runs */}
+        <div className="mb-8">
+          <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Continuous evaluation, live from your demo runs</div>
+          <RunFeed />
         </div>
 
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
