@@ -61,10 +61,12 @@ class Coder:
     def __init__(self):
         idx = np.load(ICD_DIR / "code_index.npz", allow_pickle=True)
         self.codes = list(idx["codes"])
-        self.emb = torch.tensor(idx["emb"], device=DEVICE)
-        self.enc = AutoModel.from_pretrained(ICD_DIR / "retriever").to(DEVICE).eval()
+        # weights + index ship as fp16 to fit the free 1 GB Space; upcast to fp32
+        # so CPU inference is exact (fp16 matmul is slow/unsupported on CPU).
+        self.emb = torch.tensor(np.asarray(idx["emb"], dtype=np.float32), device=DEVICE)
+        self.enc = AutoModel.from_pretrained(ICD_DIR / "retriever", torch_dtype=torch.float32).to(DEVICE).eval()
         self.enc_tok = AutoTokenizer.from_pretrained(ICD_DIR / "retriever")
-        self.ce = AutoModelForSequenceClassification.from_pretrained(ICD_DIR / "reranker").to(DEVICE).eval()
+        self.ce = AutoModelForSequenceClassification.from_pretrained(ICD_DIR / "reranker", torch_dtype=torch.float32).to(DEVICE).eval()
         self.ce_tok = AutoTokenizer.from_pretrained(ICD_DIR / "reranker")
         with gzip.open(ICD_TABULAR, "rt") as f:
             tab = json.load(f)
@@ -114,7 +116,7 @@ class Checker:
     """cross-encoder faithfulness: P(claim supported by evidence)."""
 
     def __init__(self):
-        self.model = AutoModelForSequenceClassification.from_pretrained(FAITH_DIR / "checker").to(DEVICE).eval()
+        self.model = AutoModelForSequenceClassification.from_pretrained(FAITH_DIR / "checker", torch_dtype=torch.float32).to(DEVICE).eval()
         self.tok = AutoTokenizer.from_pretrained(FAITH_DIR / "checker")
         thr = FAITH_DIR / "threshold.json"
         self.threshold = json.loads(thr.read_text())["flag_threshold"] if thr.exists() else 0.5
