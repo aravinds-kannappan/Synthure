@@ -50,6 +50,54 @@ export const maxDuration = 60
 const HAIKU = 'claude-haiku-4-5-20251001'
 const SONNET = 'claude-sonnet-4-6'
 
+// ── Trained model service (optional) ───────────────────────────────────────────
+// When SYNTHURE_MODEL_API points at the Synthure model Space, diagnosis mentions
+// are additionally linked by the trained retriever + reranker (every returned
+// code revalidated against the CMS tabular, so nothing opaque enters the
+// pipeline) and portal reports are scored for faithfulness. Unset or unreachable:
+// the app falls back to its lexical linker with no change in behavior.
+const MODEL_API = (process.env.SYNTHURE_MODEL_API || '').replace(/\/$/, '')
+
+async function modelLinkCodes(mentions: string[]): Promise<ExtractionResult['icd10']> {
+  if (!MODEL_API || mentions.length === 0) return []
+  try {
+    const res = await fetch(`${MODEL_API}/code`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mentions, top: 5 }),
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!res.ok) return []
+    const data = (await res.json()) as { codes?: { code?: string; code_raw?: string; mention?: string }[] }
+    const out: ExtractionResult['icd10'] = []
+    for (const c of data.codes ?? []) {
+      const info = icdInfo(c.code_raw || (c.code || '').replace(/\./g, ''))
+      if (info) out.push({ code: info.code, label: info.description, billable: info.billable, source: 'linked', entity: c.mention })
+    }
+    return out
+  } catch {
+    return []
+  }
+}
+
+async function modelFaithfulness(note: string, ex: ExtractionResult, report: StakeholderReport): Promise<StakeholderReport['flags']> {
+  if (!MODEL_API) return undefined
+  try {
+    const res = await fetch(`${MODEL_API}/faithfulness`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ note, extraction: ex, report }),
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!res.ok) return undefined
+    const data = (await res.json()) as { flagged?: { field: string; sentence: string; p_supported: number }[] }
+    const flagged = data.flagged ?? []
+    return flagged.length ? flagged.map((f) => ({ field: f.field, sentence: f.sentence, pSupported: f.p_supported })) : undefined
+  } catch {
+    return undefined
+  }
+}
+
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 // In-memory per serverless instance: per IP per hour plus a global daily cap.
 // This bounds Claude API spend on an open demo endpoint.
@@ -615,8 +663,10 @@ export async function POST(req: Request) {
         const cpt = literalProcs(note)
         const diagEnts = entities.filter((e) => e.type === 'DIAGNOSIS')
         const linked = linkDiagnoses(diagEnts)
+        const modelLinked = await modelLinkCodes(diagEnts.map((e) => e.text))
         const icdMap = new Map<string, ExtractionResult['icd10'][number]>()
         for (const l of linked) icdMap.set(l.code, l)
+        for (const l of modelLinked) if (!icdMap.has(l.code)) icdMap.set(l.code, l) // trained coder adds recall
         for (const l of litIcd) icdMap.set(l.code, l) // literal codes win
         const icd10 = [...icdMap.values()]
         // If the encounter has diagnoses but no procedure was written, suggest an
@@ -687,12 +737,18 @@ export async function POST(req: Request) {
         })
         stage('classify', `note type ${NOTE_TYPE_LABELS[nt.type]} (${Math.round(nt.confidence * 100)}%), ${sections.length} sections parsed`, t0)
         stage('risk', `model readiness ${Math.round(readyModel.calibrated * 100)}% (${readyModel.band}), ${missingPreds.length} missing fields, ${readiness.checks.filter((c) => c.status === 'pass').length}/${readiness.checks.length} checks passing`, t0)
+        if (MODEL_API) {
+          ex.models['ICD coder (Synthure, trained)'] =
+            'bi encoder retriever + cross encoder reranker (A100, FY2026 index + CodiEsp)'
+        }
         send({ type: 'extracted', extraction: ex })
 
         // 7) Writers in parallel.
         const reports = await Promise.all(
           STAKEHOLDER_ORDER.map(async (s) => {
             const report = await claudeReport(client, s, note, ex)
+            const flags = await modelFaithfulness(note, ex, report)
+            if (flags) report.flags = flags
             send({ type: 'report', report })
             return report
           }),

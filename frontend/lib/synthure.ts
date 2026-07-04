@@ -76,6 +76,10 @@ export interface StakeholderReport {
   metrics: ReportMetric[]
   sections: ReportSection[]
   actions: string[]
+  // Sentences the trained faithfulness checker could not support against the
+  // note + extraction (set only when the model service is wired in). Advisory:
+  // a review flag, not an automated edit.
+  flags?: { field: string; sentence: string; pSupported: number }[]
 }
 
 export interface VerificationCheck {
