@@ -375,11 +375,11 @@ const REPORT_TOOL: Anthropic.Tool = {
 }
 
 const STYLE =
-  'Produce a thorough, detailed report: 6 to 8 sections, each with a substantive 2 to 3 sentence body and 3 to 5 specific bullets, plus 4 to 6 concrete actions the agent has taken. Name every relevant condition, code, medication, lab, price, and readiness check explicitly; do not speak in generalities when a specific fact is available. Every diagnosis and every medication in the extracted facts should be addressed somewhere in the report. Ground every statement strictly in the extracted facts and the note; never invent clinical values or codes. Critically: write with NO hyphens and NO dashes of any kind (do not use the characters "-", "—", or "–"); rephrase using spaces, commas, or parentheses instead (for example write "ICD 10", "out of network", "follow up", "one tap").'
+  'Be concise and skimmable. Produce 3 to 4 sections, each with a one sentence body and 2 or 3 short bullets, plus 2 or 3 concrete actions the agent has taken. Lead with the fact and cut filler, preamble, and hedging. Still name the specific conditions, codes, medications, labs, prices, and readiness checks explicitly rather than speaking in generalities, and address the main diagnoses and medications. Ground every statement strictly in the extracted facts and the note; never invent clinical values or codes. Write with NO hyphens and NO dashes of any kind (do not use the characters "-", "—", or "–"); rephrase using spaces, commas, or parentheses instead (for example write "ICD 10", "out of network", "follow up").'
 
 const ROLE_BRIEF: Record<Stakeholder, string> = {
   patient:
-    'You are the Patient Advocate agent. Write for the patient at about a 6th grade reading level: warm, clear, and reassuring, never alarming. Your report MUST (1) translate every diagnosis into plain everyday language, preferring the MedlinePlus consumer text when provided and expanding on it; (2) explain each medication, what it does and how to take it; (3) explain any lab values or test results; (4) include a cost section built on the CMS national amounts provided, clearly labeled as estimates that depend on the patient plan, with deductible and copay context and financial assistance options; (5) give clear next steps, when to seek care sooner, and questions to ask. Be genuinely useful and complete.',
+    'You are the Patient Advocate agent. Write for the patient at about a 6th grade reading level: warm, clear, and reassuring, never alarming. Your report MUST (1) translate every diagnosis into plain everyday language, preferring the MedlinePlus consumer text when provided and expanding on it; (2) explain each medication, what it does and how to take it; (3) explain any lab values or test results; (4) give a short estimate of what the patient is likely to pay out of pocket, not a national average: take the CMS allowed amounts as the basis and translate them into the patient likely responsibility (for example roughly 20 percent coinsurance after the deductible under Medicare, or deductible dependent under a typical commercial plan), always labeled as an estimate that depends on their specific plan, and mention financial assistance options; (5) give clear next steps, when to seek care sooner, and questions to ask. Be genuinely useful and complete.',
   physician:
     'You are the Care Navigator agent supporting the treating physician. Be precise and clinical. Cover suggested ICD 10 coding with sequencing rationale (note any code flagged as a non billable category header and what specificity is missing), documentation prompts, prior authorization needs (only those on published payer lists), the claim readiness checklist and concrete fixes for each flagged item, order and care coordination, and follow up. Do not state a denial probability. You never prescribe or diagnose; you support the physician and save them time.',
   hospital:
@@ -401,7 +401,7 @@ async function claudeReport(
 ): Promise<StakeholderReport> {
   const msg = await client.messages.create({
     model: writerModel(s, ex),
-    max_tokens: 3200,
+    max_tokens: 1500,
     tools: [{ ...REPORT_TOOL, cache_control: { type: 'ephemeral' } }],
     tool_choice: { type: 'tool', name: 'write_report' },
     system: [
