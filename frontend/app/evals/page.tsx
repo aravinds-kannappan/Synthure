@@ -96,7 +96,7 @@ export default function EvalsPage() {
               </>
             ) : (
               <p className="text-[13px] leading-relaxed text-slate-400">
-                A cross encoder that scores each portal sentence against the note and extraction and flags unsupported claims. The benchmark is the held out FactCC style corruption test set: flag precision, flag recall, and AUROC over supported vs corrupted claims. It populates here from <span className="font-mono text-slate-300">faithfulness_out/eval.json</span> once the checker is deployed.
+                A cross encoder that scores each portal sentence against the note and extraction and flags unsupported claims, built in <span className="font-mono text-slate-300">ml/faithfulness</span>. Its benchmark is a held out FactCC style corruption test set: flag precision, flag recall, and AUROC over supported vs corrupted claims. It is not deployed in the live demo; the running writer check is a verifier and a constitution critic that audit each report against the extracted facts.
               </p>
             )}
           </section>

@@ -32,13 +32,13 @@ const PIPELINE: { label: string; model: string; kind: keyof typeof KIND }[] = [
   { label: 'ICD-10-CM coding', model: 'Trained retriever + reranker (A100)', kind: 'trained' },
   { label: 'Readiness + readmission', model: 'Gradient boosted trees + CMS rates', kind: 'trained' },
   { label: 'Four portal writers', model: 'Claude, grounded on the extraction', kind: 'claude' },
-  { label: 'Faithfulness check', model: 'Trained cross-encoder (A100)', kind: 'trained' },
+  { label: 'Verify + critique', model: 'Claude audits each report against the facts', kind: 'claude' },
 ]
 
 const TRUST = [
   { icon: ShieldCheck, title: 'De-identified on device', body: 'An OpenMed model scrubs identifiers in your browser. The raw note is never sent.' },
   { icon: GitBranch, title: 'Codes cannot be invented', body: 'Every code comes from the official ICD-10-CM index and is scored by a trained reranker, then revalidated against the CMS tabular.' },
-  { icon: ScanLine, title: 'Writers are checked', body: 'A trained faithfulness model scores each portal sentence against the note and flags anything it cannot support.' },
+  { icon: ScanLine, title: 'Writers are audited', body: 'Every report is checked against the extracted facts by a verifier and a constitution critic before it is shown.' },
 ]
 
 const SOURCES = ['CDC/NCHS ICD-10-CM FY2026', 'CodiEsp (CLEF eHealth)', 'CMS Physician Fee Schedule 2026', 'CMS readmission measures', 'AHRQ HCUP CCSR', 'NLM RxNorm', 'MedlinePlus Connect', 'OpenMed (Apache 2.0)']
@@ -59,7 +59,7 @@ export default function Landing() {
       <section className="relative px-6 pt-40 pb-16 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-4xl">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] px-3 py-1 text-[12px] text-emerald-300">
-            <Cpu className="h-3.5 w-3.5" /> the coding and checking are trained models, not prompts
+            <Cpu className="h-3.5 w-3.5" /> the codes come from a trained model, not an LLM guess
           </div>
           <h1 className="text-5xl font-bold leading-[1.04] tracking-tight text-white sm:text-7xl">
             One clinical note,
@@ -67,7 +67,7 @@ export default function Landing() {
             <span className="gradient-text">four portals, coded and checked.</span>
           </h1>
           <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-slate-400 sm:text-xl">
-            De-identified on your device, coded by a retriever and reranker trained on an A100, and every generated line checked by a trained faithfulness model before it reaches a portal.
+            De-identified on your device, coded by a retriever and reranker trained on an A100, then audited against the extracted facts before anything reaches a portal.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link href="/demo" className="group inline-flex items-center gap-2 rounded-xl bg-teal-400 px-7 py-3.5 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300 hover:shadow-lg hover:shadow-teal-400/25">
@@ -117,7 +117,7 @@ export default function Landing() {
               A bi-encoder retriever learned {CODER.train_pairs.toLocaleString()} phrase to code pairs across the {CODER.index_codes.toLocaleString()} code FY2026 index, and a cross-encoder reranker was fine-tuned on CodiEsp clinical cases. Given a diagnosis mention it ranks the exact ICD-10-CM code first {Math.round(CODER.codiesp.acc1 * 100)}% of the time and inside the top five {Math.round(CODER.codiesp.acc5 * 100)}%.
             </p>
             <p className="mt-3 text-[13px] leading-relaxed text-slate-500">
-              Claude still writes the four portals, but it no longer chooses the codes, and every sentence it writes is scored by a trained faithfulness model.
+              Claude still writes the four portals, but it no longer chooses the codes, and every report it writes is audited against the extracted facts by a verifier and a constitution critic before it is shown.
             </p>
             <Link href="/evals" className="mt-5 inline-flex items-center gap-1.5 text-sm text-teal-300 hover:text-teal-200">
               Full evaluations <ArrowRight className="h-3.5 w-3.5" />
@@ -187,7 +187,7 @@ export default function Landing() {
           <div className="relative">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">Paste any note. Watch it get coded and checked.</h2>
             <p className="mx-auto mt-4 max-w-md text-slate-400">
-              No fixed patients, no canned demo. The trained coder links the diagnoses live, and the trained checker flags any portal sentence it cannot support.
+              No fixed patients, no canned demo. The trained coder links the diagnoses live, then a verifier audits every portal report against the extracted facts.
             </p>
             <Link href="/demo" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-teal-400 px-9 py-4 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300 hover:shadow-lg hover:shadow-teal-400/30">
               Open the demo <ArrowRight className="h-4 w-4" />
