@@ -65,7 +65,7 @@ async function modelLinkCodes(mentions: string[]): Promise<ExtractionResult['icd
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ mentions, top: 5 }),
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(25000), // a sleeping free HF Space needs ~15-30s to wake
     })
     if (!res.ok) return []
     const data = (await res.json()) as { codes?: { code?: string; code_raw?: string; mention?: string }[] }
@@ -87,7 +87,7 @@ async function modelFaithfulness(note: string, ex: ExtractionResult, report: Sta
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ note, extraction: ex, report }),
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(25000), // a sleeping free HF Space needs ~15-30s to wake
     })
     if (!res.ok) return undefined
     const data = (await res.json()) as { flagged?: { field: string; sentence: string; p_supported: number }[] }
