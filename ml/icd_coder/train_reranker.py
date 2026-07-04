@@ -160,6 +160,42 @@ def evaluate(docs, retriever, reranker: CrossEncoder, code2desc, config, device)
             "docs": len(aps)}
 
 
+@torch.no_grad()
+def evaluate_mentions(docs, retriever, reranker: CrossEncoder, code2desc, config, device) -> dict:
+    """Linker quality: given each gold evidence span (CodiEsp-X), does the coder
+    rank the gold code at the top? This measures what the model actually does
+    (mention -> code), unlike the doc metric which needs an NER step we don't add
+    here and feeds whole sentences the retriever was not trained on. Report as a
+    CodiEsp-X linking number, mentions given.
+    """
+    reranker.eval()
+    code_set = set(retriever.codes)
+    a1, a5, mrr, n = 0, 0, 0.0, 0
+    for d in docs:
+        for sp in d.get("spans", []):
+            gc, text = sp.get("code"), (sp.get("text") or "").strip()
+            if gc not in code_set or len(text) < 2:
+                continue
+            cand = [retriever.codes[j] for j in retriever.topk([text], config.candidates_per_query)[0]]
+            if gc not in cand:
+                n += 1  # gold not even retrieved -> counts as a miss
+                continue
+            desc = [code2desc.get(c, c) for c in cand]
+            enc = reranker.tokenize([text] * len(cand), desc, config.max_pair_len, device)
+            s = reranker(**enc).float().cpu().numpy()
+            order = np.argsort(s)[::-1]
+            ranked = [cand[i] for i in order]
+            rank = ranked.index(gc)  # gc guaranteed present here
+            a1 += rank == 0
+            a5 += rank < 5
+            mrr += 1.0 / (rank + 1)
+            n += 1
+    if n == 0:
+        return {"mentions": 0}
+    return {"mentions": n, "acc@1": round(a1 / n, 4), "acc@5": round(a5 / n, 4),
+            "mrr": round(mrr / n, 4)}
+
+
 def train(config: Config, smoke: bool):
     torch.manual_seed(config.seed)
     rng = random.Random(config.seed)
@@ -167,7 +203,7 @@ def train(config: Config, smoke: bool):
     out = Path(config.out_dir)
 
     if smoke:
-        config.reranker_backbone = "prajjwal1/bert-tiny"
+        config.reranker_backbone = "google/bert_uncased_L-2_H-128_A-2"  # official BERT-tiny (has model_type)
         config.reranker_epochs = 1
         config.reranker_batch = 16
         pairs = synthetic_pairs()
@@ -200,7 +236,8 @@ def train(config: Config, smoke: bool):
     steps = max(1, len(loader) * config.reranker_epochs)
     opt = torch.optim.AdamW(reranker.parameters(), lr=config.reranker_lr, weight_decay=config.weight_decay)
     sched = get_linear_schedule_with_warmup(opt, int(steps * config.warmup_ratio), steps)
-    scaler = torch.cuda.amp.GradScaler(enabled=config.fp16 and device == "cuda")
+    use_amp = config.fp16 and device == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     bce = torch.nn.BCEWithLogitsLoss()
 
     reranker.train()
@@ -210,14 +247,16 @@ def train(config: Config, smoke: bool):
         for q, c, y in loader:
             y = y.to(device)
             enc = reranker.tokenize(q, c, config.max_pair_len, device)
-            with torch.cuda.amp.autocast(enabled=config.fp16 and device == "cuda"):
+            with torch.amp.autocast("cuda", enabled=use_amp):
                 logits = reranker(**enc)
                 loss = bce(logits, y)
             opt.zero_grad()
             scaler.scale(loss).backward()
+            prev = scaler.get_scale()
             scaler.step(opt)
             scaler.update()
-            sched.step()
+            if scaler.get_scale() >= prev:   # optimizer stepped (no fp16 overflow) -> advance LR
+                sched.step()
             step += 1
             if step % 50 == 0 or smoke:
                 print(f"  epoch {epoch} step {step}/{steps} loss {loss.item():.4f}")
@@ -230,9 +269,18 @@ def train(config: Config, smoke: bool):
     reranker.model.save_pretrained(out / "reranker")
     reranker.tok.save_pretrained(out / "reranker")
 
-    metrics = evaluate(test_docs, retriever, reranker, code2desc, config, device)
-    print("\n=== CodiEsp-D reranked, held-out test ===")
-    print(metrics)
+    doc_metrics = evaluate(test_docs, retriever, reranker, code2desc, config, device)
+    mention_metrics = evaluate_mentions(test_docs, retriever, reranker, code2desc, config, device)
+    metrics = {
+        # linker quality: the task this coder is actually built for (mention -> code)
+        "mention_linking": mention_metrics,
+        # end-to-end doc coding via whole-sentence retrieval; a weak proxy here
+        # (retriever trained on short phrases, CodiEsp is the Spanish ICD-10 modification)
+        "doc_coding_sentence_proxy": doc_metrics,
+    }
+    print("\n=== CodiEsp held-out test ===")
+    print("mention linking (given gold spans):", mention_metrics)
+    print("doc coding (sentence proxy)       :", doc_metrics)
     (out / "reranker_eval.json").write_text(json.dumps(metrics, indent=2))
     return metrics
 

@@ -47,7 +47,7 @@ def train(config: Config, smoke: bool, use_nli: bool, use_open: bool):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     if smoke:
-        config.backbone = "prajjwal1/bert-tiny"
+        config.backbone = "google/bert_uncased_L-2_H-128_A-2"  # official BERT-tiny (has model_type)
         config.warm_start_nli = ""
         config.epochs = 1
         config.batch_size = 16

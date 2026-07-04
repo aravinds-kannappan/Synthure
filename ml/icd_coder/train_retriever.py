@@ -62,7 +62,7 @@ def train(config: Config, smoke: bool):
 
     if smoke:
         data = synthetic_pairs(n=400)
-        config.retriever_backbone = "prajjwal1/bert-tiny"
+        config.retriever_backbone = "google/bert_uncased_L-2_H-128_A-2"  # official BERT-tiny (has model_type)
         config.retriever_batch = 32
         config.retriever_epochs = 1
     else:
@@ -87,7 +87,8 @@ def train(config: Config, smoke: bool):
     steps = len(loader) * config.retriever_epochs
     opt = torch.optim.AdamW(model.parameters(), lr=config.retriever_lr, weight_decay=config.weight_decay)
     sched = get_linear_schedule_with_warmup(opt, int(steps * config.warmup_ratio), steps)
-    scaler = torch.cuda.amp.GradScaler(enabled=config.fp16 and device == "cuda")
+    use_amp = config.fp16 and device == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
     max_steps = 5 if smoke else steps
     model.train()
@@ -97,15 +98,17 @@ def train(config: Config, smoke: bool):
             code_ids = code_ids.to(device)
             a = model.tokenize(phrases, config.max_phrase_len, device)
             p = model.tokenize(pos_texts, config.max_phrase_len, device)
-            with torch.cuda.amp.autocast(enabled=config.fp16 and device == "cuda"):
+            with torch.amp.autocast("cuda", enabled=use_amp):
                 ae = model.encode(a["input_ids"], a["attention_mask"])
                 pe = model.encode(p["input_ids"], p["attention_mask"])
                 loss = info_nce(ae, pe, code_ids, config.temperature)
             opt.zero_grad()
             scaler.scale(loss).backward()
+            prev = scaler.get_scale()
             scaler.step(opt)
             scaler.update()
-            sched.step()
+            if scaler.get_scale() >= prev:   # optimizer stepped (no fp16 overflow) -> advance LR
+                sched.step()
             step += 1
             if step % 50 == 0 or smoke:
                 print(f"  epoch {epoch} step {step}/{steps} loss {loss.item():.4f}")
