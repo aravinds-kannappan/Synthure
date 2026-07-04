@@ -68,11 +68,11 @@ async function modelLinkCodes(mentions: string[]): Promise<ExtractionResult['icd
       signal: AbortSignal.timeout(25000), // a sleeping free HF Space needs ~15-30s to wake
     })
     if (!res.ok) return []
-    const data = (await res.json()) as { codes?: { code?: string; code_raw?: string; mention?: string }[] }
+    const data = (await res.json()) as { codes?: { code?: string; code_raw?: string; mention?: string; score?: number }[] }
     const out: ExtractionResult['icd10'] = []
     for (const c of data.codes ?? []) {
       const info = icdInfo(c.code_raw || (c.code || '').replace(/\./g, ''))
-      if (info) out.push({ code: info.code, label: info.description, billable: info.billable, source: 'linked', entity: c.mention })
+      if (info) out.push({ code: info.code, label: info.description, billable: info.billable, source: 'linked', entity: c.mention, trained: true, modelScore: c.score })
     }
     return out
   } catch {
@@ -666,8 +666,12 @@ export async function POST(req: Request) {
         const modelLinked = await modelLinkCodes(diagEnts.map((e) => e.text))
         const icdMap = new Map<string, ExtractionResult['icd10'][number]>()
         for (const l of linked) icdMap.set(l.code, l)
-        for (const l of modelLinked) if (!icdMap.has(l.code)) icdMap.set(l.code, l) // trained coder adds recall
         for (const l of litIcd) icdMap.set(l.code, l) // literal codes win
+        for (const m of modelLinked) {
+          const existing = icdMap.get(m.code)
+          if (existing) { existing.trained = true; existing.modelScore = m.modelScore } // trained coder confirms
+          else icdMap.set(m.code, m) // trained coder adds a code the lexical linker missed
+        }
         const icd10 = [...icdMap.values()]
         // If the encounter has diagnoses but no procedure was written, suggest an
         // evaluation and management visit so the claim is not empty.

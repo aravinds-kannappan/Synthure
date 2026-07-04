@@ -313,6 +313,31 @@ export default function DemoPage() {
                 </motion.div>
               )}
 
+              {state.phase === 'complete' && ex && ex.icd10.some((c) => c.trained) && (
+                <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="text-xs uppercase tracking-wider text-emerald-300">Trained ICD coder</div>
+                    <span className="text-[10px] text-emerald-400/70">retriever + reranker</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {ex.icd10.filter((c) => c.trained).slice(0, 6).map((c) => (
+                      <div key={c.code} className="flex items-center justify-between gap-2 text-[12px]">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="rounded bg-emerald-400/10 px-1.5 py-0.5 font-mono text-[11px] text-emerald-300">{c.code}</span>
+                          <span className="truncate text-slate-300">{c.label}</span>
+                        </span>
+                        {typeof c.modelScore === 'number' && (
+                          <span className="shrink-0 tabular-nums text-[11px] text-emerald-300/80">{Math.round(c.modelScore * 100)}%</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
+                    Codes linked or confirmed by the trained bi encoder plus cross encoder, with the reranker&apos;s confidence. Each is revalidated against the CMS tabular.
+                  </p>
+                </div>
+              )}
+
               {state.phase === 'complete' && ex && (
                 <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] p-4">
                   <div className="text-xs uppercase tracking-wider text-slate-500 mb-2">Models in this run</div>

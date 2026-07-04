@@ -32,6 +32,8 @@ export interface ExtractionResult {
     entity?: string // the note phrase this code was linked from
     plain?: string // MedlinePlus Connect consumer language, when available
     plainSource?: string
+    trained?: boolean // the trained coder (retriever + reranker) linked or confirmed this code
+    modelScore?: number // the trained reranker's confidence for this code, 0-1
   }[]
   cpt: {
     code: string

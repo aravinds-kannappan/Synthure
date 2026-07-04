@@ -124,6 +124,7 @@ function PortalShellInner({
 
   const Active = PORTAL[active]
   const cfg = STAKEHOLDERS[active]
+  const activeFlags = reports[active]?.flags ?? []
 
   return (
     <div className="relative space-y-5">
@@ -248,6 +249,24 @@ function PortalShellInner({
           </motion.div>
         ) : (
           <motion.div key={active} initial={{ opacity: 0, y: 14, scale: 0.99 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.99 }} transition={{ duration: 0.35, ease: 'easeOut' }}>
+            {activeFlags.length > 0 && (
+              <div className="mb-3 rounded-xl border border-amber-400/25 bg-amber-400/[0.05] p-3">
+                <div className="mb-1.5 text-[11px] uppercase tracking-wider text-amber-300">
+                  Faithfulness review · {activeFlags.length} flagged
+                </div>
+                <ul className="space-y-1">
+                  {activeFlags.slice(0, 4).map((f, i) => (
+                    <li key={i} className="flex items-start justify-between gap-3 text-[12px]">
+                      <span className="text-slate-300">&ldquo;{f.sentence}&rdquo;</span>
+                      <span className="shrink-0 tabular-nums text-[11px] text-amber-300/80">{Math.round(f.pSupported * 100)}% supported</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[10px] leading-relaxed text-slate-500">
+                  Sentences the trained checker could not support against the note and extraction. Advisory, for human review.
+                </p>
+              </div>
+            )}
             <Active report={reports[active]} />
           </motion.div>
         )}
