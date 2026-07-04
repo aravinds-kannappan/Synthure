@@ -1,0 +1,18 @@
+{
+  "built": "2026-07-04",
+  "icd_coder": {
+    "backbone": "BiomedBERT base",
+    "index_codes": 98186,
+    "train_pairs": 268787,
+    "codiesp": {
+      "mentions": 3615,
+      "acc1": 0.4066,
+      "acc5": 0.4918,
+      "mrr": 0.4443,
+      "doc_map": 0.0459,
+      "doc_p5": 0.0624,
+      "docs": 250
+    }
+  },
+  "faithfulness": null
+}
