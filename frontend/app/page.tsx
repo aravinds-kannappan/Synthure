@@ -1,225 +1,233 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ArrowRight, ShieldCheck, GitBranch, ScanLine, Cpu } from 'lucide-react'
+import { Fraunces, DM_Sans } from 'next/font/google'
+import { ArrowRight, User, Stethoscope, Building2, Briefcase } from 'lucide-react'
 import Nav from '@/components/Nav'
-import AgentFloor from '@/components/AgentFloor'
-import { Bars } from '@/components/Charts'
-import modelEvals from '@/data/model_evals.json'
-import { STAKEHOLDERS, STAKEHOLDER_ORDER } from '@/lib/synthure'
 
-const CODER = modelEvals.icd_coder
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['700', '900'], display: 'swap' })
+const dmSans = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '700'], display: 'swap' })
 
-const STATS = [
-  { n: `${Math.round(CODER.codiesp.acc1 * 100)}%`, label: 'exact ICD-10-CM code ranked first (CodiEsp, N = 3,615)' },
-  { n: '98K', label: 'ICD-10-CM codes in the trained index' },
-  { n: '269K', label: 'phrase to code pairs the retriever learned' },
-  { n: '4', label: 'stakeholder portals from one note' },
+const STAGES = [
+  { n: '01', color: 'text-indigo-400', title: 'Intake + de-identification', desc: 'Identifiers are scrubbed on your device before anything is sent.' },
+  { n: '02', color: 'text-emerald-400', title: 'Biomedical NER', desc: 'OpenMed models tag diagnoses, medications, and labs with real confidences.' },
+  { n: '03', color: 'text-cyan-400', title: 'ICD-10-CM coding', desc: 'A trained retriever and reranker link each mention to its billable code.' },
+  { n: '04', color: 'text-amber-400', title: 'Risk + readiness', desc: 'CMS readmission rates and a sourced claim readiness scrub, no fabricated denial score.' },
+  { n: '05', color: 'text-rose-400', title: 'Generation + audit', desc: 'Four portal writers, then a verifier and a constitution critic before anything ships.' },
 ]
 
-// kind drives the color: what actually runs each stage
-const KIND = {
-  device: { c: '#38bdf8', tag: 'on device' },
-  trained: { c: '#34d399', tag: 'trained' },
-  claude: { c: '#a78bfa', tag: 'Claude' },
-} as const
+const PORTALS = [
+  { id: 'patient', icon: User, color: 'indigo', title: 'Patient', desc: 'Plain-language explanations, medication guidance, and a personalized out-of-pocket estimate for the reader plan.' },
+  { id: 'physician', icon: Stethoscope, color: 'emerald', title: 'Physician', desc: 'Suggested coding with sequencing, documentation prompts, prior authorization needs, and the readiness checklist.' },
+  { id: 'hospital', icon: Building2, color: 'cyan', title: 'Hospital', desc: 'Claim construction with CMS amounts, review lane, expected reimbursement, and HRRP exposure.' },
+  { id: 'employer', icon: Briefcase, color: 'amber', title: 'Employer', desc: 'Aggregated, anonymized population category, cost exposure, and benefit design, with no identifying detail.' },
+] as const
 
-const PIPELINE: { label: string; model: string; kind: keyof typeof KIND }[] = [
-  { label: 'De-identify', model: 'OpenMed PII, in your browser', kind: 'device' },
-  { label: 'Biomedical NER', model: 'OpenMed disease + pharma, in your browser', kind: 'device' },
-  { label: 'Note type + sections', model: 'Synthure classifier', kind: 'trained' },
-  { label: 'ICD-10-CM coding', model: 'Trained retriever + reranker (A100)', kind: 'trained' },
-  { label: 'Readiness + readmission', model: 'Gradient boosted trees + CMS rates', kind: 'trained' },
-  { label: 'Four portal writers', model: 'Claude, grounded on the extraction', kind: 'claude' },
-  { label: 'Verify + critique', model: 'Claude audits each report against the facts', kind: 'claude' },
+const METRICS = [
+  { count: '41', suffix: '%', label: 'exact ICD-10-CM code ranked first, on CodiEsp gold mentions (N = 3,615)' },
+  { count: '49', suffix: '%', label: 'correct code within the top five' },
+  { count: '0.44', suffix: '', label: 'mean reciprocal rank of the trained coder' },
 ]
 
-const TRUST = [
-  { icon: ShieldCheck, title: 'De-identified on device', body: 'An OpenMed model scrubs identifiers in your browser. The raw note is never sent.' },
-  { icon: GitBranch, title: 'Codes cannot be invented', body: 'Every code comes from the official ICD-10-CM index and is scored by a trained reranker, then revalidated against the CMS tabular.' },
-  { icon: ScanLine, title: 'Writers are audited', body: 'Every report is checked against the extracted facts by a verifier and a constitution critic before it is shown.' },
+const SAFETY = [
+  { title: 'Codes cannot be invented', desc: 'Every code comes from the official ICD-10-CM index and is revalidated against the CMS tabular before it appears.' },
+  { title: 'Writers are audited', desc: 'A verifier and a constitution critic check each report against the extracted facts before it is shown.' },
+  { title: 'It abstains when unsure', desc: 'Below a confidence threshold the pipeline escalates to a human coder instead of auto routing.' },
 ]
 
-const SOURCES = ['CDC/NCHS ICD-10-CM FY2026', 'CodiEsp (CLEF eHealth)', 'CMS Physician Fee Schedule 2026', 'CMS readmission measures', 'AHRQ HCUP CCSR', 'NLM RxNorm', 'MedlinePlus Connect', 'OpenMed (Apache 2.0)']
+const PORTAL_STYLE: Record<string, { border: string; bg: string; text: string }> = {
+  indigo: { border: 'border-indigo-500/20', bg: 'bg-indigo-500/10', text: 'text-indigo-400' },
+  emerald: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
+  cyan: { border: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
+  amber: { border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' },
+}
 
 export default function Landing() {
+  useEffect(() => {
+    // reveal on scroll
+    const revealObs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target) } }),
+      { threshold: 0.12 },
+    )
+    document.querySelectorAll('.reveal').forEach((el) => revealObs.observe(el))
+
+    // metric count-up
+    const countObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return
+        const el = e.target as HTMLElement
+        const target = parseFloat(el.dataset.count || '0')
+        const suffix = el.dataset.suffix || ''
+        const isDecimal = String(el.dataset.count || '').includes('.')
+        const duration = 1800
+        const startT = performance.now()
+        countObs.unobserve(el)
+        const tick = (now: number) => {
+          const p = Math.min((now - startT) / duration, 1)
+          const eased = 1 - Math.pow(1 - p, 4)
+          el.textContent = (isDecimal ? (target * eased).toFixed(2) : Math.round(target * eased)) + suffix
+          if (p < 1) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      })
+    }, { threshold: 0.5 })
+    document.querySelectorAll('[data-count]').forEach((el) => countObs.observe(el))
+
+    // pipeline scroll progression
+    const section = document.getElementById('pipeline-section')
+    const stages = document.querySelectorAll('.pipeline-stage')
+    const noteLines = document.querySelectorAll<HTMLElement>('.note-line')
+    const codeTags = document.querySelectorAll('.code-tag')
+    const riskBars = document.querySelectorAll('.risk-bar')
+    const outputLines = document.querySelectorAll('.output-line')
+    const updatePipeline = () => {
+      if (!section) return
+      const rect = section.getBoundingClientRect()
+      const scrollable = rect.height - window.innerHeight
+      const progress = Math.max(0, Math.min(1, -rect.top / scrollable))
+      const active = Math.min(5, Math.floor(progress * 5) + 1)
+      stages.forEach((s, i) => s.classList.toggle('active', i < active))
+      noteLines.forEach((l) => l.classList.toggle('revealed', parseInt(l.dataset.stage || '0') <= active))
+      codeTags.forEach((t) => t.classList.toggle('shown', active >= 3))
+      riskBars.forEach((b) => b.classList.toggle('filled', active >= 4))
+      outputLines.forEach((l) => l.classList.toggle('typed', active >= 5))
+    }
+    window.addEventListener('scroll', updatePipeline, { passive: true })
+    updatePipeline()
+
+    return () => {
+      revealObs.disconnect()
+      countObs.disconnect()
+      window.removeEventListener('scroll', updatePipeline)
+    }
+  }, [])
+
   return (
-    <div className="relative">
+    <div className={`${dmSans.className} relative overflow-x-hidden text-white`}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute inset-0 grid-bg opacity-60" />
-        <div className="absolute -top-40 -left-32 h-[600px] w-[600px] rounded-full opacity-[0.07]" style={{ background: 'radial-gradient(circle, #2dd4bf, transparent 70%)' }} />
-        <div className="absolute top-1/4 -right-48 h-[600px] w-[600px] rounded-full opacity-[0.06]" style={{ background: 'radial-gradient(circle, #34d399, transparent 70%)' }} />
-        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full opacity-[0.05]" style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }} />
+        <div className="absolute inset-0 grid-bg opacity-50" />
+        <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full opacity-[0.08]" style={{ background: 'radial-gradient(circle, #818cf8, transparent 70%)' }} />
+        <div className="absolute top-1/3 -right-40 h-[600px] w-[600px] rounded-full opacity-[0.06]" style={{ background: 'radial-gradient(circle, #34d399, transparent 70%)' }} />
       </div>
 
       <Nav />
 
-      {/* ── Hero ───────────────────────────────────────────────────── */}
-      <section className="relative px-6 pt-40 pb-16 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-4xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] px-3 py-1 text-[12px] text-emerald-300">
-            <Cpu className="h-3.5 w-3.5" /> the codes come from a trained model, not an LLM guess
-          </div>
-          <h1 className="text-5xl font-bold leading-[1.04] tracking-tight text-white sm:text-7xl">
-            One clinical note,
-            <br />
-            <span className="gradient-text">four portals, coded and checked.</span>
+      {/* Hero */}
+      <section className="relative flex items-center justify-center" style={{ minHeight: '100vh' }}>
+        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+          <p className="hero-anim hero-d1 text-sm uppercase tracking-[0.25em] text-indigo-300">One note, four portals</p>
+          <h1 className={`${fraunces.className} hero-anim hero-d2 mt-6 text-5xl font-black leading-[1.05] sm:text-7xl`}>
+            One clinical note,<br /><span className="gradient-text">coded and checked.</span>
           </h1>
-          <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-slate-400 sm:text-xl">
+          <p className="hero-anim hero-d3 mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-slate-300">
             De-identified on your device, coded by a retriever and reranker trained on an A100, then audited against the extracted facts before anything reaches a portal.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/demo" className="group inline-flex items-center gap-2 rounded-xl bg-teal-400 px-7 py-3.5 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300 hover:shadow-lg hover:shadow-teal-400/25">
+          <div className="hero-anim hero-d3 mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/demo" className="group inline-flex items-center gap-2 rounded-xl bg-teal-400 px-7 py-3.5 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300">
               Try the live demo <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link href="/evals" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-7 py-3.5 text-sm text-slate-300 transition-all hover:border-white/20 hover:text-white">
               See the numbers
             </Link>
           </div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="relative mx-auto mt-16 max-w-3xl">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {STAKEHOLDER_ORDER.map((s, i) => {
-              const c = STAKEHOLDERS[s]
-              return (
-                <motion.div key={s} animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 5, delay: i * 0.5 }} className="rounded-2xl border bg-[#0a1120]/70 p-4 text-left backdrop-blur" style={{ borderColor: `${c.accent}33` }}>
-                  <div className="mb-2 text-xl" style={{ color: c.accent }}>{c.glyph}</div>
-                  <div className="text-sm font-semibold text-white">{c.label}</div>
-                  <div className="mt-1 text-[11px] leading-snug text-slate-500">{c.blurb}</div>
-                </motion.div>
-              )
-            })}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ── Stats strip (real numbers) ─────────────────────────────── */}
-      <section className="relative border-y border-white/[0.06] py-12">
-        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 px-6 sm:grid-cols-4">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="gradient-text text-4xl font-bold">{s.n}</div>
-              <div className="mt-1 text-xs leading-snug text-slate-500">{s.label}</div>
-            </div>
-          ))}
         </div>
       </section>
 
-      {/* ── The trained decision layer + its numbers ───────────────── */}
-      <section id="how" className="relative px-6 py-24">
-        <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2">
-          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6 }}>
-            <div className="text-xs uppercase tracking-wider text-emerald-300">The decisions are trained</div>
-            <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Coding is a learned model, not an LLM guess.</h2>
-            <p className="mt-4 leading-relaxed text-slate-400">
-              A bi-encoder retriever learned {CODER.train_pairs.toLocaleString()} phrase to code pairs across the {CODER.index_codes.toLocaleString()} code FY2026 index, and a cross-encoder reranker was fine-tuned on CodiEsp clinical cases. Given a diagnosis mention it ranks the exact ICD-10-CM code first {Math.round(CODER.codiesp.acc1 * 100)}% of the time and inside the top five {Math.round(CODER.codiesp.acc5 * 100)}%.
-            </p>
-            <p className="mt-3 text-[13px] leading-relaxed text-slate-500">
-              Claude still writes the four portals, but it no longer chooses the codes, and every report it writes is audited against the extracted facts by a verifier and a constitution critic before it is shown.
-            </p>
-            <Link href="/evals" className="mt-5 inline-flex items-center gap-1.5 text-sm text-teal-300 hover:text-teal-200">
-              Full evaluations <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6 }} className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.03] p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="text-sm font-semibold text-white">Trained ICD coder</div>
-              <span className="rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] text-emerald-300">CodiEsp · N = {CODER.codiesp.mentions.toLocaleString()}</span>
-            </div>
-            <Bars items={[
-              { label: 'acc@1 · exact code first', value: CODER.codiesp.acc1, tone: 'emerald' },
-              { label: 'acc@5 · code in top 5', value: CODER.codiesp.acc5, tone: 'emerald' },
-              { label: 'MRR', value: CODER.codiesp.mrr, tone: 'teal' },
-            ]} />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Animated pipeline ──────────────────────────────────────── */}
-      <section className="relative px-6 pb-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">Seven stages from note to record</h2>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400">
-              {Object.entries(KIND).map(([k, v]) => (
-                <span key={k} className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ background: v.c }} /> {v.tag}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            {PIPELINE.map((st, i) => {
-              const k = KIND[st.kind]
-              return (
-                <motion.div
-                  key={st.label}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.07 }}
-                  className="rounded-xl border bg-white/[0.02] p-4"
-                  style={{ borderColor: `${k.c}2b` }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] text-slate-600">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="rounded px-1.5 py-0.5 text-[9px] uppercase tracking-wider" style={{ background: `${k.c}18`, color: k.c }}>{k.tag}</span>
+      <main className="relative mx-auto max-w-6xl px-6">
+        {/* Pipeline */}
+        <section id="pipeline-section" className="py-32">
+          <h2 className={`${fraunces.className} reveal text-center text-4xl font-bold sm:text-5xl`}>From messy note to auditable record</h2>
+          <div className="relative mt-20" style={{ minHeight: '280vh' }}>
+            <div className="sticky top-16 grid items-start gap-10 lg:grid-cols-[1fr_1.5fr]">
+              <div className="space-y-4">
+                {STAGES.map((st) => (
+                  <div key={st.n} className="pipeline-stage rounded-2xl border border-slate-700/40 bg-white/[0.02] p-6">
+                    <div className={`mb-2 text-xs font-bold uppercase tracking-wider ${st.color}`}>{st.n}</div>
+                    <h3 className="font-bold text-white">{st.title}</h3>
+                    <p className="mt-1 text-sm text-slate-400">{st.desc}</p>
                   </div>
-                  <div className="mt-2 text-sm font-semibold text-white">{st.label}</div>
-                  <div className="mt-1 text-[11px] leading-snug text-slate-500">{st.model}</div>
-                </motion.div>
+                ))}
+              </div>
+
+              {/* animated clinical note */}
+              <div className="overflow-hidden rounded-3xl border border-slate-700/40 bg-[#0d0d18] p-8">
+                <div className="mb-6 flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-rose-500/60" />
+                  <div className="h-3 w-3 rounded-full bg-amber-500/60" />
+                  <div className="h-3 w-3 rounded-full bg-emerald-500/60" />
+                  <span className="ml-3 font-mono text-xs text-slate-500">clinical_note.txt</span>
+                </div>
+                <div className="space-y-1 font-mono text-xs leading-7 text-slate-300">
+                  <p className="note-line" data-stage="1">Patient: [redacted on device] · DOB: [redacted]</p>
+                  <p className="note-line" data-stage="1">Encounter: 2026-07-01, follow up visit</p>
+                  <p className="note-line" data-stage="2">HPI: pt presents with <span className="entity-highlight">persistent chest pain</span> radiating to left arm x 3 days.</p>
+                  <p className="note-line" data-stage="2">PMH: <span className="entity-highlight">Type 2 diabetes</span>, <span className="entity-highlight">hypertension</span>, prior <span className="entity-highlight">MI 2019</span>.</p>
+                  <p className="note-line" data-stage="2">Meds: <span className="entity-highlight">Metformin 1000mg</span>, <span className="entity-highlight">Lisinopril 20mg</span>, <span className="entity-highlight">Aspirin 81mg</span></p>
+                  <p className="note-line" data-stage="3">Codes: <span className="code-tag">I20.9 Angina pectoris</span> <span className="code-tag">E11.9 T2DM</span> <span className="code-tag">I10 HTN</span></p>
+                  <p className="note-line" data-stage="3"><span className="code-tag">CPT 99214</span> <span className="code-tag">CPT 93000 EKG</span></p>
+                  <p className="note-line" data-stage="4">Risk: HRRP readmission rate <span className="text-amber-400">0.23</span></p>
+                  <p className="note-line" data-stage="4"><span className="risk-bar mt-1 block" /></p>
+                  <p className="note-line" data-stage="4">Claim readiness: <span className="text-emerald-400">PASS</span></p>
+                  <p className="note-line output-line" data-stage="5" style={{ color: '#818cf8' }}>&#9656; Patient summary generated</p>
+                  <p className="note-line output-line" data-stage="5" style={{ color: '#34d399' }}>&#9656; Prior auth packet ready</p>
+                  <p className="note-line output-line" data-stage="5" style={{ color: '#fbbf24' }}>&#9656; Claim submitted to payer</p>
+                  <p className="note-line output-line" data-stage="5" style={{ color: '#f87171' }}>&#9656; Constitution audit: PASSED</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Portals */}
+        <section className="py-32">
+          <h2 className={`${fraunces.className} reveal text-center text-4xl font-bold sm:text-5xl`}>Four portals, one shared encounter</h2>
+          <p className="reveal mx-auto mt-4 max-w-2xl text-center text-slate-400" style={{ transitionDelay: '0.1s' }}>
+            The same coded record, rewritten for each reader. An action in one portal ripples through the others.
+          </p>
+          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {PORTALS.map((p, i) => {
+              const s = PORTAL_STYLE[p.color]
+              const Icon = p.icon
+              return (
+                <div key={p.id} className={`reveal rounded-3xl border ${s.border} bg-white/[0.02] p-8 ${p.id === 'patient' ? 'glow' : ''}`} style={{ transitionDelay: `${i * 0.1}s` }}>
+                  <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ${s.bg}`}>
+                    <Icon className={`h-6 w-6 ${s.text}`} />
+                  </div>
+                  <h3 className="font-bold text-white">{p.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-400">{p.desc}</p>
+                </div>
               )
             })}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Scrollytelling agent floor ─────────────────────────────── */}
-      <AgentFloor />
-
-      {/* ── Try demo CTA ───────────────────────────────────────────── */}
-      <section className="relative px-6 pb-16 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-teal-400/20 p-12 text-center" style={{ background: 'linear-gradient(135deg, rgba(45,212,191,0.08), rgba(52,211,153,0.08))' }}>
-          <div className="absolute inset-0 opacity-30 blur-3xl" style={{ background: 'linear-gradient(135deg, rgba(45,212,191,0.2), rgba(52,211,153,0.2))' }} />
-          <div className="relative">
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">Paste any note. Watch it get coded and checked.</h2>
-            <p className="mx-auto mt-4 max-w-md text-slate-400">
-              No fixed patients, no canned demo. The trained coder links the diagnoses live, then a verifier audits every portal report against the extracted facts.
-            </p>
-            <Link href="/demo" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-teal-400 px-9 py-4 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300 hover:shadow-lg hover:shadow-teal-400/30">
-              Open the demo <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ── Trust strip ────────────────────────────────────────────── */}
-      <section className="relative px-6 pb-16">
-        <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-3">
-          {TRUST.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
-              <f.icon className="mb-3 h-5 w-5 text-teal-400" />
-              <div className="mb-1.5 text-sm font-semibold text-white">{f.title}</div>
-              <p className="text-xs leading-relaxed text-slate-500">{f.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Data sources strip ─────────────────────────────────────── */}
-      <section className="relative px-6 pb-24">
-        <div className="mx-auto max-w-5xl text-center">
-          <div className="mb-3 text-xs uppercase tracking-wider text-slate-600">Built on primary public data, rebuilt from source</div>
-          <div className="flex flex-wrap justify-center gap-2">
-            {SOURCES.map((src) => (
-              <span key={src} className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[11px] text-slate-400">{src}</span>
+        {/* Metrics */}
+        <section className="py-32">
+          <h2 className={`${fraunces.className} reveal text-center text-4xl font-bold sm:text-5xl`}>Measured on open data</h2>
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {METRICS.map((m, i) => (
+              <div key={m.label} className="reveal rounded-3xl border border-slate-700/30 bg-white/[0.02] p-12 text-center" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <p className={`${fraunces.className} gradient-text text-6xl font-black`} data-count={m.count} data-suffix={m.suffix}>{m.count}{m.suffix}</p>
+                <p className="mt-4 text-sm leading-relaxed text-slate-400">{m.label}</p>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Safety */}
+        <section className="py-32 pb-40">
+          <h2 className={`${fraunces.className} reveal text-center text-4xl font-bold sm:text-5xl`}>Guardrails, not vibes</h2>
+          <div className="mx-auto mt-16 grid max-w-4xl gap-6 md:grid-cols-3">
+            {SAFETY.map((s, i) => (
+              <div key={s.title} className="reveal rounded-3xl border border-slate-700/30 bg-white/[0.02] p-8" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <h3 className="font-bold text-white">{s.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-400">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
 
       <footer className="relative border-t border-white/[0.06] px-6 py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-xs text-slate-600 sm:flex-row">
