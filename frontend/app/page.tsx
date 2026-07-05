@@ -104,7 +104,7 @@ export default function Landing() {
   }, [])
 
   return (
-    <div className={`${dmSans.className} relative overflow-x-hidden text-white`}>
+    <div className={`${dmSans.className} relative text-white`}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-50" />
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full opacity-[0.08]" style={{ background: 'radial-gradient(circle, #818cf8, transparent 70%)' }} />
@@ -138,7 +138,7 @@ export default function Landing() {
         {/* Pipeline */}
         <section id="pipeline-section" className="py-32">
           <h2 className={`${fraunces.className} reveal text-center text-4xl font-bold sm:text-5xl`}>From messy note to auditable record</h2>
-          <div className="relative mt-20" style={{ minHeight: '280vh' }}>
+          <div className="relative mt-20" style={{ minHeight: '220vh' }}>
             <div className="sticky top-16 grid items-start gap-10 lg:grid-cols-[1fr_1.5fr]">
               <div className="space-y-4">
                 {STAGES.map((st) => (

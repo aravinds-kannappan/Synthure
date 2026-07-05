@@ -2,6 +2,7 @@ import Nav from '@/components/Nav'
 import evals from '@/data/evals.json'
 import modelEvals from '@/data/model_evals.json'
 import { Bars } from '@/components/Charts'
+import RevealOnScroll from '@/components/RevealOnScroll'
 import RunFeed from '@/components/RunFeed'
 
 export const metadata = { title: 'Synthure — Model evaluations' }
@@ -30,7 +31,7 @@ function Card({ title, owner, children }: { title: string; owner: string; childr
       : owner === 'rule-based' ? 'border-slate-400/30 bg-slate-400/10 text-slate-300'
         : 'border-teal-400/30 bg-teal-400/10 text-teal-300'
   return (
-    <section className="rounded-2xl border border-white/[0.08] bg-white/[0.015] p-5">
+    <section className="reveal rounded-2xl border border-white/[0.08] bg-white/[0.015] p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">{title}</h2>
         <span className={`rounded-md border px-2.5 py-1 text-[11px] ${badge}`}>{owner}</span>
@@ -48,6 +49,7 @@ export default function EvalsPage() {
   return (
     <div className="min-h-screen grid-bg">
       <Nav />
+      <RevealOnScroll />
       <main className="relative mx-auto max-w-5xl px-6 pb-24 pt-28">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">Model evaluations</h1>
@@ -61,7 +63,7 @@ export default function EvalsPage() {
 
         {/* Trained on the A100, evaluated on real (open) data */}
         <div className="mb-8 grid gap-4 md:grid-cols-2">
-          <section className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.03] p-5">
+          <section className="reveal rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.03] p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Trained ICD coder</h2>
               <span className="rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] text-emerald-300">A100 · trained</span>
@@ -79,7 +81,7 @@ export default function EvalsPage() {
             </p>
           </section>
 
-          <section className="rounded-2xl border border-white/[0.08] bg-white/[0.015] p-5">
+          <section className="reveal rounded-2xl border border-white/[0.08] bg-white/[0.015] p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Faithfulness checker</h2>
               <span className="rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] text-emerald-300">A100 · trained</span>
@@ -109,7 +111,7 @@ export default function EvalsPage() {
           <RunFeed />
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="reveal mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Metric label="Note type accuracy" value={pct(e.note_type.accuracy)} sub={`n=${e.note_type.n}, synthetic`} />
           <Metric label="ICD top 3" value={pct(e.coding.top3_accuracy)} sub={`n=${e.coding.n} codes`} />
           <Metric label="Readiness AUROC" value={e.readiness.auroc.toFixed(3)} sub={`AUPRC ${e.readiness.auprc.toFixed(2)}`} tone="violet" />
