@@ -42,6 +42,7 @@ import { OPENMED_MODELS } from '@/lib/openmedModels'
 import { classifyNoteType, detectMissing, predictReadiness, rerankScore } from '@/lib/models/synthure'
 import { parseSections } from '@/lib/models/sections'
 import { NOTE_TYPE_LABELS } from '@/lib/schema'
+import { PAYERS } from '@/lib/pricing'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -123,9 +124,26 @@ function rateLimited(ip: string): string | null {
   return null
 }
 
+// Default plan used to seed the patient cost estimate the writer speaks to. The
+// portal lets the patient edit payer, deductible, coinsurance, and OOP max to
+// recompute live; this is the starting point so the prose states a real number,
+// not the raw Medicare national amount. Mirrors DEFAULT_PLAN in lib/encounter.ts.
+const DEFAULT_PLAN = { deductibleRemaining: 1886, coinsurance: 0.2, oopMaxRemaining: 4500 }
+
+function patientCost(ex: ExtractionResult): { patient: number; allowed: number } | null {
+  const mult = PAYERS.commercial.multiplier
+  const priced = ex.cpt.filter((c) => c.price != null)
+  const allowed = priced.reduce((a, c) => a + (c.price as number) * mult, 0)
+  if (allowed <= 0) return null
+  const ded = Math.min(DEFAULT_PLAN.deductibleRemaining, allowed)
+  const coins = (allowed - ded) * DEFAULT_PLAN.coinsurance
+  return { allowed: Math.round(allowed), patient: Math.round(Math.min(DEFAULT_PLAN.oopMaxRemaining, ded + coins)) }
+}
+
 // ── Shared context handed to every writer ────────────────────────────────────
 function exContext(note: string, ex: ExtractionResult): string {
   const flagged = ex.readiness.checks.filter((c) => c.status === 'flag')
+  const cost = patientCost(ex)
   return [
     `DE-IDENTIFIED CLINICAL NOTE:\n${note}`,
     '',
@@ -140,7 +158,10 @@ function exContext(note: string, ex: ExtractionResult): string {
     `- Readmission: ${ex.readmissionCalibrated ? `${ex.readmissionRisk}% CMS published 30 day rate for the ${ex.readmissionDriver} cohort` : `${ex.readmissionRisk}% national hospital wide published rate (no condition cohort matched)`}`,
     `- Population category (AHRQ CCSR): ${ex.cohorts.map((c) => c.label).join('; ') || 'none'}`,
     `- Consumer language from MedlinePlus where available: ${ex.icd10.filter((c) => c.plain).map((c) => `${c.code}: ${c.plain}`).join(' | ') || 'none retrieved'}`,
-    'IMPORTANT: Do not state a denial probability; none exists. Costs are CMS national amounts and must be labeled as estimates for the patient. Discuss readiness only via the checklist facts above.',
+    cost
+      ? `- Estimated patient out of pocket (typical ${PAYERS.commercial.label}: $${DEFAULT_PLAN.deductibleRemaining} deductible remaining, ${Math.round(DEFAULT_PLAN.coinsurance * 100)}% coinsurance, $${DEFAULT_PLAN.oopMaxRemaining} out of pocket max, priced at ${PAYERS.commercial.multiplier}x the Medicare allowed amount per RAND 2024): about $${cost.patient} on about $${cost.allowed} allowed. The patient can edit their coverage in the portal to recompute.`
+      : '- Estimated patient out of pocket: no published service amounts to price.',
+    'IMPORTANT: Do not state a denial probability; none exists. When you mention cost to the patient, use the estimated patient out of pocket figure above (a real dollar number), never a national average, and label it as an estimate that updates when they edit their coverage in the portal. Discuss readiness only via the checklist facts above.',
   ].join('\n')
 }
 
@@ -379,7 +400,7 @@ const STYLE =
 
 const ROLE_BRIEF: Record<Stakeholder, string> = {
   patient:
-    'You are the Patient Advocate agent. Write for the patient at about a 6th grade reading level: warm, clear, and reassuring, never alarming. Your report MUST (1) translate every diagnosis into plain everyday language, preferring the MedlinePlus consumer text when provided and expanding on it; (2) explain each medication, what it does and how to take it; (3) explain any lab values or test results; (4) give a short estimate of what the patient is likely to pay out of pocket, not a national average: take the CMS allowed amounts as the basis and translate them into the patient likely responsibility (for example roughly 20 percent coinsurance after the deductible under Medicare, or deductible dependent under a typical commercial plan), always labeled as an estimate that depends on their specific plan, and mention financial assistance options; (5) give clear next steps, when to seek care sooner, and questions to ask. Be genuinely useful and complete.',
+    'You are the Patient Advocate agent. Write for the patient at about a 6th grade reading level: warm, clear, and reassuring, never alarming. Your report MUST (1) translate every diagnosis into plain everyday language, preferring the MedlinePlus consumer text when provided and expanding on it; (2) explain each medication, what it does and how to take it; (3) explain any lab values or test results; (4) state the estimated out of pocket cost using the estimated patient out of pocket figure given in the facts (a real dollar amount for a typical commercial plan), never a national average, labeled as an estimate that updates when they edit their coverage in the portal, and mention financial assistance options; (5) give clear next steps, when to seek care sooner, and questions to ask. Be genuinely useful and complete.',
   physician:
     'You are the Care Navigator agent supporting the treating physician. Be precise and clinical. Cover suggested ICD 10 coding with sequencing rationale (note any code flagged as a non billable category header and what specificity is missing), documentation prompts, prior authorization needs (only those on published payer lists), the claim readiness checklist and concrete fixes for each flagged item, order and care coordination, and follow up. Do not state a denial probability. You never prescribe or diagnose; you support the physician and save them time.',
   hospital:
