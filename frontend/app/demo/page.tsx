@@ -6,6 +6,7 @@ import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-re
 import Nav from '@/components/Nav'
 import PortalShell from '@/components/portals/PortalShell'
 import SafetyConsole from '@/components/SafetyConsole'
+import { AnnotatedNote, PipelineFlow } from '@/components/DemoVisuals'
 import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
 import { OPENMED_MODELS, type OpenMedStage } from '@/lib/openmed'
@@ -154,9 +155,9 @@ export default function DemoPage() {
 
       <main className="relative max-w-6xl mx-auto px-6 pt-28 pb-24">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">Synthesis Console</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">Watch it work</h1>
           <p className="text-slate-400 mt-2">
-            Paste any clinical note. Watch the agents read it, then step into the four portals it produces, one tailored to each reader.
+            Paste a clinical note. See it de identified on device, watch the entities light up in the note itself, follow every stage of the pipeline, then step into the four portals it produces.
           </p>
         </div>
 
@@ -248,7 +249,9 @@ export default function DemoPage() {
 
         {/* Working layout */}
         {state.phase !== 'idle' && (
-          <div className="mt-8 grid lg:grid-cols-[340px_1fr] gap-6 items-start">
+          <div className="mt-6 space-y-6">
+            <PipelineFlow status={state.status} activeId={state.activeId} />
+            <div className="grid lg:grid-cols-[340px_1fr] gap-6 items-start">
             {/* Pipeline */}
             <div className="space-y-5 lg:sticky lg:top-24">
               {PHASES.map((phase) => (
@@ -372,7 +375,8 @@ export default function DemoPage() {
             </div>
 
             {/* Portals / placeholder */}
-            <div>
+            <div className="space-y-6">
+              {ex && state.deid?.text && <AnnotatedNote text={state.deid.text} entities={ex.entities} />}
               {hasExtraction && state.extraction ? (
                 <PortalShell
                   extraction={state.extraction}
@@ -387,6 +391,7 @@ export default function DemoPage() {
                   <p className="text-slate-500 text-sm">Reading the note and opening the four portals…</p>
                 </div>
               )}
+            </div>
             </div>
           </div>
         )}

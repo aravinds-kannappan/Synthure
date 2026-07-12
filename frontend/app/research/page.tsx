@@ -1,7 +1,17 @@
 'use client'
 import Link from 'next/link'
-import { Bars } from '@/components/Charts'
+import { motion } from 'framer-motion'
+import { Bars, Gauge } from '@/components/Charts'
 import modelEvals from '@/data/model_evals.json'
+
+const DE = modelEvals.data_engine
+const DE_FLOW = [
+  { t: 'Real notes', s: 'MTSamples + PMC OA', c: '#2dd4bf' },
+  { t: 'Trained generator', s: 'byte-level conditional GPT', c: '#34d399' },
+  { t: 'Conditional samples', s: 'note type is gold', c: '#818cf8' },
+  { t: 'Independent labels', s: 'not from the generator', c: '#22d3ee' },
+  { t: 'Frozen real test', s: 'the honest metric', c: '#a78bfa' },
+]
 
 const SECTIONS = [
   {
@@ -123,6 +133,54 @@ export default function ResearchPage() {
             { label: 'MRR', value: modelEvals.icd_coder.codiesp.mrr, tone: 'teal' },
           ]} />
         </div>
+
+        {/* Trained models dashboard */}
+        <div className="mb-6 grid gap-4 lg:grid-cols-[220px_1fr]">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
+            <Gauge value={modelEvals.icd_coder.codiesp.acc1} label="ICD coder acc@1" sub="exact code first" tone="emerald" />
+            <div className="mt-3 text-center text-[11px] text-slate-500">
+              {modelEvals.icd_coder.index_codes.toLocaleString()} codes · {modelEvals.icd_coder.train_pairs.toLocaleString()} training pairs
+            </div>
+          </div>
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
+            <div className="mb-4 text-sm font-semibold text-white">The trained data engine</div>
+            <div className="flex flex-wrap items-stretch gap-2">
+              {DE_FLOW.map((step, i) => (
+                <div key={step.t} className="flex items-stretch gap-2">
+                  <motion.div
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: i * 0.12 }}
+                    className="min-w-[128px] flex-1 rounded-xl border bg-white/[0.02] p-3"
+                    style={{ borderColor: `${step.c}44`, borderTop: `2px solid ${step.c}` }}
+                  >
+                    <div className="text-[12px] font-semibold text-white">{step.t}</div>
+                    <div className="mt-0.5 text-[10px] leading-snug text-slate-500">{step.s}</div>
+                  </motion.div>
+                  {i < DE_FLOW.length - 1 && <span className="self-center text-slate-600">→</span>}
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-[12px] leading-relaxed text-slate-400">
+              The note generator is trained on real open license notes ({DE.sources.join(', ')}); labels come from a source independent of the generator, so a model must learn text to label rather than memorize a template. Every headline number is reported on the {DE.holdout}.
+            </p>
+            <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.015] p-4">
+              <div className="mb-1 text-[12px] font-semibold text-white">Note type classifier ({DE.note_types} classes, retrained in PyTorch)</div>
+              {DE.note_type_real_test != null ? (
+                <Bars items={[
+                  { label: 'synthetic val', value: DE.note_type_synthetic_val ?? 0, tone: 'slate' },
+                  { label: 'real test (held out)', value: DE.note_type_real_test, tone: 'emerald' },
+                ]} />
+              ) : (
+                <p className="text-[12px] leading-relaxed text-slate-500">
+                  Real test accuracy populates here after the Colab data engine run writes it to <span className="font-mono text-slate-400">data/model_evals.json</span>. It is reported separately from the synthetic val split on purpose: a number well below the old 1.00 is the honest signal that the model learned clinical language, not a template grammar.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
         <p className="text-center text-xs text-slate-600 mb-16">
           Only measured results are shown as numbers. Components that are not yet benchmarked are marked Heuristic or Planned and detailed in the evaluation plan.
         </p>
