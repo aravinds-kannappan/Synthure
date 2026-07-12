@@ -17,6 +17,8 @@ import PatientPortal from './PatientPortal'
 import ClinicianConsole from './ClinicianConsole'
 import RevenueDashboard from './RevenueDashboard'
 import BenefitsDashboard from './BenefitsDashboard'
+import ActivityRail from './ActivityRail'
+import FactThread from './FactThread'
 
 const PORTAL: Record<Stakeholder, ComponentType<{ report?: StakeholderReport }>> = {
   patient: PatientPortal,
@@ -197,6 +199,9 @@ function PortalShellInner({
         </div>
       </div>
 
+      {/* Always visible shared timeline */}
+      <ActivityRail />
+
       {/* Verifier + orchestrator strip */}
       {(verification || synthesis) && (
         <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[0.03] px-4 py-3">
@@ -328,6 +333,9 @@ function PortalShellInner({
           </>
         )}
       </AnimatePresence>
+
+      {/* Follow this fact: one truth across all four lenses */}
+      <FactThread />
     </div>
   )
 }

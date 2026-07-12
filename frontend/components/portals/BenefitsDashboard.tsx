@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Briefcase, Lock, TrendingUp, BadgeCheck, Check, Target, Layers } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
 import { fmt$ } from '@/lib/engine'
+import { dxFactId } from '@/lib/encounter'
 import { useEncounter } from './EncounterContext'
 import { ReportDrawer } from './widgets'
 import Inbox from './Inbox'
@@ -12,8 +13,8 @@ import { aggregates, encounterHistory, type HistoryEntry } from '@/lib/history'
 const ACCENT = '#a78bfa'
 
 export default function BenefitsDashboard({ report }: { report?: StakeholderReport }) {
-  const { state, d } = useEncounter()
-  const conditions = state.diagnoses.filter((x) => x.accepted).map((x) => x.name)
+  const { state, d, setFocusFact } = useEncounter()
+  const conditions = state.diagnoses.filter((x) => x.accepted)
   // Real aggregates over the encounters synthesized in this browser. No
   // fabricated trend lines: before there is history, there is an empty state.
   const [history, setHistory] = useState<HistoryEntry[]>([])
@@ -111,9 +112,14 @@ export default function BenefitsDashboard({ report }: { report?: StakeholderRepo
             </div>
             <div className="flex flex-wrap gap-1.5">
               {conditions.map((c) => (
-                <span key={c} className="rounded-full border border-violet-400/20 bg-violet-400/10 px-2.5 py-1 text-[12px] text-violet-200">
-                  {c.toLowerCase()}
-                </span>
+                <button
+                  key={c.code}
+                  onClick={() => setFocusFact(dxFactId(c.code))}
+                  title="Follow this fact across all four portals"
+                  className="rounded-full border border-violet-400/20 bg-violet-400/10 px-2.5 py-1 text-[12px] text-violet-200 transition-colors hover:border-violet-400/50"
+                >
+                  {c.name.toLowerCase()}
+                </button>
               ))}
             </div>
           </div>

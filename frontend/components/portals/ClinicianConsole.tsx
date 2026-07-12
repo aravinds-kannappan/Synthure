@@ -2,18 +2,20 @@
 
 import { motion } from 'framer-motion'
 import {
-  Stethoscope, Check, FileCheck2, ClipboardList, ShieldCheck, Zap, Plus,
+  Stethoscope, Check, FileCheck2, ClipboardList, ShieldCheck, Zap, Plus, GitBranch, ArrowUpRight,
 } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
+import { dxFactId, svcFactId, checkFactId } from '@/lib/encounter'
 import { useEncounter } from './EncounterContext'
 import { Gauge, ReportDrawer, ChecksPanel } from './widgets'
 import Inbox from './Inbox'
+import TaskQueue from './TaskQueue'
 
 const ACCENT = '#818cf8'
 const riskColor = (r: number) => (r >= 55 ? '#f87171' : r >= 35 ? '#fbbf24' : '#34d399')
 
 export default function ClinicianConsole({ report }: { report?: StakeholderReport }) {
-  const { state, d, dispatch } = useEncounter()
+  const { state, d, dispatch, setFocusFact } = useEncounter()
 
   const meds = state.medications.filter((m) => m.active).map((m) => m.name)
   const labs = state.labs.map((l) => l.label)
@@ -24,26 +26,39 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
     state.diagnoses.some((x) => x.accepted) ? 'Sequence the primary diagnosis first to support medical necessity.' : 'Confirm at least one diagnosis to support the services billed.',
   ]
 
-  const row = (kind: 'ICD' | 'CPT', code: string, label: string, tag: string, tagTone: string, on: boolean, onClick: () => void) => (
-    <button
-      key={kind + code}
-      onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors"
-      style={{ borderColor: on ? `${ACCENT}55` : 'rgba(255,255,255,0.07)', background: on ? `${ACCENT}14` : 'rgba(255,255,255,0.015)' }}
-    >
-      <span
-        className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border"
-        style={{ borderColor: on ? ACCENT : 'rgba(255,255,255,0.15)', background: on ? ACCENT : 'transparent' }}
-      >
-        {on && <Check className="h-3 w-3 text-[#05070f]" />}
-      </span>
-      <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-xs text-indigo-300">{code}</span>
-      <span className="truncate text-[13px] text-slate-300">{label}</span>
-      <span className="ml-auto text-[10px] uppercase tracking-wider" style={{ color: tagTone }}>
-        {tag}
-      </span>
-    </button>
-  )
+  const row = (kind: 'ICD' | 'CPT', code: string, label: string, tag: string, tagTone: string, on: boolean, onToggle: () => void) => {
+    const factId = kind === 'ICD' ? dxFactId(code) : svcFactId(code)
+    return (
+      <div key={kind + code} className="flex items-center gap-1.5">
+        <button
+          onClick={onToggle}
+          className="flex flex-1 items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors"
+          style={{ borderColor: on ? `${ACCENT}55` : 'rgba(255,255,255,0.07)', background: on ? `${ACCENT}14` : 'rgba(255,255,255,0.015)' }}
+        >
+          <span
+            className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border"
+            style={{ borderColor: on ? ACCENT : 'rgba(255,255,255,0.15)', background: on ? ACCENT : 'transparent' }}
+          >
+            {on && <Check className="h-3 w-3 text-[#05070f]" />}
+          </span>
+          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-xs text-indigo-300">{code}</span>
+          <span className="truncate text-[13px] text-slate-300">{label}</span>
+          <span className="ml-auto text-[10px] uppercase tracking-wider" style={{ color: tagTone }}>
+            {tag}
+          </span>
+        </button>
+        <button
+          onClick={() => setFocusFact(factId)}
+          title="Follow this fact across all four portals"
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/[0.07] text-slate-500 transition-colors hover:text-teal-300"
+          disabled={!on}
+          style={{ opacity: on ? 1 : 0.4 }}
+        >
+          <GitBranch className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-2xl border border-indigo-400/20 bg-[#0a1020]/80">
@@ -128,15 +143,39 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
                     <li className="text-[13px] text-slate-400">A claim readiness flag is open. A drafted packet is ready for approval.</li>
                   )}
                 </ul>
-                <button
-                  onClick={() => dispatch({ type: 'approvePriorAuth' })}
-                  disabled={state.priorAuthApproved}
-                  className="flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:opacity-100"
-                  style={{ background: state.priorAuthApproved ? '#0f2a22' : ACCENT, color: state.priorAuthApproved ? '#34d399' : '#05070f' }}
-                >
-                  {state.priorAuthApproved ? <Check className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
-                  {state.priorAuthApproved ? 'Packet approved & filed' : 'Approve drafted packet'}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {state.priorAuthApproved ? (
+                    <span className="flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold" style={{ background: '#0f2a22', color: '#34d399' }}>
+                      <Check className="h-4 w-4" /> Cleared by Revenue Cycle
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        dispatch({
+                          type: 'raiseTask',
+                          taskId: 'prior_auth',
+                          from: 'physician',
+                          to: ['hospital'],
+                          title: 'Prior authorization handed to Revenue Cycle',
+                          body: 'The drafted packet was routed to Revenue Cycle to file. Clearing it there flips the readiness check and moves the at risk dollars across all four portals.',
+                          factId: checkFactId('prior_auth'),
+                        })
+                      }
+                      disabled={state.raisedTasks.includes('prior_auth')}
+                      className="flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:opacity-70"
+                      style={{ background: state.raisedTasks.includes('prior_auth') ? '#1a2440' : ACCENT, color: state.raisedTasks.includes('prior_auth') ? '#818cf8' : '#05070f' }}
+                    >
+                      {state.raisedTasks.includes('prior_auth') ? <ArrowUpRight className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+                      {state.raisedTasks.includes('prior_auth') ? 'Handed to Revenue Cycle' : 'Hand off to Revenue Cycle'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setFocusFact(checkFactId('prior_auth'))}
+                    className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[13px] text-slate-400 transition-colors hover:text-teal-300"
+                  >
+                    <GitBranch className="h-3.5 w-3.5" /> Follow this fact
+                  </button>
+                </div>
               </>
             ) : (
               <span className="text-[13px] text-slate-500">Standard submission is appropriate. No packet required.</span>
@@ -170,6 +209,7 @@ export default function ClinicianConsole({ report }: { report?: StakeholderRepor
             </div>
           )}
 
+          <TaskQueue portal="physician" accent={ACCENT} />
           <Inbox portal="physician" accent={ACCENT} />
           <ReportDrawer sections={report?.sections ?? []} accent={ACCENT} />
         </div>

@@ -18,6 +18,14 @@ import { PAYERS, type Payer } from './pricing'
 export type Portal = Stakeholder
 export const PORTALS: Portal[] = ['patient', 'physician', 'hospital', 'employer']
 
+// ── Stable fact ids ──────────────────────────────────────────────────────────
+// A fact is one truth that surfaces in more than one portal. Every event that
+// changes a fact tags it, so a fact can trace its own provenance across portals.
+export const dxFactId = (code: string) => `dx:${code}`
+export const svcFactId = (code: string) => `svc:${code}`
+export const checkFactId = (id: string) => `check:${id}`
+export const medFactId = (name: string) => `med:${name}`
+
 export type ClaimStatus = 'review' | 'ready' | 'submitted' | 'reimbursed'
 
 export interface EncDx {
@@ -55,6 +63,27 @@ export const DEFAULT_PLAN: PlanDesign = { payer: 'commercial', deductibleRemaini
 export const PLAN_SOURCE =
   'Defaults: KFF Employer Health Benefits Survey averages for single coverage (editable)'
 
+// ── Patient intake survey ────────────────────────────────────────────────────
+// Optional patient-reported context that changes what each portal surfaces and
+// prioritizes, deterministically. It never feeds a score or a probability: every
+// effect traces to a specific answer and is sourced to "Patient intake survey".
+export interface Survey {
+  literacy: 'standard' | 'plain' // plain -> patient views prefer plainer wording
+  language: string // '' means English default
+  transportation: boolean // barrier to in-person visits
+  financialHardship: boolean
+  comorbidities: string[] // patient-reported conditions that may not be in the note
+  submitted: boolean
+}
+export const DEFAULT_SURVEY: Survey = {
+  literacy: 'standard',
+  language: '',
+  transportation: false,
+  financialHardship: false,
+  comorbidities: [],
+  submitted: false,
+}
+
 export type EventKind = 'system' | 'action' | 'message'
 export interface EncEvent {
   id: string
@@ -64,6 +93,7 @@ export interface EncEvent {
   kind: EventKind
   title: string
   body?: string
+  factIds?: string[] // facts this event created or changed, for provenance threading
   readBy: Portal[]
 }
 
@@ -79,6 +109,8 @@ export interface EncounterState {
   financialAssistance: boolean
   claimStatus: ClaimStatus
   events: EncEvent[]
+  raisedTasks: string[] // task ids explicitly handed off to their owning portal
+  survey: Survey
 }
 
 let _seq = 0
@@ -92,8 +124,8 @@ const AUTH_CODES = new Set([
 const PORTAL_LABEL: Record<Portal, string> = { patient: 'Patient', physician: 'Clinician', hospital: 'Revenue Cycle', employer: 'Benefits' }
 export const portalLabel = (p: Portal | 'system') => (p === 'system' ? 'System' : PORTAL_LABEL[p])
 
-function ev(from: Portal | 'system', to: Portal[], kind: EventKind, title: string, body?: string): EncEvent {
-  return { id: uid(), ts: Date.now(), from, to, kind, title, body, readBy: from === 'system' ? [] : [from as Portal] }
+function ev(from: Portal | 'system', to: Portal[], kind: EventKind, title: string, body?: string, factIds?: string[]): EncEvent {
+  return { id: uid(), ts: Date.now(), from, to, kind, title, body, factIds, readBy: from === 'system' ? [] : [from as Portal] }
 }
 
 export function initEncounter(ex: ExtractionResult): EncounterState {
@@ -132,6 +164,8 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
     financialAssistance: false,
     claimStatus: 'review',
     events: [ev('system', [...PORTALS], 'system', 'Encounter synthesized from the clinical note', 'Four portals opened from one note. Every action here ripples across all of them.')],
+    raisedTasks: [],
+    survey: { ...DEFAULT_SURVEY, comorbidities: [] },
   }
 }
 
@@ -340,6 +374,8 @@ export type EncAction =
   | { type: 'submitClaim' }
   | { type: 'applyFinancialAssistance' }
   | { type: 'setPlan'; plan: PlanDesign }
+  | { type: 'setSurvey'; survey: Survey }
+  | { type: 'raiseTask'; taskId: string; from: Portal; to: Portal[]; title: string; body?: string; factId?: string }
   | { type: 'sendMessage'; from: Portal; to: Portal[]; body: string }
   | { type: 'markRead'; portal: Portal }
 
@@ -353,7 +389,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         diagnoses: s.diagnoses.map((d) => (d.code === a.code ? { ...d, accepted: on } : d)),
         events: [
-          ev('physician', ['hospital', 'employer'], 'action', `Diagnosis ${on ? 'confirmed' : 'removed'}: ${dx.code}`, `${dx.name} ${on ? 'added to' : 'removed from'} the billed diagnosis set. Readiness and claim updated.`),
+          ev('physician', ['hospital', 'employer'], 'action', `Diagnosis ${on ? 'confirmed' : 'removed'}: ${dx.code}`, `${dx.name} ${on ? 'added to' : 'removed from'} the billed diagnosis set. Readiness and claim updated.`, [dxFactId(dx.code)]),
           ...s.events,
         ],
       }
@@ -366,7 +402,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         procedures: s.procedures.map((p) => (p.code === a.code ? { ...p, accepted: on } : p)),
         events: [
-          ev('physician', ['patient', 'hospital', 'employer'], 'action', `${on ? 'Procedure added to' : 'Procedure removed from'} the plan: ${pr.code}`, `${pr.label}. Patient cost, expected reimbursement, and claim readiness were recalculated.`),
+          ev('physician', ['patient', 'hospital', 'employer'], 'action', `${on ? 'Procedure added to' : 'Procedure removed from'} the plan: ${pr.code}`, `${pr.label}. Patient cost, expected reimbursement, and claim readiness were recalculated.`, [svcFactId(pr.code)]),
           ...s.events,
         ],
       }
@@ -379,7 +415,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         medications: s.medications.map((m) => (m.name === a.name ? { ...m, active: on } : m)),
         events: [
-          ev('physician', ['patient'], 'action', `Medication ${on ? 'resumed' : 'paused'}: ${md.name}`, 'Your medication list was updated.'),
+          ev('physician', ['patient'], 'action', `Medication ${on ? 'resumed' : 'paused'}: ${md.name}`, 'Your medication list was updated.', [medFactId(md.name)]),
           ...s.events,
         ],
       }
@@ -391,7 +427,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         priorAuthApproved: true,
         claimStatus: s.claimStatus === 'review' ? 'ready' : s.claimStatus,
         events: [
-          ev('physician', ['patient', 'hospital'], 'action', 'Prior authorization approved', 'The flagged procedures are authorized. The readiness check now passes, the at risk dollars moved to expected reimbursement, and the patient sees the procedure as covered.'),
+          ev('hospital', ['patient', 'physician'], 'action', 'Prior authorization cleared', 'The flagged procedures are authorized. The readiness check now passes, the at risk dollars moved to expected reimbursement, and the patient sees the procedure as covered.', [checkFactId('prior_auth')]),
           ...s.events,
         ],
       }
@@ -402,7 +438,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         claimStatus: 'submitted',
         events: [
-          ev('hospital', ['patient', 'physician'], 'action', 'Claim submitted to payer', 'The claim moved to the payer. The patient can track billing status, and the chart reflects submission.'),
+          ev('hospital', ['patient', 'physician'], 'action', 'Claim submitted to payer', 'The claim moved to the payer. The patient can track billing status, and the chart reflects submission.', ['claim:status']),
           ...s.events,
         ],
       }
@@ -413,7 +449,7 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         financialAssistance: true,
         events: [
-          ev('patient', ['hospital'], 'action', 'Financial assistance requested', 'The patient requested assistance screening. The request was routed to revenue cycle; eligibility depends on the hospital policy and household income.'),
+          ev('patient', ['hospital'], 'action', 'Financial assistance requested', 'The patient requested assistance screening. The request was routed to revenue cycle; eligibility depends on the hospital policy and household income.', ['plan:assistance']),
           ...s.events,
         ],
       }
@@ -423,9 +459,45 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
         ...s,
         plan: a.plan,
         events: [
-          ev('patient', ['hospital'], 'action', 'Plan design updated', 'The cost estimate was recalculated with the new deductible, coinsurance, and out of pocket values.'),
+          ev('patient', ['hospital'], 'action', 'Plan design updated', 'The cost estimate was recalculated with the new deductible, coinsurance, and out of pocket values.', ['plan:design']),
           ...s.events,
         ],
+      }
+    }
+    case 'setSurvey': {
+      const s2 = a.survey
+      const changes: string[] = []
+      if (s2.transportation) changes.push('a transportation barrier to in person visits')
+      if (s2.financialHardship) changes.push('financial hardship')
+      if (s2.comorbidities.length) changes.push(`other conditions (${s2.comorbidities.join(', ')})`)
+      if (s2.language) changes.push(`a preference for ${s2.language}`)
+      if (s2.literacy === 'plain') changes.push('a preference for plain language')
+      return {
+        ...s,
+        survey: { ...s2, submitted: true },
+        events: [
+          ev(
+            'patient',
+            ['physician', 'hospital'],
+            'action',
+            'Patient intake survey submitted',
+            changes.length
+              ? `The patient reported ${changes.join('; ')}. The care team views reprioritized deterministically from these answers. No score or risk number changed.`
+              : 'Intake survey submitted with no additional barriers reported.',
+            ['survey'],
+          ),
+          ...s.events,
+        ],
+      }
+    }
+    case 'raiseTask': {
+      const already = s.raisedTasks.includes(a.taskId)
+      return {
+        ...s,
+        raisedTasks: already ? s.raisedTasks : [...s.raisedTasks, a.taskId],
+        events: already
+          ? s.events
+          : [ev(a.from, a.to, 'action', a.title, a.body, a.factId ? [a.factId] : undefined), ...s.events],
       }
     }
     case 'sendMessage': {
@@ -450,5 +522,8 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
 
 // ── Selectors ────────────────────────────────────────────────────────────────
 export const inboxFor = (s: EncounterState, p: Portal) => s.events.filter((e) => e.to.includes(p))
+// Provenance: the events (newest first) that created or changed a given fact.
+export const provenanceFor = (s: EncounterState, factId: string) =>
+  s.events.filter((e) => e.factIds?.includes(factId))
 export const unreadFor = (s: EncounterState, p: Portal) =>
   s.events.filter((e) => e.to.includes(p) && !e.readBy.includes(p) && e.from !== p).length
