@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  ShieldCheck, Sparkles, Play, Pause, LayoutGrid, Loader2, ArrowRight, ChevronDown, Bell, X, Zap, Megaphone,
+  ShieldCheck, Sparkles, Play, Pause, LayoutGrid, Loader2, ArrowRight, ChevronDown, Bell, X, Zap, Megaphone, Download,
 } from 'lucide-react'
 import {
   STAKEHOLDERS, STAKEHOLDER_ORDER,
@@ -11,6 +11,7 @@ import {
   type Verification, type Synthesis,
 } from '@/lib/synthure'
 import { unreadFor, portalLabel } from '@/lib/encounter'
+import { captureFromEvents, exportFlywheel } from '@/lib/flywheel'
 import ReportView from '@/components/ReportView'
 import { EncounterProvider, useEncounter } from './EncounterContext'
 import PatientPortal from './PatientPortal'
@@ -74,7 +75,13 @@ function PortalShellInner({
   const [showConnections, setShowConnections] = useState(false)
   const [drawer, setDrawer] = useState(false)
   const [toast, setToast] = useState<{ title: string; from: string; to: string } | null>(null)
+  const [flywheel, setFlywheel] = useState(0)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Persist human corrections as flywheel training data (deduped across encounters).
+  useEffect(() => {
+    setFlywheel(captureFromEvents(state.events, { noteType: state.base?.noteType?.label }).length)
+  }, [state.events, state.base])
 
   const stopTour = useCallback(() => {
     setTouring(false)
@@ -190,6 +197,15 @@ function PortalShellInner({
           >
             <Bell className="h-3.5 w-3.5" /> Activity
             {state.events.length > 1 && <span className="rounded-full bg-white/10 px-1.5 text-[10px]">{state.events.length}</span>}
+          </button>
+          <button
+            onClick={exportFlywheel}
+            disabled={flywheel === 0}
+            title="Export the human corrections captured here as feedback-flywheel training data"
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-slate-300 transition-colors hover:text-white disabled:opacity-40"
+          >
+            <Download className="h-3.5 w-3.5" /> Flywheel
+            {flywheel > 0 && <span className="rounded-full bg-white/10 px-1.5 text-[10px]">{flywheel}</span>}
           </button>
           <div className="ml-auto flex items-center gap-2 text-[11px] text-slate-500">
             <span>Shared encounter</span>

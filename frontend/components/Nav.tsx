@@ -21,7 +21,6 @@ export default function Nav() {
         <Logo />
         <div className="hidden md:flex items-center gap-8 text-sm text-slate-400">
           <a href="/#how" className="hover:text-white transition-colors">How it works</a>
-          <Link href="/evals" className="hover:text-white transition-colors">Evals</Link>
           <Link href="/research" className="hover:text-white transition-colors">Research</Link>
         </div>
         <Link

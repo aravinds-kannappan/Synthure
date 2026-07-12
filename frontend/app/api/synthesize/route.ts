@@ -444,16 +444,21 @@ async function claudeReport(
   return dehyphen({ stakeholder: s, ...input })
 }
 
-const VERIFY_TOOL: Anthropic.Tool = {
-  name: 'verify',
-  description: 'Verify the reports against the extracted facts.',
+// One combined audit call replaces the previous separate verifier and constitution
+// critic passes: it returns both the fact-verification checks and the
+// constitution critiques in a single Sonnet call, halving the audit fan-out with
+// no loss of either signal.
+const AUDIT_TOOL: Anthropic.Tool = {
+  name: 'audit',
+  description: 'Verify the four reports against the extracted facts and audit them against the clinical constitution, in one pass.',
   input_schema: {
     type: 'object',
     properties: {
-      confidence: { type: 'number', description: 'Overall confidence 0-1' },
+      confidence: { type: 'number', description: 'Overall confidence 0-1 that the reports are supported by the facts' },
       sourcesChecked: { type: 'number' },
       checks: {
         type: 'array',
+        description: '4 to 6 fact-verification checks against the note and extraction.',
         items: {
           type: 'object',
           properties: {
@@ -465,38 +470,59 @@ const VERIFY_TOOL: Anthropic.Tool = {
           required: ['label', 'status', 'note', 'target'],
         },
       },
+      critiques: {
+        type: 'array',
+        description: 'One entry per violated constitution principle. Empty if every principle is satisfied.',
+        items: {
+          type: 'object',
+          properties: {
+            target: { type: 'string', enum: ['patient', 'physician', 'hospital', 'employer', 'all'] },
+            issue: { type: 'string', description: 'Which principle is violated and how, in one sentence.' },
+            severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+          },
+          required: ['target', 'issue', 'severity'],
+        },
+      },
     },
-    required: ['confidence', 'sourcesChecked', 'checks'],
+    required: ['confidence', 'sourcesChecked', 'checks', 'critiques'],
   },
 }
 
 type VerifyOut = Verification & { checks: (Verification['checks'][number] & { target?: Stakeholder | 'all' })[] }
+type AuditOut = {
+  confidence: number
+  sourcesChecked: number
+  checks: VerifyOut['checks']
+  critiques: { target: Stakeholder | 'all'; issue: string; severity: 'low' | 'medium' | 'high' }[]
+}
 
-async function claudeVerify(
+async function claudeAudit(
   client: Anthropic,
   note: string,
   ex: ExtractionResult,
   reports: StakeholderReport[],
-): Promise<VerifyOut> {
+): Promise<AuditOut> {
+  const principles = CONSTITUTION.map((p, i) => `${i + 1}. ${p.principle}`).join('\n')
   const msg = await client.messages.create({
     model: SONNET,
-    max_tokens: 1200,
-    tools: [VERIFY_TOOL],
-    tool_choice: { type: 'tool', name: 'verify' },
+    max_tokens: 1600,
+    tools: [AUDIT_TOOL],
+    tool_choice: { type: 'tool', name: 'audit' },
     system:
-      'You are the Verifier agent. Audit the four stakeholder reports against the extracted facts and clinical knowledge. Flag any statement that is not supported by the note or extraction or that is clinically unsafe, and name which report it concerns. Return 4 to 6 specific checks. Write with no hyphens and no dashes.',
+      'You are the combined Verifier and Constitution Critic, an alignment safeguard in the style of Constitutional AI. Do two audits of the four stakeholder reports in one pass. (1) Verification: flag any statement not supported by the note or extraction or that is clinically unsafe, naming which report it concerns; return 4 to 6 specific checks. (2) Constitution: report only genuine violations of the principles below; if a principle holds, do not invent a problem. Be strict about fabricated codes, any agent issued prescribing or diagnosing, and unqualified cost claims. Write with no hyphens and no dashes.\n\nCLINICAL CONSTITUTION:\n' +
+      principles,
     messages: [
       {
         role: 'user',
-        content: `${exContext(note, ex)}\n\nREPORTS TO VERIFY:\n${JSON.stringify(
-          reports.map((r) => ({ for: r.stakeholder, summary: r.summary, sections: r.sections })),
+        content: `${exContext(note, ex)}\n\nREPORTS:\n${JSON.stringify(
+          reports.map((r) => ({ for: r.stakeholder, summary: r.summary, sections: r.sections, actions: r.actions })),
         )}`,
       },
     ],
   })
   const block = msg.content.find((b) => b.type === 'tool_use')
-  if (!block || block.type !== 'tool_use') throw new Error('no tool_use')
-  return dehyphen(block.input as VerifyOut)
+  if (!block || block.type !== 'tool_use') throw new Error('no tool_use from audit')
+  return dehyphen(block.input as AuditOut)
 }
 
 const SYNTH_TOOL: Anthropic.Tool = {
@@ -537,59 +563,6 @@ async function claudeSynthesis(
   const block = msg.content.find((b) => b.type === 'tool_use')
   if (!block || block.type !== 'tool_use') throw new Error('no tool_use')
   return dehyphen(block.input as Synthesis)
-}
-
-const CRITIC_TOOL: Anthropic.Tool = {
-  name: 'critique',
-  description: 'Audit the reports against the clinical constitution and report any violations.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      critiques: {
-        type: 'array',
-        description: 'One entry per violated principle. Empty if every principle is satisfied.',
-        items: {
-          type: 'object',
-          properties: {
-            target: { type: 'string', enum: ['patient', 'physician', 'hospital', 'employer', 'all'] },
-            issue: { type: 'string', description: 'Which principle is violated and how, in one sentence.' },
-            severity: { type: 'string', enum: ['low', 'medium', 'high'] },
-          },
-          required: ['target', 'issue', 'severity'],
-        },
-      },
-    },
-    required: ['critiques'],
-  },
-}
-
-async function claudeCritic(
-  client: Anthropic,
-  note: string,
-  reports: StakeholderReport[],
-): Promise<SafetyResult['critiques']> {
-  const principles = CONSTITUTION.map((p, i) => `${i + 1}. ${p.principle}`).join('\n')
-  const msg = await client.messages.create({
-    model: SONNET,
-    max_tokens: 900,
-    tools: [CRITIC_TOOL],
-    tool_choice: { type: 'tool', name: 'critique' },
-    system:
-      'You are the Constitution Critic, an alignment safeguard in the style of Constitutional AI. Audit the four reports against the clinical constitution below. Report only genuine violations; if a principle holds, do not invent a problem. Be strict about fabricated codes, any agent issued prescribing or diagnosing, and unqualified cost claims. Write with no hyphens and no dashes.\n\nCLINICAL CONSTITUTION:\n' +
-      principles,
-    messages: [
-      {
-        role: 'user',
-        content: `DE-IDENTIFIED NOTE:\n${note}\n\nREPORTS:\n${JSON.stringify(
-          reports.map((r) => ({ for: r.stakeholder, summary: r.summary, sections: r.sections, actions: r.actions })),
-        )}`,
-      },
-    ],
-  })
-  const block = msg.content.find((b) => b.type === 'tool_use')
-  if (!block || block.type !== 'tool_use') throw new Error('no tool_use from critic')
-  const inp = block.input as { critiques?: { target: Stakeholder | 'all'; issue: string; severity: 'low' | 'medium' | 'high' }[] }
-  return (inp.critiques ?? []).map((c) => ({ ...dehyphen(c), action: 'flagged' as const }))
 }
 
 // ── The pipeline ──────────────────────────────────────────────────────────────
@@ -780,16 +753,15 @@ export async function POST(req: Request) {
         )
         reports.sort((a, b) => STAKEHOLDER_ORDER.indexOf(a.stakeholder) - STAKEHOLDER_ORDER.indexOf(b.stakeholder))
 
-        // 8) Verifier + constitution critic.
+        // 8) Combined audit: fact verification + constitution critique in one call.
         t0 = Date.now()
-        const [verification, criticFindings] = await Promise.all([
-          claudeVerify(client, note, ex, reports),
-          claudeCritic(client, note, reports),
-        ])
+        const audit = await claudeAudit(client, note, ex, reports)
+        const verification: VerifyOut = { confidence: audit.confidence, sourcesChecked: audit.sourcesChecked, checks: audit.checks }
         send({ type: 'verification', verification })
 
         const safety = assessSafety(note, ex, reports)
         const seen = new Set(safety.critiques.map((c) => c.issue))
+        const criticFindings = audit.critiques.map((c) => ({ ...c, action: 'flagged' as const }))
         for (const c of criticFindings) if (!seen.has(c.issue)) safety.critiques.push(c)
         safety.mode = 'claude assisted'
 

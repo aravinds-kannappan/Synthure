@@ -127,8 +127,8 @@ export default function Landing() {
             <Link href="/demo" className="group inline-flex items-center gap-2 rounded-xl bg-teal-400 px-7 py-3.5 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300">
               Try the live demo <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <Link href="/evals" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-7 py-3.5 text-sm text-slate-300 transition-all hover:border-white/20 hover:text-white">
-              See the numbers
+            <Link href="/research" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-7 py-3.5 text-sm text-slate-300 transition-all hover:border-white/20 hover:text-white">
+              Research notes
             </Link>
           </div>
         </div>
@@ -236,7 +236,6 @@ export default function Landing() {
             <span>Synthure, clinical note normalization and claim readiness (research prototype)</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/evals" className="transition-colors hover:text-slate-300">Evals</Link>
             <Link href="/research" className="transition-colors hover:text-slate-300">Research</Link>
             <Link href="/demo" className="transition-colors hover:text-slate-300">Demo</Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-slate-300">GitHub</a>
