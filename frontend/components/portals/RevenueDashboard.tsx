@@ -2,18 +2,20 @@
 
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { Building2, Check, Loader2, Circle, TrendingUp, FileText, Send } from 'lucide-react'
+import { Building2, Check, Loader2, Circle, TrendingUp, FileText, Send, GitBranch } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
 import { fmt$ } from '@/lib/engine'
+import { svcFactId } from '@/lib/encounter'
 import { useEncounter } from './EncounterContext'
 import { Gauge, ReportDrawer, ChecksPanel } from './widgets'
 import Inbox from './Inbox'
+import TaskQueue from './TaskQueue'
 
 const ACCENT = '#22d3ee'
 const riskColor = (r: number) => (r >= 55 ? '#f87171' : r >= 35 ? '#fbbf24' : '#34d399')
 
 export default function RevenueDashboard({ report }: { report?: StakeholderReport }) {
-  const { state, d, dispatch } = useEncounter()
+  const { state, d, dispatch, setFocusFact } = useEncounter()
   const procedures = state.procedures.filter((p) => p.accepted)
   const dxCodes = state.diagnoses.filter((x) => x.accepted).map((x) => x.code)
   const submitted = state.claimStatus === 'submitted' || state.claimStatus === 'reimbursed'
@@ -94,16 +96,24 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
               </div>
               {d.services.length ? (
                 d.services.map((p) => (
-                  <div key={p.code} className="flex items-center justify-between border-b border-white/[0.04] px-4 py-2.5 last:border-0">
+                  <button
+                    key={p.code}
+                    onClick={() => setFocusFact(svcFactId(p.code))}
+                    title="Follow this fact across all four portals"
+                    className="group flex w-full items-center justify-between border-b border-white/[0.04] px-4 py-2.5 text-left transition-colors last:border-0 hover:bg-white/[0.02]"
+                  >
                     <div className="flex items-center gap-2.5">
                       <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-cyan-300">{p.code}</span>
                       <span className="text-[13px] text-slate-300">{p.label}</span>
                       {p.atRisk && (
-                        <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300" title={p.atRiskWhy ?? ''}>at risk</span>
+                        <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">at risk</span>
                       )}
                     </div>
-                    <span className="font-mono text-[13px] text-slate-200">{p.price != null ? fmt$(p.price) : 'no CMS amount'}</span>
-                  </div>
+                    <span className="flex items-center gap-2">
+                      <span className="font-mono text-[13px] text-slate-200">{p.price != null ? fmt$(p.price) : 'no CMS amount'}</span>
+                      <GitBranch className="h-3.5 w-3.5 text-slate-600 transition-colors group-hover:text-cyan-300" />
+                    </span>
+                  </button>
                 ))
               ) : (
                 <div className="px-4 py-3 text-[13px] text-slate-500">No procedure lines. Office visit billing applies.</div>
@@ -136,6 +146,7 @@ export default function RevenueDashboard({ report }: { report?: StakeholderRepor
               </div>
             )}
 
+            <TaskQueue portal="hospital" accent={ACCENT} />
             <Inbox portal="hospital" accent={ACCENT} />
             <ReportDrawer sections={report?.sections ?? []} accent={ACCENT} />
           </div>

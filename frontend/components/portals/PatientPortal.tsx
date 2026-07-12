@@ -1,14 +1,16 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import {
   HeartPulse, Pill, Activity, Wallet, ListChecks, ShieldAlert,
   MessageCircleQuestion, CheckCircle2, Sparkles, BadgeCheck, FileClock, HandCoins,
+  ClipboardList, Bus, Languages,
 } from 'lucide-react'
 import type { StakeholderReport } from '@/lib/synthure'
 import { fmt$ } from '@/lib/engine'
 import { PAYERS, PAYER_ORDER, type Payer } from '@/lib/pricing'
+import { dxFactId, type Survey } from '@/lib/encounter'
 import { useEncounter } from './EncounterContext'
 import { ReportDrawer } from './widgets'
 import Inbox from './Inbox'
@@ -27,7 +29,7 @@ const BILLING: Record<string, string> = {
 }
 
 export default function PatientPortal({ report }: { report?: StakeholderReport }) {
-  const { state, d, dispatch } = useEncounter()
+  const { state, d, dispatch, setFocusFact } = useEncounter()
   const diagnoses = state.diagnoses.filter((x) => x.accepted)
   const meds = state.medications.filter((m) => m.active)
   const covered = state.priorAuthApproved && d.anyAuthNeeded
@@ -115,6 +117,10 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
           <PlanEditor />
         </motion.div>
 
+        {/* Intake survey + its deterministic personalization */}
+        <SurveyCard />
+        <PersonalizedGuidance />
+
         {/* Billing status */}
         <motion.div {...fade(2)} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-[13px] text-slate-600">
           <FileClock className="h-4 w-4 text-teal-600" />
@@ -127,7 +133,12 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
             <SectionTitle icon={<HeartPulse className="h-4 w-4" />} title="What this means for you" />
             <div className="grid gap-3 sm:grid-cols-2">
               {diagnoses.map((dx) => (
-                <div key={dx.code} className="rounded-xl border border-slate-200 bg-white p-4">
+                <button
+                  key={dx.code}
+                  onClick={() => setFocusFact(dxFactId(dx.code))}
+                  title="See how this diagnosis appears across your care team"
+                  className="rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-teal-300"
+                >
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-slate-800">{dx.name}</span>
                     <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">{dx.code}</span>
@@ -140,7 +151,8 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
                   ) : (
                     <p className="mt-1.5 text-[13px] leading-relaxed text-slate-600">Your report below explains this in plain language.</p>
                   )}
-                </div>
+                  <span className="mt-2 flex items-center gap-1 text-[11px] font-medium text-teal-600">See this across your care team</span>
+                </button>
               ))}
             </div>
           </motion.div>
@@ -263,6 +275,105 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
       <span className="text-teal-600">{icon}</span>
       <h3 className="text-sm font-semibold">{title}</h3>
     </div>
+  )
+}
+
+// ── Intake survey ─────────────────────────────────────────────────────────────
+// Optional patient-reported context. Everything it changes is deterministic and
+// sourced to the survey: it never feeds a score or a risk number.
+function SurveyCard() {
+  const { state, dispatch } = useEncounter()
+  const [draft, setDraft] = useState<Survey>(state.survey)
+  const [comorbid, setComorbid] = useState(state.survey.comorbidities.join(', '))
+
+  const save = () => {
+    const comorbidities = comorbid.split(',').map((x) => x.trim()).filter(Boolean)
+    dispatch({ type: 'setSurvey', survey: { ...draft, comorbidities, submitted: true } })
+  }
+
+  return (
+    <motion.div {...fade(2)} className="rounded-2xl border border-teal-200 bg-white p-5">
+      <div className="flex items-center gap-2 text-teal-700">
+        <ClipboardList className="h-4 w-4" />
+        <span className="text-xs font-semibold uppercase tracking-wider">Tell us about you (optional)</span>
+        {state.survey.submitted && <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">saved</span>}
+      </div>
+      <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">
+        This helps your care team tailor your plan. It changes what we show you and prompt your team about, nothing more.
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <label className="text-[11px] text-slate-500">
+          Reading preference
+          <select
+            value={draft.literacy}
+            onChange={(e) => setDraft({ ...draft, literacy: e.target.value as Survey['literacy'] })}
+            className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[13px] text-slate-800"
+          >
+            <option value="standard">Standard</option>
+            <option value="plain">Plain language</option>
+          </select>
+        </label>
+        <label className="text-[11px] text-slate-500">
+          Preferred language
+          <input
+            value={draft.language}
+            onChange={(e) => setDraft({ ...draft, language: e.target.value })}
+            placeholder="English"
+            className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[13px] text-slate-800"
+          />
+        </label>
+        <label className="col-span-full text-[11px] text-slate-500">
+          Other conditions you have (comma separated)
+          <input
+            value={comorbid}
+            onChange={(e) => setComorbid(e.target.value)}
+            placeholder="e.g. asthma, anxiety"
+            className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[13px] text-slate-800"
+          />
+        </label>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-4">
+        <label className="flex items-center gap-2 text-[13px] text-slate-600">
+          <input type="checkbox" checked={draft.transportation} onChange={(e) => setDraft({ ...draft, transportation: e.target.checked })} className="h-4 w-4 accent-teal-600" />
+          <Bus className="h-4 w-4 text-teal-600" /> Getting to visits is hard for me
+        </label>
+        <label className="flex items-center gap-2 text-[13px] text-slate-600">
+          <input type="checkbox" checked={draft.financialHardship} onChange={(e) => setDraft({ ...draft, financialHardship: e.target.checked })} className="h-4 w-4 accent-teal-600" />
+          <HandCoins className="h-4 w-4 text-teal-600" /> Cost is a concern for me
+        </label>
+      </div>
+      <button onClick={save} className="mt-3 flex items-center gap-1.5 rounded-lg bg-teal-600 px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-teal-700">
+        <CheckCircle2 className="h-4 w-4" /> {state.survey.submitted ? 'Update' : 'Save'}
+      </button>
+    </motion.div>
+  )
+}
+
+// Deterministic personalization shown back to the patient, each item traceable to
+// a survey answer. No scores.
+function PersonalizedGuidance() {
+  const { state } = useEncounter()
+  const sv = state.survey
+  if (!sv.submitted) return null
+  const items: { icon: ReactNode; text: string }[] = []
+  if (sv.transportation) items.push({ icon: <Bus className="h-4 w-4 text-teal-600" />, text: 'We flagged your team to offer a telehealth follow up so you do not have to travel.' })
+  if (sv.financialHardship) items.push({ icon: <HandCoins className="h-4 w-4 text-teal-600" />, text: 'We asked the billing team to reach out about financial assistance before any bill.' })
+  if (sv.comorbidities.length) items.push({ icon: <ClipboardList className="h-4 w-4 text-teal-600" />, text: `We asked your clinician to review the conditions you listed: ${sv.comorbidities.join(', ')}.` })
+  if (sv.language) items.push({ icon: <Languages className="h-4 w-4 text-teal-600" />, text: `We noted your preference for ${sv.language} for your care team.` })
+  if (sv.literacy === 'plain') items.push({ icon: <Sparkles className="h-4 w-4 text-teal-600" />, text: 'We will keep explanations in plain language where we can.' })
+  if (!items.length) return null
+  return (
+    <motion.div {...fade(2)} className="rounded-2xl border border-teal-200 bg-teal-50/60 p-5">
+      <SectionTitle icon={<Sparkles className="h-4 w-4" />} title="Personalized for you" />
+      <ul className="space-y-2">
+        {items.map((it, i) => (
+          <li key={i} className="flex gap-2 text-[13px] text-slate-700">
+            <span className="mt-0.5 flex-shrink-0">{it.icon}</span>
+            <span>{it.text}</span>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
   )
 }
 

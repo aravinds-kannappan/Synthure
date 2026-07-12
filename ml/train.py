@@ -1,74 +1,109 @@
 """Train the Synthure-owned models and export them to JSON for TS inference.
 
-Models:
-  note_type   TF-IDF (word 1-2gram) + multinomial logistic regression
-  missing     per-field logistic regression over structural features
-  readiness   gradient boosted trees over structural features
-  calibration isotonic calibration of readiness scores (fit on val)
-  reranker    logistic regression over lexical features for ICD candidate ranking
+Data source: the trained data engine (ml/data_engine), which writes
+ml/artifacts/corpus/{train,val,test}.jsonl. `test.jsonl` is a frozen real-note
+holdout; every headline number is reported on it, separately from the synthetic
+val split. If the corpus is absent, this falls back to the legacy
+ml/artifacts/{split}.jsonl for backward compatibility.
 
-Exports land in ml/artifacts/models/ and are copied to frontend/lib/models/.
+Models:
+  note_type   PyTorch multinomial logistic over word 1-2 gram TF-IDF (note_type_torch.py)
+  missing     per-field logistic regression over structural features (scikit-learn)
+  readiness   gradient boosted trees + isotonic calibration (scikit-learn)
+  reranker    logistic regression over lexical features (scikit-learn)
+
+Exports land in ml/artifacts/models/ and, unless --no-export is passed, are copied
+to frontend/lib/models/. scikit-learn is imported lazily so `--only note_type`
+runs with just torch (handy for local verification without sklearn).
 """
 
+import argparse
 import gzip
 import json
 import re
 import shutil
+import sys
+from pathlib import Path
 
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.isotonic import IsotonicRegression
 
 from common import OUT, DATA, ROOT
 from features import (
-    note_type_tokens, structural_features, struct_vector, STRUCT_KEYS,
+    structural_features, struct_vector, STRUCT_KEYS,
     NOTE_TYPES, MISSING_FIELDS,
 )
+from note_type_torch import train_note_type as _train_note_type_torch
 
+# The data engine's independent labelers, for records that arrive without
+# missing/readiness labels (e.g. real notes). Flat imports resolve because we add
+# the data_engine dir to the path; there is no name clash with ml/ modules.
+sys.path.append(str(Path(__file__).resolve().parent / "data_engine"))
+from labels import missing_labels, readiness_label  # noqa: E402
+
+CORPUS = ROOT / "ml" / "artifacts" / "corpus"
 MODELS = OUT / "models"
 MODELS.mkdir(parents=True, exist_ok=True)
 FE_MODELS = ROOT / "frontend" / "lib" / "models"
 FE_MODELS.mkdir(parents=True, exist_ok=True)
 
+EXPORT_FE = True  # set False by --no-export to avoid clobbering the shipped models
 
-def load(split):
-    with open(OUT / f"{split}.jsonl") as f:
-        return [json.loads(l) for l in f]
+_DX_SECTION = re.compile(r"\b(assessment|diagnosis|impression|problem|decision)\b", re.I)
 
 
-def dump(name, obj):
+def _enrich(r: dict) -> dict:
+    """Fill labels an incoming record may lack, using the independent labelers so a
+    real note and a generated note carry the same label semantics."""
+    if r.get("icd") is None:
+        r["icd"] = []
+    if r.get("cpt") is None:
+        r["cpt"] = []
+    if r.get("missing") is None:
+        r["missing"] = missing_labels(r["note"])
+    if r.get("ready") is None:
+        has_dx = bool(r["icd"]) or bool(_DX_SECTION.search(r["note"].lower()))
+        r["ready"] = readiness_label(r["missing"], has_dx)
+    return r
+
+
+def load(split: str) -> list[dict]:
+    path = CORPUS / f"{split}.jsonl"
+    if not path.exists():
+        path = OUT / f"{split}.jsonl"  # legacy fallback
+    if not path.exists():
+        return []
+    with open(path) as f:
+        return [_enrich(json.loads(line)) for line in f if line.strip()]
+
+
+def dump(name: str, obj) -> None:
     (MODELS / name).write_text(json.dumps(obj))
-    shutil.copy(MODELS / name, FE_MODELS / name)
-    print(f"  exported {name} ({(MODELS / name).stat().st_size/1024:.0f} KB)")
+    if EXPORT_FE:
+        shutil.copy(MODELS / name, FE_MODELS / name)
+        print(f"  exported {name} ({(MODELS / name).stat().st_size/1024:.0f} KB) -> frontend/lib/models/")
+    else:
+        print(f"  wrote {name} to ml/artifacts/models/ (frontend export skipped)")
 
 
-# ── 1. Note-type classifier ──────────────────────────────────────────────────
-def train_note_type(train, val):
-    print("note_type: TF-IDF + logistic regression")
-    Xtr = [" ".join(note_type_tokens(r["note"])) for r in train]
-    ytr = [NOTE_TYPES.index(r["note_type"]) for r in train]
-    vec = TfidfVectorizer(analyzer="word", token_pattern=r"[^ ]+", max_features=1600, sublinear_tf=True)
-    Xv = vec.fit_transform(Xtr)
-    clf = LogisticRegression(max_iter=2000, C=6.0)
-    clf.fit(Xv, ytr)
-    # export vocab + idf + coef
-    vocab = vec.vocabulary_
-    inv = {i: t for t, i in vocab.items()}
-    dump("note_type.json", {
-        "classes": NOTE_TYPES,
-        "vocab": {inv[i]: i for i in range(len(inv))},
-        "idf": vec.idf_.tolist(),
-        "coef": clf.coef_.tolist(),
-        "intercept": clf.intercept_.tolist(),
-    })
-    acc = np.mean([NOTE_TYPES[int(np.argmax(clf.decision_function(vec.transform([" ".join(note_type_tokens(r["note"]))]))[0]))] == r["note_type"] for r in val])
-    print(f"  val accuracy: {acc:.3f}")
+# ── 1. Note-type classifier (PyTorch) ─────────────────────────────────────────
+def train_note_type(train, val, test):
+    print("note_type: PyTorch multinomial logistic over TF-IDF")
+    export, metrics = _train_note_type_torch(train, val, test)
+    dump("note_type.json", export)
+    (MODELS / "note_type_eval.json").write_text(json.dumps(metrics, indent=2))
+    print(
+        f"  train {metrics['train_acc']}  |  synthetic-val {metrics['val_acc']}  |  "
+        f"REAL-test {metrics['real_test_acc']}  (n_test={metrics['n_test']}, vocab={metrics['vocab_size']})"
+    )
+    if metrics["real_test_acc"] is not None and metrics["real_test_acc"] >= 0.999:
+        print("  note: real-test accuracy at ceiling. Confirm the test split is real notes, not synthetic.")
+    return metrics
 
 
 # ── 2. Missing-info detector (per field) ──────────────────────────────────────
 def train_missing(train, val):
+    from sklearn.linear_model import LogisticRegression
+
     print("missing: per-field logistic regression")
     Xtr = np.array([struct_vector(structural_features(r["note"], r["note_type"], len(r["icd"]), len(r["cpt"]))) for r in train])
     models = {}
@@ -85,8 +120,6 @@ def train_missing(train, val):
 
 # ── 3. Readiness predictor + calibration ──────────────────────────────────────
 def export_gbm(clf):
-    """Serialize a sklearn GradientBoostingClassifier (binary) to a compact JSON
-    ensemble of regression trees plus init and learning rate."""
     trees = []
     for stage in clf.estimators_:
         t = stage[0].tree_
@@ -103,6 +136,10 @@ def export_gbm(clf):
 
 
 def train_readiness(train, val):
+    from sklearn.ensemble import GradientBoostingClassifier
+    from sklearn.isotonic import IsotonicRegression
+    from sklearn.metrics import roc_auc_score
+
     print("readiness: gradient boosted trees + isotonic calibration")
     Xtr = np.array([struct_vector(structural_features(r["note"], r["note_type"], len(r["icd"]), len(r["cpt"]))) for r in train])
     ytr = np.array([r["ready"] for r in train])
@@ -113,17 +150,13 @@ def train_readiness(train, val):
     raw = clf.predict_proba(Xva)[:, 1]
     iso = IsotonicRegression(out_of_bounds="clip")
     iso.fit(raw, yva)
-    # export calibration as a monotone step function (x thresholds -> y)
     xs = np.linspace(0, 1, 51)
     ys = iso.predict(xs).tolist()
     dump("readiness.json", {"gbm": export_gbm(clf), "calibration": {"x": xs.tolist(), "y": ys}})
-    from sklearn.metrics import roc_auc_score
     print(f"  val AUROC (raw): {roc_auc_score(yva, raw):.3f}")
 
 
 # ── 4. ICD candidate reranker ─────────────────────────────────────────────────
-# Minimal port of the index token-overlap retrieval so we can build candidate
-# sets in Python, then train a learned reranker over lexical features.
 def load_index():
     with gzip.open(DATA / "icd10index.json.gz", "rt") as f:
         raw = json.load(f)
@@ -174,9 +207,11 @@ def retrieve(phrase, terms, tokmap, tab, limit=8):
 
 
 def train_reranker(train, terms, tokmap, tab):
+    from sklearn.linear_model import LogisticRegression
+    from common import ICD_OF
+
     print("reranker: logistic regression over lexical features")
     X, y = [], []
-    from common import ICD_OF
     for r in train[:600]:
         for c in r["icd"]:
             cond = ICD_OF.get(c)
@@ -191,7 +226,7 @@ def train_reranker(train, terms, tokmap, tab):
                 y.append(1 if cand["code"].replace(".", "").upper() == gold else 0)
     X, y = np.array(X, float), np.array(y)
     if y.sum() < 5:
-        print("  not enough positives, skipping")
+        print("  not enough positives (corpus lacks gold ICD pairs); skipping reranker")
         return
     clf = LogisticRegression(max_iter=1500, class_weight="balanced")
     clf.fit(X, y)
@@ -199,12 +234,24 @@ def train_reranker(train, terms, tokmap, tab):
 
 
 def main():
-    train, val = load("train"), load("val")
-    train_note_type(train, val)
-    train_missing(train, val)
-    train_readiness(train, val)
-    terms, tokmap, tab = load_index()
-    train_reranker(train, terms, tokmap, tab)
+    global EXPORT_FE
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--only", default="all", choices=["all", "note_type"], help="which models to train")
+    ap.add_argument("--no-export", action="store_true", help="do not copy artifacts into frontend/lib/models")
+    args = ap.parse_args()
+    EXPORT_FE = not args.no_export
+
+    train, val, test = load("train"), load("val"), load("test")
+    if not train:
+        raise SystemExit("no training corpus found. Run ml/data_engine/build.py first.")
+    print(f"corpus: train {len(train)} / val {len(val)} / test {len(test)} (test is the frozen real-note holdout)")
+
+    train_note_type(train, val, test)
+    if args.only == "all":
+        train_missing(train, val)
+        train_readiness(train, val)
+        terms, tokmap, tab = load_index()
+        train_reranker(train, terms, tokmap, tab)
     print("done.")
 
 

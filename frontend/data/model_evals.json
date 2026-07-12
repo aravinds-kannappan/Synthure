@@ -14,5 +14,13 @@
       "docs": 250
     }
   },
-  "faithfulness": null
+  "faithfulness": null,
+  "data_engine": {
+    "generator": "byte-level conditional GPT, trained from scratch on real notes",
+    "sources": ["MTSamples: 1,952 usable notes", "MedSecId sections (optional)", "PMC Open Access"],
+    "note_types": 7,
+    "holdout": "frozen real-note test split, never trained on",
+    "note_type_synthetic_val": null,
+    "note_type_real_test": null
+  }
 }
