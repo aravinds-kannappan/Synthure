@@ -111,6 +111,7 @@ export interface EncounterState {
   events: EncEvent[]
   raisedTasks: string[] // task ids explicitly handed off to their owning portal
   survey: Survey
+  actionLog: EncAction[] // append-only log of applied actions, for deterministic replay
 }
 
 let _seq = 0
@@ -166,6 +167,7 @@ export function initEncounter(ex: ExtractionResult): EncounterState {
     events: [ev('system', [...PORTALS], 'system', 'Encounter synthesized from the clinical note', 'Four portals opened from one note. Every action here ripples across all of them.')],
     raisedTasks: [],
     survey: { ...DEFAULT_SURVEY, comorbidities: [] },
+    actionLog: [],
   }
 }
 
@@ -379,7 +381,7 @@ export type EncAction =
   | { type: 'sendMessage'; from: Portal; to: Portal[]; body: string }
   | { type: 'markRead'; portal: Portal }
 
-export function reducer(s: EncounterState, a: EncAction): EncounterState {
+function coreReducer(s: EncounterState, a: EncAction): EncounterState {
   switch (a.type) {
     case 'toggleDx': {
       const dx = s.diagnoses.find((d) => d.code === a.code)
@@ -518,6 +520,38 @@ export function reducer(s: EncounterState, a: EncAction): EncounterState {
     default:
       return s
   }
+}
+
+// Public reducer: the core reducer plus an append-only action log so an encounter
+// can be replayed deterministically. markRead is UI-only read tracking and no-op
+// transitions are not logged.
+export function reducer(s: EncounterState, a: EncAction): EncounterState {
+  const next = coreReducer(s, a)
+  if (next === s || a.type === 'markRead') return next
+  return { ...next, actionLog: [...next.actionLog, a] }
+}
+
+// ── Event sourcing: replay an encounter from its base + action log ────────────
+// This is the seam for a server-authoritative encounter. The client holds an
+// action log; a server can receive { base, actions } and replay it to the exact
+// same clinical and financial state. Event ids and timestamps are regenerated on
+// replay (they are cosmetic); everything the portals read from derive() is
+// reconstructed identically.
+export interface EncounterSnapshot {
+  base: ExtractionResult
+  actions: EncAction[]
+}
+
+export function replay(base: ExtractionResult, actions: EncAction[]): EncounterState {
+  return actions.reduce(reducer, initEncounter(base))
+}
+
+export function serializeEncounter(s: EncounterState): EncounterSnapshot {
+  return { base: s.base, actions: s.actionLog }
+}
+
+export function deserializeEncounter(snap: EncounterSnapshot): EncounterState {
+  return replay(snap.base, snap.actions)
 }
 
 // ── Selectors ────────────────────────────────────────────────────────────────
