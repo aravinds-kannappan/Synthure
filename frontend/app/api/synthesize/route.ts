@@ -43,6 +43,7 @@ import { classifyNoteType, detectMissing, predictReadiness, rerankScore } from '
 import { parseSections } from '@/lib/models/sections'
 import { NOTE_TYPE_LABELS } from '@/lib/schema'
 import { PAYERS } from '@/lib/pricing'
+import { runGuardrails, guardrailRevisionIssues } from '@/lib/guardrails'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -775,6 +776,25 @@ export async function POST(req: Request) {
         for (const ch of verification.checks) if (ch.status === 'flag') addIssue(ch.target, `${ch.label}: ${ch.note}`)
         for (const c of safety.critiques) if (c.severity !== 'low') addIssue(c.target, c.issue)
 
+        // Deterministic guardrails (defense in depth). These run in process, do not
+        // call an LLM, and catch grounding and policy violations the audit may miss.
+        // Their revise and block findings are merged into the revision issues so the
+        // writers fix them too. The known numbers set is what the reports may cite.
+        const gMult = PAYERS.commercial.multiplier
+        const gRaw = ex.cpt.map((c) => c.price).filter((p): p is number => p != null)
+        const gPayer = gRaw.map((p) => Math.round(p * gMult))
+        const gPc = patientCost(ex)
+        const knownNumbers = [
+          ...gRaw, gRaw.reduce((a, b) => a + b, 0),
+          ...gPayer, gPayer.reduce((a, b) => a + b, 0),
+          ...(gPc ? [gPc.allowed, gPc.patient] : []),
+          ex.readmissionRisk,
+          DEFAULT_PLAN.deductibleRemaining, Math.round(DEFAULT_PLAN.coinsurance * 100), DEFAULT_PLAN.oopMaxRemaining,
+        ]
+        for (const [target, issues] of guardrailRevisionIssues(runGuardrails({ note, extraction: ex, reports, knownNumbers }))) {
+          for (const t of issues) addIssue(target, t)
+        }
+
         let revised = 0
         for (const [target, issues] of issuesByTarget) {
           if (revised >= 2) break
@@ -795,6 +815,13 @@ export async function POST(req: Request) {
         if (revised) stage('revise', `${revised} report${revised === 1 ? '' : 's'} revised from verifier/critic findings`, t0)
         safety.caughtViolations = safety.critiques.length
         send({ type: 'safety', safety })
+
+        // Re-run the guardrails on the final (post revision) reports and stream the
+        // report as the observability layer: a per run, per layer verdict with a
+        // score and a ship / revise / block / escalate decision.
+        const guardrails = runGuardrails({ note, extraction: ex, reports, knownNumbers })
+        stage('gate', `guardrails ${guardrails.decision}, score ${(guardrails.score * 100).toFixed(0)} percent, ${guardrails.flagged.length} finding${guardrails.flagged.length === 1 ? '' : 's'}`, t0)
+        send({ type: 'guardrails', guardrails })
 
         // 10) Orchestrator reads the final (post revision) reports.
         const synthesis = await claudeSynthesis(client, note, ex, reports)
