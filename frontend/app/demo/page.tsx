@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-react'
+import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap, ArrowRight } from 'lucide-react'
 import Nav from '@/components/Nav'
 import PortalShell from '@/components/portals/PortalShell'
 import SafetyConsole from '@/components/SafetyConsole'
 import GuardrailPanel from '@/components/GuardrailPanel'
+import HarnessPanel from '@/components/HarnessPanel'
 import { AnnotatedNote, PipelineFlow } from '@/components/DemoVisuals'
 import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
@@ -134,6 +135,9 @@ export default function DemoPage() {
         entities: ex.entities.length,
         guardrailScore: state.guardrails?.score ?? null,
         guardrailDecision: state.guardrails?.decision ?? null,
+        guardrailFlags: state.guardrails?.flagged.map((f) => f.id) ?? [],
+        harnessAction: state.harness?.action ?? null,
+        riskTier: state.harness?.riskTier ?? null,
       })
     }
   }, [state.phase, ex])
@@ -399,14 +403,32 @@ export default function DemoPage() {
           </div>
         )}
 
+        {/* Agent harness: the seven safety mechanisms folded into one decision */}
+        {state.harness && (
+          <div className="mt-8">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-white">Agent harness</h2>
+              <p className="mt-1 max-w-3xl text-sm text-slate-400">
+                Everything around the model. Seven mechanisms decide whether this output can be handled automatically, needs a human, should abstain, or must be blocked: retrieval only evidence, confidence abstention, a policy engine, adversarial input detection, model agreement, an immutable audit log, and human in the loop for high risk.
+              </p>
+            </div>
+            <HarnessPanel report={state.harness} />
+          </div>
+        )}
+
         {/* Guardrail layer: deterministic, layered output verification */}
         {state.guardrails && (
           <div className="mt-8">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-white">Guardrails</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                Before the reports are trusted, a deterministic layered engine verifies them: is every code and number grounded, does any report break a policy, is it consistent and complete. It runs in process with no API call and produces a scored, per layer verdict.
-              </p>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Guardrails</h2>
+                <p className="mt-1 max-w-3xl text-sm text-slate-400">
+                  Before the reports are trusted, a deterministic layered engine verifies them: is every code and number grounded, does any report break a policy, is it consistent and complete. It runs in process with no API call and produces a scored, per layer verdict.
+                </p>
+              </div>
+              <a href="/observability" className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300 transition-colors hover:text-white">
+                Aggregate metrics <ArrowRight className="h-3.5 w-3.5" />
+              </a>
             </div>
             <GuardrailPanel report={state.guardrails} />
           </div>

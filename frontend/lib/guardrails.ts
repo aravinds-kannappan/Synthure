@@ -374,3 +374,30 @@ export function guardrailRevisionIssues(report: GuardrailReport): Map<GStakehold
   }
   return m
 }
+
+// ── Catalog ──────────────────────────────────────────────────────────────────
+// The full set of checks the engine can emit, for documentation and for the
+// observability dashboard to group and label findings. Kept in sync with the
+// check functions above (same ids).
+export interface GuardCheckSpec { id: string; layer: GuardLayer; severity: GuardSeverity; what: string }
+export const GUARDRAIL_CHECKS: GuardCheckSpec[] = [
+  { id: 'input.injection', layer: 'input', severity: 'high', what: 'The note carries no instruction injection aimed at the model.' },
+  { id: 'grounding.codes', layer: 'grounding', severity: 'blocking', what: 'Every code in every report traces to the validated extraction or the note.' },
+  { id: 'grounding.numbers', layer: 'grounding', severity: 'high', what: 'Every dollar and percent figure traces to a priced service, the benefit math, the note, or a published rate.' },
+  { id: 'grounding.billable', layer: 'grounding', severity: 'medium', what: 'No non billable category header is presented as billable.' },
+  { id: 'policy.denial_probability', layer: 'policy', severity: 'blocking', what: 'No report states a denial probability (no data exists to ground one).' },
+  { id: 'policy.prescribing', layer: 'policy', severity: 'blocking', what: 'No agent issued prescribing or diagnosing.' },
+  { id: 'policy.phi_isolation', layer: 'policy', severity: 'blocking', what: 'The aggregate employer view carries no identifying detail.' },
+  { id: 'policy.cost_estimate_labeled', layer: 'policy', severity: 'medium', what: 'Costs shown to the patient are labeled as estimates.' },
+  { id: 'consistency.readiness', layer: 'consistency', severity: 'medium', what: 'Report claims about claim readiness match the checklist.' },
+  { id: 'style.dashes', layer: 'style', severity: 'low', what: 'No hyphens or dashes in any report.' },
+  { id: 'quality.structure', layer: 'quality', severity: 'low', what: 'Every report has a summary, at least two sections, and at least one action.' },
+  { id: 'quality.dx_coverage', layer: 'quality', severity: 'medium', what: 'The primary diagnoses appear in the reports.' },
+]
+export const checkLayer = (id: string): GuardLayer | undefined => GUARDRAIL_CHECKS.find((c) => c.id === id)?.layer
+
+// Injection detection, exported so the harness input gate can run it before the
+// pipeline (retrieval preconditions), reusing the same patterns as the engine.
+export function detectInjection(note: string): string[] {
+  return INJECTION_RES.filter((re) => re.test(note)).map((re) => (note.match(re) ?? [''])[0]).filter(Boolean)
+}
