@@ -1,3 +1,4 @@
 
 # guardrail grading build output
 .guardrail-build/
+.harness-build/

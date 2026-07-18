@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "grade-guardrails": "tsc lib/guardrails.ts lib/guardrails.harness.ts --rootDir lib --outDir .guardrail-build --module commonjs --target es2020 --skipLibCheck && node -e \"const {runHarness}=require('./.guardrail-build/guardrails.harness');process.exit(runHarness().failures.length?1:0)\""
+    "grade-guardrails": "tsc lib/guardrails.ts lib/guardrails.harness.ts --rootDir lib --outDir .guardrail-build --module commonjs --target es2020 --skipLibCheck && node -e \"const {runHarness}=require('./.guardrail-build/guardrails.harness');process.exit(runHarness().failures.length?1:0)\"",
+    "grade-harness": "tsc lib/guardrails.ts lib/harness.ts lib/audit.ts lib/harness.harness.ts --rootDir lib --outDir .harness-build --module commonjs --target es2020 --skipLibCheck --lib es2020,dom && node -e \"require('./.harness-build/harness.harness').runHarnessSuite().then(r=>process.exit(r.failures.length?1:0))\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

@@ -44,6 +44,8 @@ import { parseSections } from '@/lib/models/sections'
 import { NOTE_TYPE_LABELS } from '@/lib/schema'
 import { PAYERS } from '@/lib/pricing'
 import { runGuardrails, guardrailRevisionIssues } from '@/lib/guardrails'
+import { validateInput, assembleHarness } from '@/lib/harness'
+import { auditRecordFrom } from '@/lib/audit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -596,6 +598,17 @@ export async function POST(req: Request) {
       headers: { 'content-type': 'application/json' },
     })
   }
+  // Harness stage: adversarial and malformed input detection before the pipeline
+  // runs. A malformed or too-short note is rejected up front (there is nothing to
+  // retrieve evidence from); injection is carried as a warning into the harness
+  // report and treated as data, never as a directive.
+  const inputReport = validateInput(note)
+  if (inputReport.reject) {
+    return new Response(JSON.stringify({ error: inputReport.findings.find((f) => f.severity === 'block')?.detail ?? 'The note could not be processed.' }), {
+      status: 400,
+      headers: { 'content-type': 'application/json' },
+    })
+  }
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return new Response(
@@ -822,6 +835,34 @@ export async function POST(req: Request) {
         const guardrails = runGuardrails({ note, extraction: ex, reports, knownNumbers })
         stage('gate', `guardrails ${guardrails.decision}, score ${(guardrails.score * 100).toFixed(0)} percent, ${guardrails.flagged.length} finding${guardrails.flagged.length === 1 ? '' : 's'}`, t0)
         send({ type: 'guardrails', guardrails })
+
+        // Harness: fold the seven safety mechanisms into one decision (retrieval
+        // only, confidence abstention, policy engine, model agreement, risk tier,
+        // human in the loop), plus the input findings from the pre-pipeline gate.
+        const harness = assembleHarness({ extraction: ex, guardrails, input: inputReport })
+        send({ type: 'harness', harness })
+
+        // Immutable audit record: evidence, model versions, prompts, and decisions.
+        // The client seals it into a hash chain (lib/audit.ts).
+        const auditRecord = auditRecordFrom({
+          ts: Date.now(),
+          noteType: ex.noteType?.label ?? 'note',
+          icd: ex.icd10.map((c) => c.code),
+          cpt: ex.cpt.map((c) => c.code),
+          entities: ex.entities.length,
+          sources: [...ex.entities.map((e) => e.source), ...ex.icd10.map((c) => c.source)].map((s) => s ?? '').filter((s) => s.length > 0),
+          models: ex.models,
+          prompts: [
+            { stage: 'span_tagger', model: HAIKU },
+            ...STAKEHOLDER_ORDER.map((s) => ({ stage: `writer:${s}`, model: writerModel(s, ex) })),
+            { stage: 'audit', model: SONNET },
+            { stage: 'orchestrator', model: SONNET },
+          ],
+          guardrail: { decision: guardrails.decision, score: guardrails.score, flags: guardrails.flagged.map((f) => f.id) },
+          agreement: { available: harness.agreement.available, score: harness.agreement.score },
+          harness: { action: harness.action, riskTier: harness.riskTier, hitl: harness.hitl.required },
+        })
+        send({ type: 'audit', audit: auditRecord })
 
         // 10) Orchestrator reads the final (post revision) reports.
         const synthesis = await claudeSynthesis(client, note, ex, reports)

@@ -2,11 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Activity, ShieldCheck, AlertTriangle, Layers, RotateCcw, ArrowRight, TrendingUp } from 'lucide-react'
+import { Activity, ShieldCheck, ShieldX, AlertTriangle, Layers, RotateCcw, ArrowRight, TrendingUp, Lock, Cpu } from 'lucide-react'
 import Nav from '@/components/Nav'
 import { Bars, Gauge, Sparkline } from '@/components/Charts'
 import { getRuns, clearRuns, type RunRecord } from '@/lib/runlog'
 import { GUARDRAIL_CHECKS, checkLayer, type GuardLayer, type GuardSeverity } from '@/lib/guardrails'
+import { getAudit, verifyAuditChain, clearAudit, type AuditEntry } from '@/lib/audit'
+
+const HARNESS_ACTIONS = ['auto', 'human_review', 'abstain', 'block'] as const
+const ACT_COLOR: Record<string, string> = { auto: '#34d399', human_review: '#a78bfa', abstain: '#fbbf24', block: '#f87171' }
+const ACT_LABEL: Record<string, string> = { auto: 'Automated', human_review: 'Human review', abstain: 'Abstained', block: 'Blocked' }
 
 const DECISIONS = ['ship', 'revise', 'escalate', 'block'] as const
 const DEC_COLOR: Record<string, string> = { ship: '#34d399', revise: '#fbbf24', escalate: '#a78bfa', block: '#f87171' }
@@ -17,7 +22,10 @@ const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.l
 
 export default function ObservabilityPage() {
   const [runs, setRuns] = useState<RunRecord[]>([])
-  useEffect(() => setRuns(getRuns()), [])
+  const [audit, setAudit] = useState<AuditEntry[]>([])
+  const [chain, setChain] = useState<{ ok: boolean; length: number; brokenAt: number | null } | null>(null)
+  useEffect(() => { setRuns(getRuns()); setAudit(getAudit()) }, [])
+  const verify = async () => setChain(await verifyAuditChain())
 
   const g = useMemo(() => {
     const guarded = runs.filter((r) => typeof r.guardrailScore === 'number')
@@ -43,6 +51,9 @@ export default function ObservabilityPage() {
       blocked: decisions.block,
       decisions,
       scores,
+      harnessActions: Object.fromEntries(HARNESS_ACTIONS.map((x) => [x, guarded.filter((r) => r.harnessAction === x).length])) as Record<string, number>,
+      autoRate: (() => { const withH = guarded.filter((r) => r.harnessAction); return withH.length ? withH.filter((r) => r.harnessAction === 'auto').length / withH.length : 0 })(),
+      hasHarness: guarded.some((r) => r.harnessAction),
       flagFreq: [...flagFreq.entries()].sort((a, b) => b[1] - a[1]),
       layerRate: Object.fromEntries(LAYERS.map((l) => [l, n ? layerClean[l] / n : 1])) as Record<GuardLayer, number>,
       avgCodes: mean(guarded.map((r) => r.codes)),
@@ -52,7 +63,7 @@ export default function ObservabilityPage() {
     }
   }, [runs])
 
-  const reset = () => { clearRuns(); setRuns([]) }
+  const reset = () => { clearRuns(); clearAudit(); setRuns([]); setAudit([]); setChain(null) }
 
   return (
     <div className="min-h-screen grid-bg text-white">
@@ -159,6 +170,28 @@ export default function ObservabilityPage() {
               </div>
             </div>
 
+            {/* Harness decisions */}
+            {g.hasHarness && (
+              <div className="mt-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+                <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <Cpu className="h-4 w-4 text-teal-300" /> Harness decisions
+                  <span className="ml-auto font-normal normal-case text-slate-500">{Math.round(g.autoRate * 100)}% handled automatically</span>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-4">
+                  {HARNESS_ACTIONS.map((act) => {
+                    const c = g.harnessActions[act]
+                    return (
+                      <div key={act} className="rounded-lg border px-3 py-2.5 text-center" style={{ borderColor: `${ACT_COLOR[act]}33`, background: `${ACT_COLOR[act]}0d` }}>
+                        <div className="text-2xl font-bold tabular-nums" style={{ color: ACT_COLOR[act] }}>{c}</div>
+                        <div className="text-[11px] text-slate-400">{ACT_LABEL[act]}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="mt-2 text-[11px] text-slate-500">Auto = cleared every layer. Human review = high risk. Abstain = low confidence or coder disagreement. Block = policy violation.</p>
+              </div>
+            )}
+
             {/* Extraction / output richness */}
             <div className="mt-6 grid gap-4 sm:grid-cols-4">
               <Tile label="Avg codes / note" value={g.avgCodes.toFixed(1)} tone="#22d3ee" />
@@ -168,6 +201,52 @@ export default function ObservabilityPage() {
             </div>
           </>
         )}
+
+        {/* Immutable audit log */}
+        <div className="mt-12 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <Lock className="h-5 w-5 text-teal-300" />
+            <h2 className="text-lg font-semibold text-white">Immutable audit log</h2>
+            <span className="ml-auto flex items-center gap-2">
+              {chain && (
+                <span className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium" style={{ background: chain.ok ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.12)', color: chain.ok ? '#34d399' : '#f87171' }}>
+                  {chain.ok ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldX className="h-3.5 w-3.5" />}
+                  {chain.ok ? `chain intact (${chain.length})` : `broken at #${chain.brokenAt}`}
+                </span>
+              )}
+              <button onClick={verify} disabled={audit.length === 0} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-slate-300 transition-colors hover:text-white disabled:opacity-40">Verify integrity</button>
+            </span>
+          </div>
+          <p className="mb-4 text-sm text-slate-400">
+            Every run seals a record (evidence, model versions, prompts, and the harness decision) into a hash chain: each entry hashes the previous entry, so tampering with any earlier record is detectable by replaying the chain. In this demo it persists in your browser; in production the same records go to append only storage server side.
+          </p>
+          {audit.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-white/10 px-4 py-6 text-center text-[13px] text-slate-500">No audit entries yet. Run the demo to seal one.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-[12px]">
+                <thead className="text-[10px] uppercase tracking-wider text-slate-500">
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="py-2 pr-3">#</th><th className="pr-3">note</th><th className="pr-3">decision</th><th className="pr-3">risk</th><th className="pr-3">guardrail</th><th className="pr-3">hash</th><th>links to</th>
+                  </tr>
+                </thead>
+                <tbody className="font-mono text-slate-400">
+                  {audit.slice(-10).reverse().map((e) => (
+                    <tr key={e.hash} className="border-b border-white/[0.03]">
+                      <td className="py-1.5 pr-3 text-slate-500">{e.seq}</td>
+                      <td className="pr-3 font-sans text-slate-300">{e.noteType}</td>
+                      <td className="pr-3" style={{ color: ACT_COLOR[e.harness.action] ?? '#94a3b8' }}>{e.harness.action}</td>
+                      <td className="pr-3 font-sans">{e.harness.riskTier}</td>
+                      <td className="pr-3 font-sans">{e.guardrail.decision} ({Math.round(e.guardrail.score * 100)}%)</td>
+                      <td className="pr-3 text-teal-300/80">{e.hash.slice(0, 10)}…</td>
+                      <td className="text-slate-600">{e.prevHash === '0'.repeat(64) ? 'genesis' : `${e.prevHash.slice(0, 8)}…`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         {/* The guardrail suite (static, always present) */}
         <div className="mt-12 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">

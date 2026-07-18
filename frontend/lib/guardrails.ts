@@ -395,3 +395,9 @@ export const GUARDRAIL_CHECKS: GuardCheckSpec[] = [
   { id: 'quality.dx_coverage', layer: 'quality', severity: 'medium', what: 'The primary diagnoses appear in the reports.' },
 ]
 export const checkLayer = (id: string): GuardLayer | undefined => GUARDRAIL_CHECKS.find((c) => c.id === id)?.layer
+
+// Injection detection, exported so the harness input gate can run it before the
+// pipeline (retrieval preconditions), reusing the same patterns as the engine.
+export function detectInjection(note: string): string[] {
+  return INJECTION_RES.filter((re) => re.test(note)).map((re) => (note.match(re) ?? [''])[0]).filter(Boolean)
+}

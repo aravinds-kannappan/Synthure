@@ -7,6 +7,7 @@ import Nav from '@/components/Nav'
 import PortalShell from '@/components/portals/PortalShell'
 import SafetyConsole from '@/components/SafetyConsole'
 import GuardrailPanel from '@/components/GuardrailPanel'
+import HarnessPanel from '@/components/HarnessPanel'
 import { AnnotatedNote, PipelineFlow } from '@/components/DemoVisuals'
 import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
@@ -135,6 +136,8 @@ export default function DemoPage() {
         guardrailScore: state.guardrails?.score ?? null,
         guardrailDecision: state.guardrails?.decision ?? null,
         guardrailFlags: state.guardrails?.flagged.map((f) => f.id) ?? [],
+        harnessAction: state.harness?.action ?? null,
+        riskTier: state.harness?.riskTier ?? null,
       })
     }
   }, [state.phase, ex])
@@ -397,6 +400,19 @@ export default function DemoPage() {
               )}
             </div>
             </div>
+          </div>
+        )}
+
+        {/* Agent harness: the seven safety mechanisms folded into one decision */}
+        {state.harness && (
+          <div className="mt-8">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-white">Agent harness</h2>
+              <p className="mt-1 max-w-3xl text-sm text-slate-400">
+                Everything around the model. Seven mechanisms decide whether this output can be handled automatically, needs a human, should abstain, or must be blocked: retrieval only evidence, confidence abstention, a policy engine, adversarial input detection, model agreement, an immutable audit log, and human in the loop for high risk.
+              </p>
+            </div>
+            <HarnessPanel report={state.harness} />
           </div>
         )}
 

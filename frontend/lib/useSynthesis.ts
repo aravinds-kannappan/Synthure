@@ -14,6 +14,8 @@ import {
 import { deidentify, extractEntities, loadAllModels, type DeidResult, type LoadProgress } from './openmed'
 import { logEncounter } from './history'
 import type { GuardrailReport } from './guardrails'
+import type { HarnessReport } from './harness'
+import { appendAudit } from './audit'
 
 export type AgentStatus = 'idle' | 'active' | 'done'
 export type Phase = 'idle' | 'loading-models' | 'running' | 'complete'
@@ -67,6 +69,7 @@ export interface SynthesisState {
   synthesis: Synthesis | null
   safety: SafetyResult | null
   guardrails: GuardrailReport | null
+  harness: HarnessReport | null
   live: boolean | null
   error: string | null
 }
@@ -88,6 +91,7 @@ const initialState = (): SynthesisState => ({
   synthesis: null,
   safety: null,
   guardrails: null,
+  harness: null,
   live: null,
   error: null,
 })
@@ -253,6 +257,12 @@ export function useSynthesis() {
                 break
               case 'guardrails':
                 setState((s) => ({ ...s, guardrails: evt.guardrails }))
+                break
+              case 'harness':
+                setState((s) => ({ ...s, harness: evt.harness }))
+                break
+              case 'audit':
+                appendAudit(evt.audit).catch(() => { /* audit log is best effort in the demo */ })
                 break
               case 'done':
                 setState((s) => ({ ...s, live: !!evt.live }))
