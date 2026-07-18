@@ -13,6 +13,7 @@ export interface RunRecord {
   entities: number
   guardrailScore?: number | null // deterministic guardrail safety score 0..1
   guardrailDecision?: string | null // ship | revise | block | escalate
+  guardrailFlags?: string[] // ids of the checks that flagged this run
 }
 
 const KEY = 'synthure_runs_v1'
