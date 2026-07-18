@@ -6,6 +6,7 @@ import { Loader2, Check, Circle, FileText, RotateCcw, Cpu, Zap } from 'lucide-re
 import Nav from '@/components/Nav'
 import PortalShell from '@/components/portals/PortalShell'
 import SafetyConsole from '@/components/SafetyConsole'
+import GuardrailPanel from '@/components/GuardrailPanel'
 import { AnnotatedNote, PipelineFlow } from '@/components/DemoVisuals'
 import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
@@ -131,6 +132,8 @@ export default function DemoPage() {
         readiness: ex.modelReadiness?.calibrated ?? null,
         reviewRisk: ex.reviewRisk,
         entities: ex.entities.length,
+        guardrailScore: state.guardrails?.score ?? null,
+        guardrailDecision: state.guardrails?.decision ?? null,
       })
     }
   }, [state.phase, ex])
@@ -393,6 +396,19 @@ export default function DemoPage() {
               )}
             </div>
             </div>
+          </div>
+        )}
+
+        {/* Guardrail layer: deterministic, layered output verification */}
+        {state.guardrails && (
+          <div className="mt-8">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-white">Guardrails</h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Before the reports are trusted, a deterministic layered engine verifies them: is every code and number grounded, does any report break a policy, is it consistent and complete. It runs in process with no API call and produces a scored, per layer verdict.
+              </p>
+            </div>
+            <GuardrailPanel report={state.guardrails} />
           </div>
         )}
 

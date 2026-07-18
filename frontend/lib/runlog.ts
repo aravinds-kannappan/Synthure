@@ -11,6 +11,8 @@ export interface RunRecord {
   readiness: number | null // calibrated readiness 0..1
   reviewRisk: number // share of readiness checks flagged, 0..100
   entities: number
+  guardrailScore?: number | null // deterministic guardrail safety score 0..1
+  guardrailDecision?: string | null // ship | revise | block | escalate
 }
 
 const KEY = 'synthure_runs_v1'

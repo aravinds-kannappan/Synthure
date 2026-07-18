@@ -13,6 +13,7 @@ import {
 } from './synthure'
 import { deidentify, extractEntities, loadAllModels, type DeidResult, type LoadProgress } from './openmed'
 import { logEncounter } from './history'
+import type { GuardrailReport } from './guardrails'
 
 export type AgentStatus = 'idle' | 'active' | 'done'
 export type Phase = 'idle' | 'loading-models' | 'running' | 'complete'
@@ -65,6 +66,7 @@ export interface SynthesisState {
   verification: Verification | null
   synthesis: Synthesis | null
   safety: SafetyResult | null
+  guardrails: GuardrailReport | null
   live: boolean | null
   error: string | null
 }
@@ -85,6 +87,7 @@ const initialState = (): SynthesisState => ({
   verification: null,
   synthesis: null,
   safety: null,
+  guardrails: null,
   live: null,
   error: null,
 })
@@ -247,6 +250,9 @@ export function useSynthesis() {
               case 'safety':
                 setState((s) => ({ ...s, safety: evt.safety }))
                 safetyReady.resolve()
+                break
+              case 'guardrails':
+                setState((s) => ({ ...s, guardrails: evt.guardrails }))
                 break
               case 'done':
                 setState((s) => ({ ...s, live: !!evt.live }))
