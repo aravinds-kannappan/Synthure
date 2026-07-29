@@ -34,6 +34,7 @@ OUT = ROOT / "ml" / "artifacts"
 
 RESULTS = OUT / "results.json"          # tabular + OpenMed suite
 MODEL_EVALS = DATA / "model_evals.json"  # neural coder + data engine
+REDTEAM = DATA / "redteam.json"          # agent red team catch rate
 CANONICAL = DATA / "evals.json"          # the one file the UI reads
 HISTORY = OUT / "eval_history.jsonl"
 
@@ -67,10 +68,11 @@ def run_python_suite():
 def build():
     results = _read(RESULTS)
     model_evals = _read(MODEL_EVALS)
-    if results is None and model_evals is None:
+    redteam = _read(REDTEAM)
+    if results is None and model_evals is None and redteam is None:
         print("[run_evals] no eval inputs found; nothing to build.")
         return None
-    doc = S.build_canonical(results, model_evals)
+    doc = S.build_canonical(results, model_evals, redteam)
     CANONICAL.write_text(json.dumps(doc, indent=2) + "\n")
     print(f"[run_evals] wrote {CANONICAL.relative_to(ROOT)} "
           f"({len(doc['groups'])} groups, {sum(len(g['metrics']) for g in doc['groups'])} metrics)")
@@ -113,7 +115,7 @@ def main():
             sys.exit(1)
         # The canonical file must be a deterministic function of the committed
         # eval sources. If it drifts, someone hand edited it or forgot to rebuild.
-        fresh = S.build_canonical(_read(RESULTS), _read(MODEL_EVALS))
+        fresh = S.build_canonical(_read(RESULTS), _read(MODEL_EVALS), _read(REDTEAM))
         if json.dumps(committed, sort_keys=True) != json.dumps(fresh, sort_keys=True):
             print("  SYNC        frontend/data/evals.json is stale; run `python3 ml/run_evals.py` and commit.")
             print("[run_evals] FAIL: canonical file out of sync with eval sources")

@@ -44,5 +44,7 @@ jobs:
         run: npm run grade-guardrails
       - name: Harness suite
         run: npm run grade-harness
+      - name: Agent red team
+        run: npm run redteam-agents
       - name: Typecheck + build
         run: npm run build

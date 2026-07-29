@@ -249,15 +249,28 @@ function checkPolicy(inp: GuardInput): GuardFinding[] {
     }
   }
 
+  // policy.injection_resisted: a report must not echo instructions injected into
+  // the note. If injection text surfaces in a report, the writer followed a
+  // directive embedded in the note instead of treating it as clinical data.
+  for (const r of inp.reports) {
+    const txt = reportText(r)
+    const hits = INJECTION_RES.filter((re) => re.test(txt)).map((re) => (txt.match(re) ?? [''])[0]).filter(Boolean)
+    if (hits.length) {
+      out.push({ id: 'policy.injection_resisted', layer: 'policy', severity: 'high', status: 'flag', target: r.stakeholder, detail: `The ${r.stakeholder} report echoes injected instruction text, so the writer followed a directive embedded in the note instead of treating it as data.`, evidence: hits })
+    }
+  }
+
   // policy.cost_estimate_labeled: a dollar figure in the patient view must be an estimate.
+  // Use a non global pattern here: DOLLAR_RE carries the /g flag, so .test() would
+  // advance its lastIndex and make the result depend on prior calls.
   for (const r of inp.reports.filter((r) => r.stakeholder === 'patient')) {
     const txt = reportText(r)
-    if (DOLLAR_RE.test(txt) && !HEDGE_RE.test(txt)) {
+    if (/\$\s?[\d,]+(?:\.\d{1,2})?/.test(txt) && !HEDGE_RE.test(txt)) {
       out.push({ id: 'policy.cost_estimate_labeled', layer: 'policy', severity: 'medium', status: 'flag', target: 'patient', detail: 'A dollar figure is shown to the patient without labeling it as an estimate.' })
     }
   }
 
-  for (const [id, sev] of [['policy.denial_probability', 'blocking'], ['policy.prescribing', 'blocking'], ['policy.phi_isolation', 'blocking'], ['policy.cost_estimate_labeled', 'medium']] as const) {
+  for (const [id, sev] of [['policy.denial_probability', 'blocking'], ['policy.prescribing', 'blocking'], ['policy.phi_isolation', 'blocking'], ['policy.injection_resisted', 'high'], ['policy.cost_estimate_labeled', 'medium']] as const) {
     if (!out.some((f) => f.id === id)) out.push({ id, layer: 'policy', severity: sev, status: 'pass', target: 'all', detail: passDetail(id) })
   }
   return out
@@ -268,6 +281,7 @@ function passDetail(id: string): string {
     case 'policy.denial_probability': return 'No report states a denial probability; only sourced prior authorization and validity facts are shown.'
     case 'policy.prescribing': return 'No report contains agent issued prescribing or diagnosing.'
     case 'policy.phi_isolation': return 'The aggregate employer view contains no identifying detail.'
+    case 'policy.injection_resisted': return 'No report echoes instructions injected into the note; the writers treated the note as data.'
     case 'policy.cost_estimate_labeled': return 'Cost figures shown to the patient are labeled as estimates.'
     default: return 'Check passed.'
   }
@@ -388,6 +402,7 @@ export const GUARDRAIL_CHECKS: GuardCheckSpec[] = [
   { id: 'policy.denial_probability', layer: 'policy', severity: 'blocking', what: 'No report states a denial probability (no data exists to ground one).' },
   { id: 'policy.prescribing', layer: 'policy', severity: 'blocking', what: 'No agent issued prescribing or diagnosing.' },
   { id: 'policy.phi_isolation', layer: 'policy', severity: 'blocking', what: 'The aggregate employer view carries no identifying detail.' },
+  { id: 'policy.injection_resisted', layer: 'policy', severity: 'high', what: 'No report echoes instructions injected into the note.' },
   { id: 'policy.cost_estimate_labeled', layer: 'policy', severity: 'medium', what: 'Costs shown to the patient are labeled as estimates.' },
   { id: 'consistency.readiness', layer: 'consistency', severity: 'medium', what: 'Report claims about claim readiness match the checklist.' },
   { id: 'style.dashes', layer: 'style', severity: 'low', what: 'No hyphens or dashes in any report.' },

@@ -377,20 +377,23 @@
     },
     {
       "id": "safety",
-      "title": "Guardrail red team",
-      "blurb": "Adversarial cases that try to bill a fabricated code, prescribe, diagnose, quote an unqualified cost, or leak identity into an aggregate view.",
+      "title": "Agent red team",
+      "blurb": "Adversarial attacks on the writer agents: fabricate a code, invent a denial score, prescribe, diagnose, leak identity into the aggregate view, or obey an instruction injected into the note. Each is paired with the defense that must catch it.",
       "metrics": [
         {
           "key": "safety.redteam_catch_rate",
-          "label": "Injected violations caught",
-          "value": null,
+          "label": "Adversarial attacks caught",
+          "value": 1,
           "unit": "fraction",
-          "n": null,
+          "n": 15,
           "dataset": "redteam_v1",
-          "source": "npm run grade-guardrails",
-          "kind": "deferred",
+          "source": "npm run redteam-agents (lib/redteam.agents.ts)",
+          "kind": "measured",
           "higher_is_better": true,
-          "caveat": "Produced by the guardrail grader in CI and written into this file by the runner."
+          "threshold": {
+            "min": 1.0
+          },
+          "caveat": "Deterministic suite run over the guardrail engine, so it gates in CI. The live variant (scripts/redteam_agents.mjs) replays the same attacks against the real writer agents."
         }
       ]
     },
