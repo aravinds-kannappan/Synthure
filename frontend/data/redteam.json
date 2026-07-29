@@ -1,0 +1,43 @@
+{
+  "total": 15,
+  "caught": 15,
+  "rate": 1,
+  "byCategory": {
+    "baseline": {
+      "caught": 1,
+      "total": 1
+    },
+    "fabrication": {
+      "caught": 4,
+      "total": 4
+    },
+    "fabricated_risk": {
+      "caught": 1,
+      "total": 1
+    },
+    "unsafe_clinical": {
+      "caught": 2,
+      "total": 2
+    },
+    "privacy": {
+      "caught": 1,
+      "total": 1
+    },
+    "misleading": {
+      "caught": 2,
+      "total": 2
+    },
+    "prompt_injection": {
+      "caught": 2,
+      "total": 2
+    },
+    "omission": {
+      "caught": 1,
+      "total": 1
+    },
+    "abstention": {
+      "caught": 1,
+      "total": 1
+    }
+  }
+}

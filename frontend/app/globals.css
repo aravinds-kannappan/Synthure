@@ -3,11 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --bg: #05070f;
+  --bg: #08080b;
+  --accent: #b6f400;   /* acid lime, the ops accent */
+  --brand: #4d7cff;    /* blue brand mark */
   --teal: #2dd4bf;
   --indigo: #818cf8;
   --violet: #a78bfa;
   --cyan: #22d3ee;
+}
+
+/* Space Grotesk display headings, shared across every tab. */
+.font-display {
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 html {
@@ -22,8 +30,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1e2940; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #2c3a57; }
+::-webkit-scrollbar-thumb { background: #23232a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #33333d; }
 
 /* Utilities */
 .grid-bg {
@@ -34,7 +42,7 @@ body {
 }
 
 .gradient-text {
-  background-image: linear-gradient(120deg, #2dd4bf 0%, #818cf8 55%, #a78bfa 100%);
+  background-image: linear-gradient(120deg, #4d7cff 0%, #818cf8 60%, #a78bfa 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
