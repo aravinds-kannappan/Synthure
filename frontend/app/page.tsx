@@ -9,6 +9,7 @@ import {
   ShieldCheck, Database, GitBranch, RefreshCw, Layers, Cpu,
 } from 'lucide-react'
 import Nav from '@/components/Nav'
+import UnderTheHood from '@/components/UnderTheHood'
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['700', '900'], display: 'swap' })
 const dmSans = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '700'], display: 'swap' })
@@ -156,9 +157,44 @@ export default function Landing() {
           </div>
           {/* Hero capability chips */}
           <div className="hero-anim hero-d3 mt-12 flex flex-wrap items-center justify-center gap-2">
-            {['On-device privacy', 'Trained coder', 'Follow a fact', 'Constitution audit'].map((c) => (
+            {['On device privacy', 'Trained coder', 'Follow a fact', 'Constitution audit'].map((c) => (
               <span key={c} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-slate-400">{c}</span>
             ))}
+          </div>
+
+          {/* Hero backend terminal: the pipeline, made visible */}
+          <div className="hero-anim hero-d3 mx-auto mt-14 max-w-2xl overflow-hidden rounded-2xl border border-white/[0.08] bg-[#04060d] text-left shadow-2xl shadow-black/50">
+            <div className="flex items-center gap-2 border-b border-white/[0.06] bg-white/[0.02] px-4 py-2.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-500/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
+              <span className="ml-2 font-mono text-[11px] text-slate-500">synthure backend</span>
+              <span className="rounded bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-slate-400">POST /api/synthesize</span>
+              <span className="ml-auto flex items-center gap-1 font-mono text-[10px] text-emerald-300">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> streaming
+              </span>
+            </div>
+            <div className="space-y-1 px-4 py-3.5 font-mono text-[12px] leading-relaxed">
+              {[
+                { g: '✓', c: '#2dd4bf', s: 'de identification', m: 'openmed pii 33m', v: '142ms' },
+                { g: '✓', c: '#2dd4bf', s: 'biomedical ner', m: 'tinymed 65m', v: '318ms' },
+                { g: '✓', c: '#22d3ee', s: 'code linking', m: 'reranker + index', v: 'E11.9' },
+                { g: '✓', c: '#f59e0b', s: 'readiness', m: 'synthure gbm', v: '0.86' },
+                { g: '✓', c: '#34d399', s: 'constitution audit', m: 'claude sonnet 4.6', v: 'pass' },
+                { g: '›', c: '#818cf8', s: 'write patient', m: 'claude haiku 4.5', v: '', active: true },
+              ].map((l) => (
+                <div key={l.s} className="flex items-baseline gap-2">
+                  <span style={{ color: l.c }}>{l.g}</span>
+                  <span className="w-36 flex-shrink-0 text-slate-300">{l.s}</span>
+                  <span className="hidden flex-1 truncate text-slate-500 sm:block">{l.m}</span>
+                  {l.active ? (
+                    <span className="ml-auto inline-block h-3.5 w-2 animate-pulse bg-slate-400" />
+                  ) : (
+                    <span className="ml-auto flex-shrink-0 tabular-nums" style={{ color: l.c }}>{l.v}</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -229,6 +265,23 @@ export default function Landing() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Under the hood */}
+        <section id="backend" className="py-20">
+          <h2 className={`${fraunces.className} reveal text-center text-4xl font-bold sm:text-5xl`}>Under the hood</h2>
+          <p className="reveal mx-auto mt-4 max-w-2xl text-center text-slate-400">
+            The actual backend, end to end. On device models, an edge pipeline of Claude agents, an optional trained coder service, per run guardrails and an audit chain, and a CI gate on every change.
+          </p>
+          <UnderTheHood />
+          <div className="reveal mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-teal-400 px-6 py-3 text-sm font-bold text-[#05070f] transition-all hover:bg-teal-300">
+              Watch it run live <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/evals" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-6 py-3 text-sm text-slate-300 transition-all hover:border-white/20 hover:text-white">
+              See the evals
+            </Link>
           </div>
         </section>
 

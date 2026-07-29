@@ -9,6 +9,8 @@ import SafetyConsole from '@/components/SafetyConsole'
 import GuardrailPanel from '@/components/GuardrailPanel'
 import HarnessPanel from '@/components/HarnessPanel'
 import { AnnotatedNote, PipelineFlow } from '@/components/DemoVisuals'
+import BackendConsole from '@/components/BackendConsole'
+import LatencyWaterfall from '@/components/LatencyWaterfall'
 import { useSynthesis, type AgentStatus, type StageInfo } from '@/lib/useSynthesis'
 import { PIPELINE, SAMPLE_NOTES, type AgentDef } from '@/lib/synthure'
 import { OPENMED_MODELS, type OpenMedStage } from '@/lib/openmed'
@@ -286,6 +288,17 @@ export default function DemoPage() {
               </div>
             )}
             <PipelineFlow status={state.status} activeId={state.activeId} />
+
+            {/* The backend, live. Every stage, where it runs, its model, and real latency. */}
+            <BackendConsole
+              status={state.status}
+              stageInfo={state.stageInfo}
+              activeId={state.activeId}
+              running={running}
+              complete={state.phase === 'complete'}
+            />
+            {state.phase === 'complete' && <LatencyWaterfall stageInfo={state.stageInfo} />}
+
             <div className="grid lg:grid-cols-[340px_1fr] gap-6 items-start">
             {/* Pipeline */}
             <div className="space-y-5 lg:sticky lg:top-24">
