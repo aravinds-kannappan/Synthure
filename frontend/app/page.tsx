@@ -58,7 +58,7 @@ export default function Landing() {
       {/* nav */}
       <nav className="relative z-20 flex items-center justify-between border-b border-white/10 px-5 py-3.5">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-lg" style={{ color: LIME }}>◈</span>
+          <span className="text-lg" style={{ color: '#4d7cff' }}>◈</span>
           <span className={`${grotesk.className} text-sm font-bold tracking-[0.16em] text-white`}>SYNTHURE</span>
           <span className="text-[10px] tracking-[0.3em] text-zinc-600">// OPS</span>
         </Link>

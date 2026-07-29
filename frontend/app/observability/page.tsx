@@ -76,7 +76,7 @@ export default function ObservabilityPage() {
       <main className="relative mx-auto max-w-6xl px-6 pt-28 pb-24">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold">Agent quality and guardrails</h1>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold">Agent quality and guardrails</h1>
             <p className="mt-2 max-w-2xl text-slate-400">
               Every run in this browser is scored by the deterministic guardrail engine. This is the observability layer: how often the agent output is grounded, safe, and complete, and which checks catch what. No backend, no account, this browser only.
             </p>
@@ -93,7 +93,7 @@ export default function ObservabilityPage() {
             <Activity className="mx-auto mb-3 h-6 w-6 text-slate-500" />
             <p className="text-slate-400">No runs yet in this browser.</p>
             <p className="mt-1 text-sm text-slate-500">The figures here aggregate real guardrail results across the notes you run.</p>
-            <Link href="/demo" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-teal-400 px-5 py-2.5 text-sm font-bold text-[#05070f] transition-colors hover:bg-teal-300">
+            <Link href="/demo" className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-black transition-all hover:brightness-110" style={{ background: '#b6f400' }}>
               Run the demo <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -111,10 +111,10 @@ export default function ObservabilityPage() {
               {/* Score trend + gauge */}
               <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
                 <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <TrendingUp className="h-4 w-4 text-teal-300" /> Safety score over the last {g.n} run{g.n === 1 ? '' : 's'}
+                  <TrendingUp className="h-4 w-4 text-[#b6f400]" /> Safety score over the last {g.n} run{g.n === 1 ? '' : 's'}
                 </div>
                 <div className="flex items-center gap-6">
-                  <Gauge value={g.avgScore} label="average" sub="weighted pass rate" tone="teal" />
+                  <Gauge value={g.avgScore} label="average" sub="weighted pass rate" tone="lime" />
                   <div className="flex-1">
                     <Sparkline points={g.scores.length > 1 ? g.scores : [g.scores[0] ?? 0, g.scores[0] ?? 0]} tone="teal" width={260} height={64} />
                     <div className="mt-1 text-[11px] text-slate-500">Each point is one run. Higher is safer.</div>
@@ -149,7 +149,7 @@ export default function ObservabilityPage() {
               {/* Per layer health */}
               <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
                 <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <Layers className="h-4 w-4 text-teal-300" /> Layer pass rate
+                  <Layers className="h-4 w-4 text-[#b6f400]" /> Layer pass rate
                 </div>
                 <Bars items={LAYERS.map((l) => ({ label: l, value: g.layerRate[l], tone: g.layerRate[l] > 0.95 ? 'emerald' : g.layerRate[l] > 0.8 ? 'amber' : 'rose' }))} />
                 <div className="mt-2 text-[11px] text-slate-500">Share of runs where the layer flagged nothing.</div>
@@ -174,7 +174,7 @@ export default function ObservabilityPage() {
             {g.hasHarness && (
               <div className="mt-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
                 <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <Cpu className="h-4 w-4 text-teal-300" /> Harness decisions
+                  <Cpu className="h-4 w-4 text-[#b6f400]" /> Harness decisions
                   <span className="ml-auto font-normal normal-case text-slate-500">{Math.round(g.autoRate * 100)}% handled automatically</span>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-4">
@@ -205,7 +205,7 @@ export default function ObservabilityPage() {
         {/* Immutable audit log */}
         <div className="mt-12 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <Lock className="h-5 w-5 text-teal-300" />
+            <Lock className="h-5 w-5 text-[#b6f400]" />
             <h2 className="text-lg font-semibold text-white">Immutable audit log</h2>
             <span className="ml-auto flex items-center gap-2">
               {chain && (
@@ -238,7 +238,7 @@ export default function ObservabilityPage() {
                       <td className="pr-3" style={{ color: ACT_COLOR[e.harness.action] ?? '#94a3b8' }}>{e.harness.action}</td>
                       <td className="pr-3 font-sans">{e.harness.riskTier}</td>
                       <td className="pr-3 font-sans">{e.guardrail.decision} ({Math.round(e.guardrail.score * 100)}%)</td>
-                      <td className="pr-3 text-teal-300/80">{e.hash.slice(0, 10)}…</td>
+                      <td className="pr-3 text-[#b6f400]/80">{e.hash.slice(0, 10)}…</td>
                       <td className="text-slate-600">{e.prevHash === '0'.repeat(64) ? 'genesis' : `${e.prevHash.slice(0, 8)}…`}</td>
                     </tr>
                   ))}
@@ -251,7 +251,7 @@ export default function ObservabilityPage() {
         {/* The guardrail suite (static, always present) */}
         <div className="mt-12 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-teal-300" />
+            <ShieldCheck className="h-5 w-5 text-[#b6f400]" />
             <h2 className="text-lg font-semibold text-white">The guardrail suite</h2>
             <span className="ml-auto rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">12 of 12 red team cases pass</span>
           </div>

@@ -59,7 +59,7 @@ const SECTIONS = [
 const METRICS = [
   { label: 'ICD coder acc@1', value: '41%', sub: 'exact code first · CodiEsp · N = 3,615', color: 'text-emerald-400' },
   { label: 'ICD coder acc@5', value: '49%', sub: 'code in top 5 · CodiEsp', color: 'text-emerald-400' },
-  { label: 'Index coverage', value: '98K', sub: 'FY2026 ICD 10 CM codes, 269K training pairs', color: 'text-teal-400' },
+  { label: 'Index coverage', value: '98K', sub: 'FY2026 ICD 10 CM codes, 269K training pairs', color: 'text-[#b6f400]' },
   { label: 'Readmission', value: 'CMS HRRP', sub: 'real published 30 day rates', color: 'text-indigo-400' },
   { label: 'Denial probability', value: 'Removed', sub: 'no claim outcome data; not modeled', color: 'text-amber-400' },
   { label: 'Red team safety', value: '7/7', sub: 'injected violations caught, 0 false positives', color: 'text-rose-400' },
@@ -67,14 +67,14 @@ const METRICS = [
 
 export default function ResearchPage() {
   return (
-    <div className="min-h-screen bg-[#030711] text-white">
+    <div className="min-h-screen bg-[#08080b] text-white">
 
       {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.06] bg-[#030711]/80 backdrop-blur-xl">
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[#0a0a0e]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-teal-400 text-xl">◈</span>
-            <span className="font-semibold tracking-wider text-white text-sm">SYNTHURE</span>
+            <span className="text-xl" style={{ color: '#4d7cff' }}>◈</span>
+            <span className="font-display font-semibold tracking-wider text-white text-sm">SYNTHURE</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-slate-400">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
@@ -82,8 +82,8 @@ export default function ResearchPage() {
             <Link href="/research" className="text-white">Research</Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
           </div>
-          <Link href="/demo" className="text-sm font-semibold bg-teal-500 hover:bg-teal-400 text-[#030711] px-4 py-2 rounded-lg transition-colors">
-            Try demo →
+          <Link href="/demo" className="font-display text-sm font-semibold text-black px-4 py-2 rounded-lg transition-all hover:brightness-110" style={{ background: '#b6f400' }}>
+            Launch ops →
           </Link>
         </div>
       </nav>
@@ -95,9 +95,9 @@ export default function ResearchPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/[0.08] text-indigo-400 text-xs font-medium mb-6 tracking-wide">
             Technical Report · Transparent Evaluation
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 leading-tight">
+          <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight mb-6 leading-tight">
             Synthure: Four Interconnected Portals<br />
-            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #14b8a6 0%, #6366f1 100%)' }}>
+            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #4d7cff 0%, #818cf8 100%)' }}>
               from One Clinical Note
             </span>
           </h1>
@@ -198,7 +198,7 @@ export default function ResearchPage() {
             {SECTIONS.map((s) => (
               <a key={s.id} href={`#${s.id}`}
                 className="text-sm text-slate-400 hover:text-white transition-colors py-1 flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-teal-500" />
+                <span className="w-1 h-1 rounded-full bg-[#b6f400]" />
                 {s.title}
               </a>
             ))}
@@ -218,7 +218,7 @@ export default function ResearchPage() {
                       <div key={i} className="space-y-2">
                         {para.split('\n').filter(l => l.startsWith('•')).map((line, j) => (
                           <div key={j} className="flex gap-3 text-sm text-slate-300 leading-relaxed">
-                            <span className="text-teal-400 mt-0.5 flex-shrink-0">•</span>
+                            <span className="text-[#b6f400] mt-0.5 flex-shrink-0">•</span>
                             <span dangerouslySetInnerHTML={{ __html: line.slice(2)
                               .replace(/tool_use/g, '<code class="text-indigo-300 bg-indigo-500/10 px-1 rounded text-xs">tool_use</code>')
                             }} />
@@ -262,7 +262,7 @@ export default function ResearchPage() {
             <div className="text-xs text-slate-500">Type any clinical note and watch the agents work, no account needed</div>
           </div>
           <div className="flex gap-3">
-            <Link href="/demo" className="bg-teal-500 hover:bg-teal-400 text-[#030711] font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
+            <Link href="/demo" className="bg-[#b6f400] hover:bg-teal-400 text-[#030711] font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
               Try demo
             </Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer"

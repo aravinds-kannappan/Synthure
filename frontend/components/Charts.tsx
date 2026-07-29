@@ -7,8 +7,10 @@ import { motion } from 'framer-motion'
 
 const TONES: Record<string, string> = {
   teal: '#2dd4bf',
+  lime: '#b6f400',
   emerald: '#34d399',
   sky: '#38bdf8',
+  blue: '#4d7cff',
   violet: '#a78bfa',
   amber: '#fbbf24',
   rose: '#fb7185',

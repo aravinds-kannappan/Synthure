@@ -127,7 +127,7 @@ export default function OpsConsole() {
       {/* ── command bar ─────────────────────────────────────────────────────── */}
       <header className="relative z-20 flex flex-shrink-0 flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/10 bg-[#0a0a0e]/90 px-4 py-2.5 backdrop-blur">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-lg" style={{ color: LIME }}>◈</span>
+          <span className="text-lg" style={{ color: '#4d7cff' }}>◈</span>
           <span className={`${grotesk.className} text-sm font-bold tracking-[0.16em] text-white`}>SYNTHURE</span>
           <span className="font-mono text-[10px] tracking-[0.3em] text-zinc-600">// OPS</span>
         </Link>
