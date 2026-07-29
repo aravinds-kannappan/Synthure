@@ -310,6 +310,11 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+          <div className="reveal mt-10 text-center">
+            <Link href="/evals" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-6 py-3 text-sm text-slate-300 transition-all hover:border-white/20 hover:text-white">
+              See every measured, deferred, and by construction number <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </section>
 
         {/* Safety */}
@@ -341,6 +346,7 @@ export default function Landing() {
             <span>Synthure, clinical note normalization and claim readiness (research prototype)</span>
           </div>
           <div className="flex items-center gap-6">
+            <Link href="/evals" className="transition-colors hover:text-slate-300">Evals</Link>
             <Link href="/research" className="transition-colors hover:text-slate-300">Research</Link>
             <Link href="/demo" className="transition-colors hover:text-slate-300">Demo</Link>
             <a href="https://github.com/aravinds-kannappan/Synthure" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-slate-300">GitHub</a>

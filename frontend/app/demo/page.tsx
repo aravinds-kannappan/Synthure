@@ -107,6 +107,19 @@ const PHASES: { key: AgentDef['phase']; title: string }[] = [
   { key: 'safeguard', title: 'Align & safeguard' },
 ]
 
+function fmtMs(ms: number): string {
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
+}
+
+function TraceStat({ label, value, accent = '#e2e8f0' }: { label: string; value: string; accent?: string }) {
+  return (
+    <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3">
+      <div className="text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="mt-0.5 text-lg font-semibold tabular-nums" style={{ color: accent }}>{value}</div>
+    </div>
+  )
+}
+
 export default function DemoPage() {
   const [note, setNote] = useState('')
   const { state, start, reset } = useSynthesis()
@@ -119,6 +132,11 @@ export default function DemoPage() {
   )
 
   const ex = state.extraction
+
+  // Backend trace summary, computed from the real per stage timings the pipeline streams.
+  const backendMs = Object.values(state.stageInfo).reduce((a, s) => a + (s?.ms || 0), 0)
+  const stagesDone = Object.values(state.status).filter((s) => s === 'done').length
+  const modelsUsed = ex?.models ? Object.keys(ex.models).length : 0
 
   // Append one record to the local continuous eval feed when a run completes.
   const loggedRef = useRef<object | null>(null)
@@ -162,9 +180,11 @@ export default function DemoPage() {
 
       <main className="relative max-w-6xl mx-auto px-6 pt-28 pb-24">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">Watch it work</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">Watch the backend work</h1>
           <p className="text-slate-400 mt-2">
-            Paste a clinical note. See it de identified on device, watch the entities light up in the note itself, follow every stage of the pipeline, then step into the four portals it produces.
+            Paste a clinical note and watch the pipeline run end to end: de identified on device, entities lit up in the note itself,
+            then every backend stage streamed live with its model id and latency, before you step into the four portals it produces.
+            The accuracy behind each stage is measured on the <a href="/evals" className="text-teal-300 underline decoration-teal-500/40 underline-offset-4 hover:text-teal-200">evals page</a>.
           </p>
         </div>
 
@@ -257,6 +277,14 @@ export default function DemoPage() {
         {/* Working layout */}
         {state.phase !== 'idle' && (
           <div className="mt-6 space-y-6">
+            {state.phase === 'complete' && (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <TraceStat label="Pipeline stages run" value={`${stagesDone} of ${PIPELINE.length}`} accent="#2dd4bf" />
+                <TraceStat label="Total pipeline time" value={fmtMs(backendMs)} accent="#818cf8" />
+                <TraceStat label="Models engaged" value={String(modelsUsed)} accent="#34d399" />
+                <TraceStat label="Identifiers scrubbed on device" value={state.deid ? String(state.deid.redactions) : '0'} accent="#22d3ee" />
+              </div>
+            )}
             <PipelineFlow status={state.status} activeId={state.activeId} />
             <div className="grid lg:grid-cols-[340px_1fr] gap-6 items-start">
             {/* Pipeline */}
@@ -361,7 +389,8 @@ export default function DemoPage() {
                     ))}
                   </div>
                   <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
-                    Codes linked or confirmed by the trained bi encoder plus cross encoder, with the reranker&apos;s confidence. Each is revalidated against the CMS tabular.
+                    Codes linked or confirmed by the trained bi encoder plus cross encoder, with the reranker&apos;s confidence. Each is revalidated against the CMS tabular.{' '}
+                    <a href="/evals" className="text-emerald-300/80 underline decoration-emerald-500/40 underline-offset-2 hover:text-emerald-200">See its measured accuracy</a>.
                   </p>
                 </div>
               )}
@@ -426,9 +455,14 @@ export default function DemoPage() {
                   Before the reports are trusted, a deterministic layered engine verifies them: is every code and number grounded, does any report break a policy, is it consistent and complete. It runs in process with no API call and produces a scored, per layer verdict.
                 </p>
               </div>
-              <a href="/observability" className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300 transition-colors hover:text-white">
-                Aggregate metrics <ArrowRight className="h-3.5 w-3.5" />
-              </a>
+              <div className="flex flex-shrink-0 items-center gap-2">
+                <a href="/evals" className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300 transition-colors hover:text-white">
+                  Measured accuracy <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+                <a href="/observability" className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300 transition-colors hover:text-white">
+                  Aggregate metrics <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
             </div>
             <GuardrailPanel report={state.guardrails} />
           </div>

@@ -1,0 +1,427 @@
+{
+  "schema_version": 1,
+  "generated": "2026-07-04",
+  "commit": null,
+  "sources": {
+    "results.json": "2026-07-02",
+    "model_evals.json": "2026-07-04"
+  },
+  "datasets": {
+    "codiesp": {
+      "name": "CodiEsp gold mentions",
+      "provenance": "CodiEsp physician cases (CC BY), Spanish origin translated to English, mention to ICD 10 CM linking.",
+      "trust": "medium",
+      "caveat": "Real clinician text, but Spanish origin and translated. English clinical mentions are the next addition."
+    },
+    "openmed_seeded": {
+      "name": "OpenMed on device, seeded spans",
+      "provenance": "OpenMed int8 ONNX models run over the synthetic notes with seeded PII spans; span overlap scoring (ml/openmed_eval.py).",
+      "trust": "low",
+      "caveat": "Precision is understated because the synthetic notes do not annotate every true entity; recall and de identification recall are the meaningful signals here."
+    },
+    "real_holdout": {
+      "name": "Frozen real note holdout",
+      "provenance": "ml/data_engine freezes a held out split of real open license notes (MTSamples, PMC OA) with labels from a source independent of the note generator.",
+      "trust": "high",
+      "caveat": "This is the honest generalization number. It is expected to sit well below the synthetic split, and that gap is the point."
+    },
+    "redteam_v1": {
+      "name": "Guardrail red team set",
+      "provenance": "Handcrafted adversarial cases in frontend/lib/guardrails.harness.ts, run by npm run grade-guardrails.",
+      "trust": "medium",
+      "caveat": "Small and handcrafted. Evidence the safeguards fire as intended, not a completeness guarantee."
+    },
+    "synthetic_v1": {
+      "name": "Synthetic curated split",
+      "provenance": "Notes built from curated clinical conditions with real ICD 10 CM codes (ml/common.py, ml/generate.py). Deterministic 70/15/15 split.",
+      "trust": "low",
+      "caveat": "Labels are written by the same function that writes the note, so this measures fit to a controlled grammar, not generalization to real clinical text. Treat it as a floor test, not a headline."
+    }
+  },
+  "groups": [
+    {
+      "id": "coding",
+      "title": "ICD 10 CM coding",
+      "blurb": "Constrained linking of a diagnosis mention to a billable code, and the trained neural coder that ranks it.",
+      "metrics": [
+        {
+          "key": "coding.top1_accuracy",
+          "label": "Top 1 accuracy",
+          "value": 0.741,
+          "unit": "fraction",
+          "n": 727,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_coding",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.65
+          }
+        },
+        {
+          "key": "coding.top3_accuracy",
+          "label": "Top 3 accuracy",
+          "value": 0.816,
+          "unit": "fraction",
+          "n": 727,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_coding",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.72
+          }
+        },
+        {
+          "key": "coding.hallucination_rate",
+          "label": "Out of index rate",
+          "value": 0.0,
+          "unit": "fraction",
+          "n": 727,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_coding",
+          "kind": "by_construction",
+          "higher_is_better": false,
+          "threshold": {
+            "max": 0.0
+          },
+          "caveat": "Zero by construction: candidates are retrieved from the official index, so a code outside it cannot be produced."
+        },
+        {
+          "key": "icd_coder.codiesp_acc1",
+          "label": "Neural coder acc@1",
+          "value": 0.4066,
+          "unit": "fraction",
+          "n": 3615,
+          "dataset": "codiesp",
+          "source": "ml/icd_coder + serve/app.py",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.35
+          }
+        },
+        {
+          "key": "icd_coder.codiesp_acc5",
+          "label": "Neural coder acc@5",
+          "value": 0.4918,
+          "unit": "fraction",
+          "n": 3615,
+          "dataset": "codiesp",
+          "source": "ml/icd_coder + serve/app.py",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.42
+          }
+        },
+        {
+          "key": "icd_coder.codiesp_mrr",
+          "label": "Neural coder MRR",
+          "value": 0.4443,
+          "unit": "ratio",
+          "n": 3615,
+          "dataset": "codiesp",
+          "source": "ml/icd_coder + serve/app.py",
+          "kind": "measured",
+          "higher_is_better": true
+        }
+      ]
+    },
+    {
+      "id": "note_type",
+      "title": "Note type classification",
+      "blurb": "Classify the note as SOAP, discharge, referral, radiology, and so on.",
+      "metrics": [
+        {
+          "key": "note_type.synthetic_accuracy",
+          "label": "Synthetic split accuracy",
+          "value": 1.0,
+          "unit": "fraction",
+          "n": 360,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_note_type",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.9
+          },
+          "caveat": "Label leakage inflates this toward 1.00. It is a template fit check, not a generalization estimate. The real test number below is the honest one."
+        },
+        {
+          "key": "note_type.real_test_accuracy",
+          "label": "Real note held out accuracy",
+          "value": null,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "real_holdout",
+          "source": "ml/data_engine + ml/train.py",
+          "kind": "deferred",
+          "higher_is_better": true,
+          "caveat": "Reported separately from the synthetic split on purpose. Populated after the data engine run."
+        }
+      ]
+    },
+    {
+      "id": "sections",
+      "title": "Section parsing",
+      "blurb": "Rule based detection of clinical section spans.",
+      "metrics": [
+        {
+          "key": "sections.f1",
+          "label": "Span F1",
+          "value": 0.821,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_sections",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.72
+          }
+        },
+        {
+          "key": "sections.precision",
+          "label": "Precision",
+          "value": 1.0,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_sections",
+          "kind": "measured",
+          "higher_is_better": true
+        },
+        {
+          "key": "sections.recall",
+          "label": "Recall",
+          "value": 0.696,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_sections",
+          "kind": "measured",
+          "higher_is_better": true
+        }
+      ]
+    },
+    {
+      "id": "missing",
+      "title": "Missing documentation detection",
+      "blurb": "Per field logistic regression flagging absent required documentation.",
+      "metrics": [
+        {
+          "key": "missing.micro_f1",
+          "label": "Micro F1",
+          "value": 0.749,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_missing",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.65
+          }
+        }
+      ]
+    },
+    {
+      "id": "readiness",
+      "title": "Claim and prior authorization readiness",
+      "blurb": "Calibrated readiness with an abstention layer. No denial probability is produced.",
+      "metrics": [
+        {
+          "key": "readiness.auroc",
+          "label": "AUROC",
+          "value": 0.839,
+          "unit": "fraction",
+          "n": 360,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_readiness",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.75
+          }
+        },
+        {
+          "key": "readiness.auprc",
+          "label": "AUPRC",
+          "value": 0.904,
+          "unit": "fraction",
+          "n": 360,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_readiness",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.8
+          }
+        },
+        {
+          "key": "readiness.ece_calibrated",
+          "label": "Calibration error (ECE)",
+          "value": 0.054,
+          "unit": "ratio",
+          "n": 360,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_readiness",
+          "kind": "measured",
+          "higher_is_better": false,
+          "threshold": {
+            "max": 0.1
+          },
+          "caveat": "After isotonic calibration. Lower is better."
+        },
+        {
+          "key": "readiness.accuracy_all",
+          "label": "Accuracy, all",
+          "value": 0.883,
+          "unit": "fraction",
+          "n": 360,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_readiness",
+          "kind": "measured",
+          "higher_is_better": true
+        },
+        {
+          "key": "readiness.accuracy_confident",
+          "label": "Accuracy after abstaining on the least confident fifth",
+          "value": 0.917,
+          "unit": "fraction",
+          "n": 360,
+          "dataset": "synthetic_v1",
+          "source": "ml/evaluate.py::eval_readiness",
+          "kind": "measured",
+          "higher_is_better": true
+        }
+      ]
+    },
+    {
+      "id": "openmed",
+      "title": "OpenMed backbone, on device",
+      "blurb": "De identification and biomedical NER that run in the browser before anything is transmitted.",
+      "metrics": [
+        {
+          "key": "openmed.deid_recall",
+          "label": "De identification recall",
+          "value": 1.0,
+          "unit": "fraction",
+          "n": 90,
+          "dataset": "openmed_seeded",
+          "source": "ml/openmed_eval.py",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.95
+          }
+        },
+        {
+          "key": "openmed.ner_disease_recall",
+          "label": "Disease NER recall",
+          "value": 0.83,
+          "unit": "fraction",
+          "n": 60,
+          "dataset": "openmed_seeded",
+          "source": "ml/openmed_eval.py",
+          "kind": "measured",
+          "higher_is_better": true,
+          "threshold": {
+            "min": 0.7
+          }
+        },
+        {
+          "key": "openmed.ner_pharma_recall",
+          "label": "Pharma NER recall",
+          "value": 0.944,
+          "unit": "fraction",
+          "n": 60,
+          "dataset": "openmed_seeded",
+          "source": "ml/openmed_eval.py",
+          "kind": "measured",
+          "higher_is_better": true
+        }
+      ]
+    },
+    {
+      "id": "faithfulness",
+      "title": "Faithfulness and grounding",
+      "blurb": "Whether generated statements are supported by the extracted facts.",
+      "metrics": [
+        {
+          "key": "faithfulness.flag_auroc",
+          "label": "Flag AUROC",
+          "value": null,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "real_holdout",
+          "source": "ml/faithfulness/score.py",
+          "kind": "deferred",
+          "higher_is_better": true,
+          "caveat": "The shipped grounding check is deterministic string tracing (frontend/lib/guardrails.ts). This cross encoder number is the learned entailment metric, produced by the Colab run."
+        },
+        {
+          "key": "faithfulness.human_fabrication_rate",
+          "label": "Human judged fabrication rate",
+          "value": null,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "real_holdout",
+          "source": "human review sample",
+          "kind": "deferred",
+          "higher_is_better": false,
+          "caveat": "A sampled human review of generated statements against the extracted facts. Not yet run."
+        }
+      ]
+    },
+    {
+      "id": "safety",
+      "title": "Guardrail red team",
+      "blurb": "Adversarial cases that try to bill a fabricated code, prescribe, diagnose, quote an unqualified cost, or leak identity into an aggregate view.",
+      "metrics": [
+        {
+          "key": "safety.redteam_catch_rate",
+          "label": "Injected violations caught",
+          "value": null,
+          "unit": "fraction",
+          "n": null,
+          "dataset": "redteam_v1",
+          "source": "npm run grade-guardrails",
+          "kind": "deferred",
+          "higher_is_better": true,
+          "caveat": "Produced by the guardrail grader in CI and written into this file by the runner."
+        }
+      ]
+    },
+    {
+      "id": "ops",
+      "title": "Latency and cost",
+      "blurb": "End to end pipeline cost, from the real per stage timings the demo already streams.",
+      "metrics": [
+        {
+          "key": "ops.latency_p95_ms",
+          "label": "End to end latency p95",
+          "value": null,
+          "unit": "ms",
+          "n": null,
+          "dataset": "real_holdout",
+          "source": "pipeline trace",
+          "kind": "deferred",
+          "higher_is_better": false
+        },
+        {
+          "key": "ops.cost_per_run_usd",
+          "label": "Model cost per run",
+          "value": null,
+          "unit": "count",
+          "n": null,
+          "dataset": "real_holdout",
+          "source": "pipeline trace",
+          "kind": "deferred",
+          "higher_is_better": false
+        }
+      ]
+    }
+  ]
+}
