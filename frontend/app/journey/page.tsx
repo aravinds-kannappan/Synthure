@@ -1,11 +1,5 @@
-import JourneyStory from '@/components/story/JourneyStory'
+import { redirect } from 'next/navigation'
 
-export const metadata = {
-  title: 'Follow the note · Synthure',
-  description: 'An interactive visual walkthrough of one synthetic clinical note becoming a connected care journey.',
-}
-
-export default async function JourneyPage({ searchParams }: { searchParams?: Promise<{ scenario?: string }> }) {
-  const params = await searchParams
-  return <JourneyStory initialScenario={params?.scenario} />
+export default function LegacyExperiencePage() {
+  redirect('/dashboard')
 }

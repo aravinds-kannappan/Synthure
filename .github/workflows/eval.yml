@@ -54,5 +54,7 @@ jobs:
         run: npm run grade-insurance
       - name: Synthetic dashboard snapshot
         run: npm run grade-synthetic-pipeline
+      - name: Care rehearsal invariants
+        run: npm run grade-rehearsal
       - name: Typecheck + build
         run: npm run build

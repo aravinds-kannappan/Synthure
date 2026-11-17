@@ -1,33 +1,43 @@
 # Synthure
 
-**One care journey. Four connected perspectives.**
+**One note. A clearer next step.**
 
-[Live website](https://synthure.vercel.app) · [Interactive dashboard](https://synthure.vercel.app/dashboard) · [Care workspace](https://synthure.vercel.app/demo) · [Insurance mapping](https://synthure.vercel.app/insurance)
+[Website](https://synthure.vercel.app) · [Dashboard](https://synthure.vercel.app/dashboard)
 
-Synthure is a healthcare navigation prototype that connects patient understanding, care coordination, and provider and benefit-plan decisions. A shared journey carries source-linked instructions, questions, preferences, and task updates across patient, clinician, hospital, and employer views.
+Synthure explores three connected problems: understanding a care plan, communicating across teams, and finding care that fits practical and financial needs.
 
-![Synthure landing page](docs/images/landing.jpg)
+## Two pages, one shared journey
 
-## What it explores
+The landing page explains the product. The dashboard contains the entire interactive experience:
 
-- **Understanding care:** source-linked explanations, next steps, and teach-back responses for clinician review.
-- **Communicating across teams:** shared questions, task ownership, review status, and service-specific authorization records.
-- **Finding care and understanding spending:** fictional provider comparisons and transparent plan scenarios, including a trained synthetic preference-ranking demo.
+- **Patient:** read the documented plan, describe it in your own words, save a provider preference, and record progress.
+- **Clinician:** review the source and the patient’s response, then record the review.
+- **Care team:** coordinate benefits and appointment tasks and record authorization evidence.
+- **Employer:** see aggregate activity across a fictional cohort, without individual notes or messages.
 
-| Perspective | Workspace |
-| --- | --- |
-| Patient | Understand the plan, raise questions, check understanding, and record care preferences |
-| Clinician | Review source information, patient responses, and the care plan |
-| Hospital | Coordinate tasks, see preferences, and record authorization evidence |
-| Employer | Explore aggregate navigation activity across an authored fictional cohort |
+Plan comparisons, provider mapping, source-note editing, and local questions stay in the dashboard. Former experience URLs redirect there. The original research UI remains in the source tree but is not a separate public page.
 
-The main demo runs without API keys. Three fictional example journeys cover knee care, blood pressure follow-up, and diabetes follow-up. A conservative local parser also accepts labelled synthetic notes; unsupported details remain unknown.
+## Care rehearsal
 
-![Synthure connected care journey](docs/images/journey.jpg)
+Change one assumption before changing the journey:
 
-## Quickstart
+1. **A tighter budget:** halve the premium budget and see which fictional plans still fit. Annual care assumptions stay unchanged; an empty set remains an explicit gap.
+2. **An unavailable provider:** compare alternatives against the same specialty, exact fictional plan, travel limit, and language. Incompatible alternatives are not silently substituted.
+3. **An unclear plan:** surface the source instruction and a specific clarification question for the care team.
 
-Requires **Node.js 20.9+** and npm.
+Each rehearsal connects an exact note excerpt to a visible consequence, an owner, and a next question. It compares before/after effects across the four perspectives. Sharing a rehearsal question adds a local message only after a click; the rehearsal itself never changes the note, selections, tasks, or authorizations.
+
+The dashboard also identifies the next open handoff as reviews, responses, preferences, and task statuses are recorded. This is a deterministic demonstration workflow, not clinical triage.
+
+## What is distinctive—and what is established
+
+Clinical documentation, patient explanations, navigation, and follow-up coordination already exist. Abridge describes [patient visit summaries](https://www.abridge.com/blog/patient-visit-summaries--now-generated-in-real-time); Commure offers [care journeys and communication](https://www.commure.com/engage); Included Health describes [benefits and provider navigation](https://includedhealth.com/organizations/solutions/included-health-connect/); and Transcarent describes [personalized scheduling and follow-up](https://transcarent.com/press-releases/transcarent-adds-scheduling-symptom-checking-total-recall-memory-engine).
+
+Synthure’s focus is the trace **source evidence → practical obstacle → visible consequence → accountable next action** in one approachable workspace. This is a product direction, not a substantiated world-first claim. The linked capabilities are company descriptions, not independent outcome validation. Research reviewed November 17, 2026.
+
+## Run locally
+
+Requires Node.js 20.9+ and npm.
 
 ```sh
 git clone https://github.com/aravinds-kannappan/Synthure.git
@@ -36,95 +46,44 @@ npm ci
 npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
-Open [Synthure locally](http://127.0.0.1:3000). On macOS, the optional [`Start Synthure.command`](Start%20Synthure.command) launcher starts the same local server.
+Open [localhost:3000](http://127.0.0.1:3000). No account or API key is needed for the dashboard.
 
-| Route | Experience |
+## Models and boundaries
+
+The three authored fictional journeys use exact source spans. Custom notes use a conservative labelled-section parser, not a clinical model, and are kept separate from fictional provider and insurance recommendations.
+
+The insurance comparison uses a pairwise linear ranker trained on 1,200 synthetic cases, with 300 held-out cases. Its supplied 98% top-ranked policy agreement includes a deterministic budget rule and measures reproduction of an authored policy—not real insurance accuracy, eligibility, suitability, savings, or clinical outcomes. Benefit arithmetic and exact sample-plan network mapping are deterministic. See the [model research kit](models/insurance-ranking/README.md).
+
+- All people, plans, prices, networks, and employer counts in the examples are fictional.
+- A recorded understanding response is not proof of comprehension. A saved provider preference is not a booking.
+- Authorization, eligibility, network participation, coverage, and payment remain separate facts.
+- The dashboard uses in-memory state. Refreshing clears changes; no external messages, appointments, payer requests, or claims are sent.
+- The archived clinical research pipeline and `/api/synthesize` are separate from this browser-local demo. API use requires server-side Anthropic credentials and sends processed note text to that service.
+
+## Development
+
+| Source | Responsibility |
 | --- | --- |
-| [/dashboard](https://synthure.vercel.app/dashboard) | Interactive sample-note console, source inspection, four projections, and connected workspaces |
-| [/demo](https://synthure.vercel.app/demo) | Interactive workspace with four connected perspectives |
-| [/journey](https://synthure.vercel.app/journey) | Animated walkthrough of a connected care journey |
-| [/insurance](https://synthure.vercel.app/insurance) | Trained synthetic preference model and fictional plan comparisons |
-| [/research](https://synthure.vercel.app/research) | Approach, model tracks, and capability boundaries |
-| [/evals](https://synthure.vercel.app/evals) | Synthetic evaluation and separately labelled historical clinical benchmarks |
-| [/lab](https://synthure.vercel.app/lab) | Original live clinical pipeline, model progress, backend trace, safety review, and interactive portals |
-| [/observability](https://synthure.vercel.app/observability) | Actual research-run history and local audit-chain checks in this browser |
-
-**Try the shared workflow:** open the knee example, complete “Check my understanding,” and save a provider preference. Switch to Clinician to review the response, then Hospital to update an assigned task. The employer view reflects aggregate activity from the fictional cohort. These interactions simulate coordination within one browser session.
-
-## Trained synthetic preference model
-
-The `/insurance` demo uses a pairwise linear ranker fitted to labels generated by an authored preference policy. It compares three fictional plans using cost, provider-access, and user-preference features. A separate deterministic rule orders plans by monthly-budget feasibility; cost calculations and sample network matches come from authored tables.
-
-| Supplied run | Result |
-| --- | --- |
-| Training set | 1,200 synthetic scenarios; 3,600 plan rows |
-| Held-out set | 300 distinct synthetic scenarios; 900 plan rows |
-| Top-ranked policy agreement | 98.0%, including the deterministic budget-first rule |
-| Pairwise policy agreement | 96.6%, evaluating learned scores alone |
-| Reproduction seed | `20261116` |
-
-These metrics measure **fidelity to the synthetic policy**, not real patient preference, insurance suitability, coverage, savings, or clinical outcomes. Training and holdout share the same policy and fictional plan catalog. Scores are ranking values, not calibrated probabilities. Raw clinical notes are not model inputs.
-
-Reproduce the dataset, fitted weights, and evaluation from the repository root using Python 3:
-
-```sh
-python3 -B models/insurance-ranking/synthetic_train.py
-```
-
-The script writes the [runtime model](frontend/lib/insurance-demo-model.json) and [training artifacts](models/insurance-ranking/synthetic-artifacts/). The [insurance research kit](models/insurance-ranking/README.md) also contains a separate verified-data trainer, which **has not been trained on verified data**. The rule-based comparison in `/demo`, trained synthetic model in `/insurance`, and verified-data trainer are distinct paths.
-
-## Architecture
-
-| Location | Responsibility |
-| --- | --- |
-| [`frontend/`](frontend/) | Next.js 15, React 19, and TypeScript application |
-| [`frontend/lib/journey.ts`](frontend/lib/journey.ts) | Shared journey state, source-linked examples, task transitions, and aggregate projection |
-| [`frontend/lib/insurance-demo.ts`](frontend/lib/insurance-demo.ts) | Browser-side ranking, fictional cost arithmetic, and sample network matching |
-| [`models/insurance-ranking/`](models/insurance-ranking/) | Reproducible synthetic training and the separate verified-data research kit |
-| [`frontend/app/api/synthesize/`](frontend/app/api/synthesize/) | Optional server-side clinical synthesis and report-release checks |
-| [`ml/`](ml/) | Clinical model training and evaluation tooling |
-
-## Capability boundaries
-
-- `/dashboard`, `/demo`, and `/insurance` compute locally. Journey content stays in browser memory and clears on refresh; the demo does not transmit messages, bookings, referrals, payer requests, or claims.
-- Providers, plan rates, network mappings, and the employer cohort are fictional. Actual eligibility, coverage, network participation, and availability are unverified. An authorization approval does not establish coverage.
-- Role switching demonstrates perspectives; it is not authentication. The employer projection excludes individual clinical content and suppresses pasted-note journeys, but it is not a production privacy or access-control system.
-- Teach-back supports clinician review; it does not automatically establish comprehension. Historical clinical benchmarks are separate from the synthetic model and do not validate the complete care workflow.
-- A real pilot needs verified data, organization access controls, durable task ownership, approved data processing, actual integrations and acknowledgments, and prospective patient and staff evaluation.
-
-## Vercel deployment
-
-The production site is [synthure.vercel.app](https://synthure.vercel.app). The existing Vercel project is connected to this repository’s `main` branch and publishes pushes automatically. The frontend is a Next.js application; browser-local demos do not require API credentials. API-backed `/lab` additionally requires a funded Anthropic account and a server-side environment variable.
-
-The `/dashboard` sample console uses clearly labelled authored synthetic snapshots; it does not call the clinical models or add simulated outcomes to research-run statistics. `/observability` records actual `/lab` runs separately.
-
-## Optional clinical research pipeline
-
-`/lab` retains the clinical pipeline using browser-hosted OpenMed models and `/api/synthesize`. To enable its server calls, set `ANTHROPIC_API_KEY` in `frontend/.env.local`.
-
-**Running `/lab` sends processed note text to Anthropic.** The local processing boundary of `/demo` does not apply to this route. Use synthetic notes for demonstrations. Report-release checks withhold outputs when review or blocking is required; these checks are not clinical validation.
-
-## Validation
+| `frontend/components/Landing.tsx` | Simplified landing page |
+| `frontend/components/dashboard/` | Single interactive dashboard |
+| `frontend/lib/journey.ts` | Source evidence, role actions, shared workflow state |
+| `frontend/lib/care-rehearsal.ts` | Read-only what-if calculations and next handoff |
+| `frontend/lib/insurance-demo.ts` | Synthetic ranking, benefit arithmetic, fictional networks |
+| `frontend/components/archive/`, `frontend/components/lab/` | Retained previous research views |
 
 From `frontend/`:
 
 ```sh
-npx tsc --noEmit
-npm run build
+npm run grade-journey
+npm run grade-insurance
+npm run grade-rehearsal
+npm run grade-synthetic-pipeline
 npm run grade-guardrails
 npm run grade-harness
 npm run redteam-agents
-npm run grade-journey
-npm run grade-insurance
-npm run grade-synthetic-pipeline
+npm run build
 ```
 
-For the insurance training utility, from `models/insurance-ranking/`:
+The care-rehearsal harness checks state immutability, literal evidence, strict provider constraints, affordability gaps, independent authorization status, and employer privacy. CI runs the graders and production build.
 
-```sh
-python3 -m unittest test_train.py
-```
-
-## Attribution
-
-See [`NOTICE`](NOTICE) for OpenMed model, runtime, and public-data attributions.
+Vercel publishes `main` automatically at [synthure.vercel.app](https://synthure.vercel.app). See [NOTICE](NOTICE) for model and data attribution.
