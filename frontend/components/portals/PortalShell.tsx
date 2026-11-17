@@ -47,6 +47,7 @@ export default function PortalShell(props: {
   verification: Verification | null
   synthesis: Synthesis | null
   complete: boolean
+  initialStakeholder?: Stakeholder
 }) {
   if (!props.complete || Object.keys(props.reports).length !== 4) {
     return <p className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-5 text-sm text-amber-200">Reports are not released. Wait for final checks; blocked or review-required reports remain unavailable.</p>
@@ -64,15 +65,16 @@ export default function PortalShell(props: {
 }
 
 function PortalShellInner({
-  reports, verification, synthesis, complete,
+  reports, verification, synthesis, complete, initialStakeholder = 'patient',
 }: {
   reports: Partial<Record<Stakeholder, StakeholderReport>>
   verification: Verification | null
   synthesis: Synthesis | null
   complete: boolean
+  initialStakeholder?: Stakeholder
 }) {
   const { state, dispatch } = useEncounter()
-  const [active, setActive] = useState<Stakeholder>('patient')
+  const [active, setActive] = useState<Stakeholder>(initialStakeholder)
   const [mode, setMode] = useState<'portal' | 'compare'>('portal')
   const [touring, setTouring] = useState(false)
   const [showConnections, setShowConnections] = useState(false)
@@ -80,6 +82,15 @@ function PortalShellInner({
   const [toast, setToast] = useState<{ title: string; from: string; to: string } | null>(null)
   const [flywheel, setFlywheel] = useState(0)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // A clicked dashboard tile selects its role without discarding encounter edits.
+  useEffect(() => {
+    setActive(initialStakeholder)
+    setMode('portal')
+    setTouring(false)
+    setDrawer(false)
+    setShowConnections(false)
+  }, [initialStakeholder])
 
   // Persist human corrections as flywheel training data (deduped across encounters).
   useEffect(() => {

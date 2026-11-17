@@ -2,6 +2,8 @@
 
 **One care journey. Four connected perspectives.**
 
+[Live website](https://synthure.vercel.app) · [Interactive dashboard](https://synthure.vercel.app/dashboard) · [Care workspace](https://synthure.vercel.app/demo) · [Insurance mapping](https://synthure.vercel.app/insurance)
+
 Synthure is a healthcare navigation prototype that connects patient understanding, care coordination, and provider and benefit-plan decisions. A shared journey carries source-linked instructions, questions, preferences, and task updates across patient, clinician, hospital, and employer views.
 
 ![Synthure landing page](docs/images/landing.jpg)
@@ -38,12 +40,14 @@ Open [Synthure locally](http://127.0.0.1:3000). On macOS, the optional [`Start S
 
 | Route | Experience |
 | --- | --- |
-| [/demo](http://127.0.0.1:3000/demo) | Interactive workspace with four connected perspectives |
-| [/journey](http://127.0.0.1:3000/journey) | Animated walkthrough of a connected care journey |
-| [/insurance](http://127.0.0.1:3000/insurance) | Trained synthetic preference model and fictional plan comparisons |
-| [/research](http://127.0.0.1:3000/research) | Approach, model tracks, and capability boundaries |
-| [/evals](http://127.0.0.1:3000/evals) | Synthetic evaluation and separately labelled historical clinical benchmarks |
-| [/lab](http://127.0.0.1:3000/lab) | Optional clinical research pipeline using an external model API |
+| [/dashboard](https://synthure.vercel.app/dashboard) | Interactive sample-note console, source inspection, four projections, and connected workspaces |
+| [/demo](https://synthure.vercel.app/demo) | Interactive workspace with four connected perspectives |
+| [/journey](https://synthure.vercel.app/journey) | Animated walkthrough of a connected care journey |
+| [/insurance](https://synthure.vercel.app/insurance) | Trained synthetic preference model and fictional plan comparisons |
+| [/research](https://synthure.vercel.app/research) | Approach, model tracks, and capability boundaries |
+| [/evals](https://synthure.vercel.app/evals) | Synthetic evaluation and separately labelled historical clinical benchmarks |
+| [/lab](https://synthure.vercel.app/lab) | Original live clinical pipeline, model progress, backend trace, safety review, and interactive portals |
+| [/observability](https://synthure.vercel.app/observability) | Actual research-run history and local audit-chain checks in this browser |
 
 **Try the shared workflow:** open the knee example, complete “Check my understanding,” and save a provider preference. Switch to Clinician to review the response, then Hospital to update an assigned task. The employer view reflects aggregate activity from the fictional cohort. These interactions simulate coordination within one browser session.
 
@@ -82,11 +86,17 @@ The script writes the [runtime model](frontend/lib/insurance-demo-model.json) an
 
 ## Capability boundaries
 
-- `/demo` and `/insurance` compute locally. Journey content stays in browser memory and clears on refresh; the demo does not transmit messages, bookings, referrals, payer requests, or claims.
+- `/dashboard`, `/demo`, and `/insurance` compute locally. Journey content stays in browser memory and clears on refresh; the demo does not transmit messages, bookings, referrals, payer requests, or claims.
 - Providers, plan rates, network mappings, and the employer cohort are fictional. Actual eligibility, coverage, network participation, and availability are unverified. An authorization approval does not establish coverage.
 - Role switching demonstrates perspectives; it is not authentication. The employer projection excludes individual clinical content and suppresses pasted-note journeys, but it is not a production privacy or access-control system.
 - Teach-back supports clinician review; it does not automatically establish comprehension. Historical clinical benchmarks are separate from the synthetic model and do not validate the complete care workflow.
 - A real pilot needs verified data, organization access controls, durable task ownership, approved data processing, actual integrations and acknowledgments, and prospective patient and staff evaluation.
+
+## Vercel deployment
+
+The production site is [synthure.vercel.app](https://synthure.vercel.app). The existing Vercel project is connected to this repository’s `main` branch and publishes pushes automatically. The frontend is a Next.js application; browser-local demos do not require API credentials. API-backed `/lab` additionally requires a funded Anthropic account and a server-side environment variable.
+
+The `/dashboard` sample console uses clearly labelled authored synthetic snapshots; it does not call the clinical models or add simulated outcomes to research-run statistics. `/observability` records actual `/lab` runs separately.
 
 ## Optional clinical research pipeline
 
@@ -106,6 +116,7 @@ npm run grade-harness
 npm run redteam-agents
 npm run grade-journey
 npm run grade-insurance
+npm run grade-synthetic-pipeline
 ```
 
 For the insurance training utility, from `models/insurance-ranking/`:

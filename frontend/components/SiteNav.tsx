@@ -16,10 +16,11 @@ export default function Nav() {
   const [open, setOpen] = useState(false)
   return <header className="site-nav"><div className="site-nav-inner"><Logo />
     <nav className={`site-nav-links ${open ? 'is-open' : ''}`} aria-label="Main navigation">
+      <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
       <Link href="/journey" onClick={() => setOpen(false)}>Follow the note</Link>
       <Link href="/insurance" onClick={() => setOpen(false)}>Insurance mapping</Link>
       <Link href="/research" onClick={() => setOpen(false)}>Our approach</Link>
     </nav>
-    <div className="site-nav-actions"><Link className="site-button site-button-small" href="/demo">Explore Synthure <ArrowUpRight size={16}/></Link><button className="site-menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open}>{open ? <X size={22}/> : <Menu size={22}/>}</button></div>
+    <div className="site-nav-actions"><Link className="site-button site-button-small" href="/dashboard">Open dashboard <ArrowUpRight size={16}/></Link><button className="site-menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open}>{open ? <X size={22}/> : <Menu size={22}/>}</button></div>
   </div></header>
 }

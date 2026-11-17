@@ -89,6 +89,7 @@ function PortalTile({ s, report, onOpen, disabled }: {
 export default function OpsConsole() {
   const [note, setNote] = useState('')
   const [overlay, setOverlay] = useState<'portals' | 'safety' | null>(null)
+  const [initialStakeholder, setInitialStakeholder] = useState<Stakeholder>('patient')
   const { state, start, reset } = useSynthesis()
   const running = state.phase === 'running' || state.phase === 'loading-models'
   const complete = state.phase === 'complete'
@@ -103,7 +104,8 @@ export default function OpsConsole() {
 
   const loggedRef = useRef<object | null>(null)
   useEffect(() => {
-    if (complete && ex && loggedRef.current !== ex) {
+    const terminalWithChecks = complete || state.phase === 'review-required' || (state.phase === 'failed' && !!state.guardrails)
+    if (terminalWithChecks && ex && loggedRef.current !== ex) {
       loggedRef.current = ex
       logRun({
         ts: Date.now(), noteType: ex.noteType?.label ?? 'note', codes: ex.icd10.length,
@@ -114,7 +116,7 @@ export default function OpsConsole() {
         harnessAction: state.harness?.action ?? null, riskTier: state.harness?.riskTier ?? null,
       })
     }
-  }, [complete, ex, state.guardrails, state.harness])
+  }, [complete, state.phase, ex, state.guardrails, state.harness])
 
   const statusLabel = state.phase === 'review-required' ? 'REVIEW REQUIRED' : state.error ? 'ERROR' : state.phase === 'loading-models' ? `LOADING ${modelPct}%` : running ? 'LIVE' : complete ? 'DONE' : 'IDLE'
   const statusColor = state.phase === 'review-required' ? '#f59e0b' : state.error ? '#f43f5e' : running ? LIME : complete ? '#34d399' : '#71717a'
@@ -139,6 +141,8 @@ export default function OpsConsole() {
           <Readout label="latency" value={backendMs > 0 ? fmtMs(backendMs) : '—'} tone="#a5b4fc" />
           <Readout label="codes" value={ex ? String(ex.icd10.length + ex.cpt.length) : '—'} tone={LIME} />
           <div className="hidden items-center gap-3 sm:flex">
+            <Link href="/dashboard" className="font-mono text-[11px] text-zinc-500 hover:text-white">demo</Link>
+            <Link href="/observability" className="font-mono text-[11px] text-zinc-500 hover:text-white">run history</Link>
             <Link href="/evals" className="font-mono text-[11px] text-zinc-500 hover:text-white">evals</Link>
             <Link href="/" className="font-mono text-[11px] text-zinc-500 hover:text-white">exit</Link>
           </div>
@@ -232,7 +236,7 @@ export default function OpsConsole() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {STAKEHOLDER_ORDER.map((s) => (
-                <PortalTile key={s} s={s} report={state.reports[s]} disabled={!complete} onOpen={() => complete && setOverlay('portals')} />
+                <PortalTile key={s} s={s} report={state.reports[s]} disabled={!complete} onOpen={() => { if (complete) { setInitialStakeholder(s); setOverlay('portals') } }} />
               ))}
             </div>
           </div>
@@ -316,6 +320,7 @@ export default function OpsConsole() {
                   verification={state.verification}
                   synthesis={state.synthesis}
                   complete={complete}
+                  initialStakeholder={initialStakeholder}
                 />
               )}
               {overlay === 'safety' && (

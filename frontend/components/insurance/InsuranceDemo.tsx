@@ -9,9 +9,22 @@ import { DEFAULT_INSURANCE_INPUT, INSURANCE_SCENARIOS, runInsuranceDemo, type In
 import './insurance.css'
 
 const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
-const initialInput = (scenarioId?: string): InsuranceInput => {
+type InitialPreferences = Partial<Record<'priority' | 'visits' | 'budget' | 'distance' | 'language', string>>
+const initialInput = (scenarioId?: string, planId?: string, preferences: InitialPreferences = {}): InsuranceInput => {
   const scenario = INSURANCE_SCENARIOS.find((s) => s.id === scenarioId) ?? INSURANCE_SCENARIOS[0]
-  return { ...DEFAULT_INSURANCE_INPUT, scenarioId: scenario.id, expectedVisits: scenario.defaultVisits }
+  const incomingNumber = (value: string | undefined, fallback: number) => value?.trim() ? Number(value) : fallback
+  // The shared engine validates IDs, priorities, languages, finite numbers and
+  // demo ranges before incoming URL values become controlled form state.
+  return runInsuranceDemo({
+    ...DEFAULT_INSURANCE_INPUT,
+    scenarioId: scenario.id,
+    selectedPlanId: planId ?? null,
+    priority: (preferences.priority ?? DEFAULT_INSURANCE_INPUT.priority) as InsuranceInput['priority'],
+    expectedVisits: incomingNumber(preferences.visits, scenario.defaultVisits),
+    monthlyBudget: incomingNumber(preferences.budget, DEFAULT_INSURANCE_INPUT.monthlyBudget),
+    maxTravelMiles: incomingNumber(preferences.distance, DEFAULT_INSURANCE_INPUT.maxTravelMiles),
+    preferredLanguage: preferences.language ?? DEFAULT_INSURANCE_INPUT.preferredLanguage,
+  }).input
 }
 const numeric = (raw: string, lo: number, hi: number, fallback: number) => {
   const number = Number(raw)
@@ -19,8 +32,8 @@ const numeric = (raw: string, lo: number, hi: number, fallback: number) => {
 }
 const initials = (name: string) => name.split(' ').slice(0, 2).map((part) => part[0]).join('')
 
-export default function InsuranceDemo({ initialScenario }: { initialScenario?: string }) {
-  const [input, setInput] = useState<InsuranceInput>(() => initialInput(initialScenario))
+export default function InsuranceDemo({ initialScenario, initialPlan, initialPreferences }: { initialScenario?: string; initialPlan?: string; initialPreferences?: InitialPreferences }) {
+  const [input, setInput] = useState<InsuranceInput>(() => initialInput(initialScenario, initialPlan, initialPreferences))
   const [updateText, setUpdateText] = useState('Ready to explore. Change an input to see the comparison update.')
   const result = useMemo(() => runInsuranceDemo(input), [input])
   const { scenario, selectedPlan, recommendedPlan, plans, providers } = result
