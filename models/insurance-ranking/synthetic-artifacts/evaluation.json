@@ -1,0 +1,10 @@
+{
+  "heldoutCases": 300,
+  "heldoutRows": 900,
+  "heldoutPairs": 900,
+  "top1PolicyAgreement": 0.98,
+  "pairwisePolicyAgreement": 0.9655555555555555,
+  "top1Definition": "Learned ranker plus the same deterministic budget-first rule, compared with the authored synthetic policy; distinct heldout input combinations.",
+  "pairwiseDefinition": "Learned pair ordering versus authored synthetic utility, excluding utility ties; no budget constraint in this metric.",
+  "interpretation": "Synthetic-policy fidelity only. Not real insurance accuracy, clinical validity, eligibility verification, savings, or suitability evidence."
+}

@@ -93,7 +93,7 @@ export function assessSafety(
   const fab = fabricatedCodes(reports, ex)
   byId.grounding.status = fab.length ? 'flag' : 'pass'
   byId.grounding.detail = fab.length
-    ? `Codes not found in the validated extraction were detected and removed: ${fab.join(', ')}.`
+    ? `Codes not found in the validated extraction were detected and require review: ${fab.join(', ')}.`
     : 'Every code in every report traces to the validated extraction.'
 
   // 2) No clinical decisions: scan for agent issued prescribing or diagnosing.
@@ -146,17 +146,9 @@ export function assessSafety(
     target: 'all' as Stakeholder | 'all',
     issue: `${c.principle} ${c.detail}`,
     severity: (c.id === 'grounding' || c.id === 'no_clinical_decisions' ? 'high' : 'medium') as 'high' | 'medium',
-    action: (c.id === 'grounding' ? 'revised' : 'flagged') as 'revised' | 'flagged',
+    action: 'flagged' as const,
   }))
-  let revision: SafetyResult['revision'] = null
-  if (fab.length) {
-    revision = {
-      target: 'all',
-      before: `… includes code ${fab[0]} …`,
-      after: `… code ${fab[0]} removed; only codes validated from the note remain …`,
-      note: 'The critic removed a code that did not trace to the note (grounding principle).',
-    }
-  }
+  const revision: SafetyResult['revision'] = null
 
   return {
     constitution,

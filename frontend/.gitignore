@@ -3,3 +3,6 @@
 .guardrail-build/
 .harness-build/
 .redteam-build/
+
+.journey-build/
+.insurance-build/

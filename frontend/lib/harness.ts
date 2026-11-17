@@ -64,15 +64,13 @@ export interface AgreementReport {
 
 interface ExCode { code: string; source?: string; trained?: boolean }
 
-export function checkAgreement(ex: { icd10: ExCode[] }): AgreementReport {
-  const codes = ex.icd10 ?? []
-  const trained = codes.filter((c) => c.trained === true)
-  const lexical = codes.filter((c) => c.source === 'linked')
-  if (trained.length === 0) {
-    return { available: false, score: 1, findings: [], detail: 'The trained coder was not reachable, so only the lexical linker ran. Cross-coder agreement is unavailable for this run.' }
+export function checkAgreement(ex: { icd10: ExCode[]; codingOrigins?: { lexical: string[]; trained: string[] } }): AgreementReport {
+  const origins = ex.codingOrigins
+  if (!origins || origins.trained.length === 0) {
+    return { available: false, score: 1, findings: [], detail: 'Independent coder outputs are unavailable for this run. Agreement has not been measured.' }
   }
-  const tset = new Set(trained.map((c) => c.code.toUpperCase()))
-  const lset = new Set(lexical.map((c) => c.code.toUpperCase()))
+  const tset = new Set(origins.trained.map((c) => c.toUpperCase()))
+  const lset = new Set(origins.lexical.map((c) => c.toUpperCase()))
   const union = new Set([...tset, ...lset])
   const both = [...union].filter((c) => tset.has(c) && lset.has(c))
   const onlyTrained = [...tset].filter((c) => !lset.has(c))
@@ -111,7 +109,7 @@ const CONF_FLOOR = 0.6
 const AGREE_FLOOR = 0.5
 
 export function assembleHarness(args: {
-  extraction: { icd10: ExCode[]; cpt: { code: string }[]; confidence: number }
+  extraction: { icd10: ExCode[]; cpt: { code: string }[]; confidence: number; codingOrigins?: { lexical: string[]; trained: string[] } }
   guardrails: GuardrailReport
   input: InputReport
 }): HarnessReport {
@@ -134,7 +132,7 @@ export function assembleHarness(args: {
   if (!groundingClean) reasons.push('grounding flagged non retrievable evidence')
 
   // 2. Confidence abstention.
-  const lowConf = ex.confidence < CONF_FLOOR || noCodes
+  const lowConf = !Number.isFinite(ex.confidence) || ex.confidence < CONF_FLOOR || noCodes
   const lowAgree = agreement.available && agreement.score < AGREE_FLOOR
   const abstainShould = lowConf || lowAgree || guardrails.decision === 'escalate'
   const abstainReason = abstainShould
@@ -195,4 +193,22 @@ export function assembleHarness(args: {
     reasons,
     summary,
   }
+}
+
+// A decision label alone is not enforcement: the route must use this before
+// sending report content. A pending review or any unresolved finding withholds
+// the whole report bundle. Review-required is not automatically approved here.
+export function canReleaseReports(args: {
+  harness: HarnessReport
+  guardrails: GuardrailReport
+  verificationFlags: number
+  criticFlags: number
+  faithfulnessFlags: number
+}): boolean {
+  return args.harness.action === 'auto'
+    && args.guardrails.decision === 'ship'
+    && !args.guardrails.blocked
+    && args.verificationFlags === 0
+    && args.criticFlags === 0
+    && args.faithfulnessFlags === 0
 }

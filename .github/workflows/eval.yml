@@ -23,6 +23,8 @@ jobs:
       # record, or if a measured metric dropped below its committed floor.
       - name: Gate frontend/data/evals.json
         run: python3 ml/run_evals.py --check
+      - name: Insurance research trainer checks
+        run: python3 -m unittest discover -s models/insurance-ranking -p 'test_*.py'
 
   frontend:
     name: Graders + typecheck + build
@@ -46,5 +48,9 @@ jobs:
         run: npm run grade-harness
       - name: Agent red team
         run: npm run redteam-agents
+      - name: Connected care journey
+        run: npm run grade-journey
+      - name: Synthetic insurance mapping
+        run: npm run grade-insurance
       - name: Typecheck + build
         run: npm run build

@@ -1,0 +1,11 @@
+{
+  "status": "not_trained",
+  "production_ready": false,
+  "dataset": null,
+  "metrics": null,
+  "weights": null,
+  "scope": "verified_real_data_research_path_only",
+  "ui_engine": "main journey uses transparent sample rules; /insurance uses the separately labelled trained synthetic model",
+  "synthetic_demo_model": "../../frontend/lib/insurance-demo-model.json",
+  "reason": "No verified, consented real plan-preference dataset has been supplied. Synthetic demonstration training is separate; no real-world generalization result is claimed."
+}

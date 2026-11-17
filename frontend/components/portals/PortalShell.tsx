@@ -48,6 +48,9 @@ export default function PortalShell(props: {
   synthesis: Synthesis | null
   complete: boolean
 }) {
+  if (!props.complete || Object.keys(props.reports).length !== 4) {
+    return <p className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-5 text-sm text-amber-200">Reports are not released. Wait for final checks; blocked or review-required reports remain unavailable.</p>
+  }
   // Key the provider on the actual codes so a NEW note rebuilds the encounter
   // instead of reusing the reducer's first initial state (which showed stale
   // content from a previous run).
@@ -225,8 +228,8 @@ function PortalShellInner({
             {verification && (
               <div className="flex items-center gap-2 text-sm text-emerald-300">
                 <ShieldCheck className="h-4 w-4" />
-                <span className="font-medium">Verified</span>
-                <span className="text-xs text-slate-400">{verification.sourcesChecked} sources · {Math.round(verification.confidence * 100)}% confidence · 0 fabricated facts</span>
+                <span className="font-medium">Automated checks</span>
+                <span className="text-xs text-slate-400">{verification.checks.filter((c) => c.status === 'flag').length} findings needing review · automated checks do not establish clinical accuracy</span>
               </div>
             )}
             {synthesis && (

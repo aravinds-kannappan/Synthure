@@ -27,7 +27,7 @@ function Node({ id, name, accent, status, info }: {
 }) {
   const active = status === 'active'
   const done = status === 'done'
-  const color = status === 'idle' ? '#3f3f46' : accent
+  const color = status === 'failed' ? '#f43f5e' : status === 'skipped' || status === 'idle' ? '#71717a' : accent
   return (
     <motion.div
       animate={active ? { boxShadow: [`0 0 0px ${accent}00`, `0 0 18px ${accent}66`, `0 0 0px ${accent}00`] } : { boxShadow: '0 0 0px transparent' }}
@@ -43,10 +43,10 @@ function Node({ id, name, accent, status, info }: {
           className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-sm text-[9px] font-bold"
           style={{ color: status === 'idle' ? '#52525b' : accent, background: done ? `${accent}22` : 'transparent' }}
         >
-          {done ? '✓' : active ? '›' : '·'}
+          {done ? '✓' : status === 'failed' ? '×' : status === 'skipped' ? '–' : active ? '›' : '·'}
         </span>
         <span className="min-w-0 flex-1 truncate font-mono text-[12px]" style={{ color: status === 'idle' ? '#71717a' : '#e4e4e7' }}>
-          {name.toLowerCase()}
+          {name.toLowerCase()}{status === 'failed' || status === 'skipped' ? ` · ${status}` : ''}
         </span>
         {info?.ms ? (
           <span className="flex-shrink-0 font-mono text-[10px] tabular-nums" style={{ color }}>{fmtMs(info.ms)}</span>

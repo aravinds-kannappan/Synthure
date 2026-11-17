@@ -24,6 +24,9 @@ export interface ReadinessCheck {
 
 export interface ExtractionResult {
   entities: Entity[]
+  // Independent model outputs, recorded before reconciliation. Candidates from
+  // the neural model are not automatically accepted as encounter diagnoses.
+  codingOrigins?: { lexical: string[]; trained: string[] }
   icd10: {
     code: string
     label: string // official ICD 10 CM FY2026 description

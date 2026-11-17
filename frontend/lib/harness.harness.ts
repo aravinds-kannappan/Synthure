@@ -4,8 +4,10 @@
 // block, risk tier, human in the loop), and the immutable audit chain (append,
 // verify, tamper detection). Pure and headless (see scripts/grade-harness).
 
-import { validateInput, checkAgreement, assembleHarness, type HarnessReport } from './harness'
+import { validateInput, checkAgreement, assembleHarness, canReleaseReports, type HarnessReport } from './harness'
 import type { GuardrailReport } from './guardrails'
+import { dehyphen } from './engine'
+import { stopPipeline } from './pipelineState'
 import { appendAudit, verifyAuditChain, clearAudit, auditRecordFrom } from './audit'
 
 // A minimal localStorage so the audit log runs headlessly.
@@ -40,8 +42,13 @@ async function run(): Promise<{ passed: number; total: number; failures: string[
   // ── 5. Model agreement ─────────────────────────────────────────────────────
   const noTrained = checkAgreement({ icd10: [{ code: 'E11.9', source: 'linked' }] })
   assert('agreement: unavailable when the trained coder did not run', !noTrained.available && noTrained.score === 1)
-  const disagree = checkAgreement({ icd10: [{ code: 'E11.9', source: 'linked', trained: true }, { code: 'I10', source: 'linked' }] })
+  const disagree = checkAgreement({ icd10: [{ code: 'E11.9', source: 'linked', trained: true }, { code: 'I10', source: 'linked' }], codingOrigins: { lexical: ['E11.9', 'I10'], trained: ['E11.9'] } })
   assert('agreement: flags a code only the lexical linker produced', disagree.available && disagree.findings.some((f) => f.id === 'agreement.lexical_only'), disagree.detail)
+
+  const neuralOnly = checkAgreement({ icd10: [{ code: 'I10', source: 'linked', trained: true }], codingOrigins: { lexical: [], trained: ['I10'] } })
+  assert('agreement: neural-only output is not lexical agreement', neuralOnly.score === 0 && neuralOnly.findings.some((f) => f.id === 'agreement.trained_only'))
+  const mergedOnly = checkAgreement({ icd10: [{ code: 'I10', source: 'linked', trained: true }] })
+  assert('agreement: merged provenance cannot claim independent agreement', !mergedOnly.available)
 
   // ── Assembled decision ─────────────────────────────────────────────────────
   const baseEx = { icd10: [{ code: 'E11.9', source: 'linked', trained: true }], cpt: [{ code: '99214' }], confidence: 0.9 }
@@ -59,6 +66,23 @@ async function run(): Promise<{ passed: number; total: number; failures: string[
 
   const rHigh = assembleHarness({ extraction: { icd10: [{ code: 'I21.4', source: 'linked', trained: true }], cpt: [{ code: '99284' }], confidence: 0.9 }, guardrails: guard({}), input: clean })
   assert('decision: high-risk condition => human_review + hitl', rHigh.action === 'human_review' && rHigh.riskTier === 'high' && rHigh.hitl.required, `${rHigh.action}/${rHigh.highRisk.join(',')}`)
+
+  // Release gating must reject every unresolved review path.
+  const release = { harness: rClean, guardrails: guard({}), verificationFlags: 0, criticFlags: 0, faithfulnessFlags: 0 }
+  assert('release: clean bundle can be released', canReleaseReports(release))
+  assert('release: blocking verdict withholds reports', !canReleaseReports({ ...release, harness: rBlock }))
+  assert('release: low confidence withholds reports', !canReleaseReports({ ...release, harness: rAbstain }))
+  assert('release: human review withholds reports', !canReleaseReports({ ...release, harness: rHigh }))
+  assert('release: unresolved verifier finding withholds reports', !canReleaseReports({ ...release, verificationFlags: 1 }))
+  assert('release: unresolved critic finding withholds reports', !canReleaseReports({ ...release, criticFlags: 1 }))
+  assert('release: unsupported sentence withholds reports', !canReleaseReports({ ...release, faithfulnessFlags: 1 }))
+  assert('release: pending revision withholds reports', !canReleaseReports({ ...release, guardrails: guard({ decision: 'revise' }) }))
+  const unknown = assembleHarness({ extraction: { ...baseEx, confidence: Number.NaN }, guardrails: guard({}), input: clean })
+  assert('confidence: nonfinite confidence requires abstention', unknown.action === 'abstain')
+  const stopped = stopPipeline({ deid: 'done', rag: 'active', patient: 'idle' })
+  assert('failure: completed work stays done; unfinished work never completes', stopped.deid === 'done' && stopped.rag === 'failed' && stopped.patient === 'skipped')
+  const clinical = { dose: '5-10 mg as needed', lab: '−2.5', identifier: 'ABC-123', text: 'Follow-up in 3–5 days' }
+  assert('clinical source: ranges, negative signs and identifiers preserved', JSON.stringify(dehyphen(clinical)) === JSON.stringify(clinical))
 
   // ── 6. Immutable audit chain ───────────────────────────────────────────────
   clearAudit()

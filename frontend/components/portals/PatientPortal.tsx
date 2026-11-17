@@ -23,7 +23,7 @@ const fade = (i = 0) => ({
 
 const BILLING: Record<string, string> = {
   review: 'Your claim is being prepared by your care team.',
-  ready: 'Your claim is ready and your procedure is authorized.',
+  ready: 'The demo checklist is complete. Coverage and payment still need verification.',
   submitted: 'Your claim was submitted to your insurer.',
   reimbursed: 'Your claim has been processed.',
 }
@@ -32,7 +32,7 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
   const { state, d, dispatch, setFocusFact } = useEncounter()
   const diagnoses = state.diagnoses.filter((x) => x.accepted)
   const meds = state.medications.filter((m) => m.active)
-  const covered = state.priorAuthApproved && d.anyAuthNeeded
+  const authorizationRecorded = state.priorAuthApproved && d.anyAuthNeeded
 
   return (
     <div className="rounded-2xl overflow-hidden border border-teal-200/40 bg-gradient-to-b from-white to-[#f3fbf9] text-slate-700 shadow-[0_20px_60px_-20px_rgba(13,148,136,0.45)]">
@@ -55,10 +55,10 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
         )}
 
         {/* Live status banners reacting to other portals */}
-        {covered && (
+        {authorizationRecorded && (
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             <BadgeCheck className="h-5 w-5 flex-shrink-0 text-emerald-600" />
-            <span>Good news: your procedure was authorized by your care team, so it is covered. Your estimate below reflects that.</span>
+            <span>An authorization is recorded in this demo. Authorization does not confirm eligibility, network status, coverage, or your final cost.</span>
           </motion.div>
         )}
 
@@ -172,10 +172,10 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold capitalize text-slate-800">{m.name}</span>
                       {m.verified && (
-                        <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-700">RxNorm verified</span>
+                        <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-700">Name matched to RxNorm</span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-[13px] leading-relaxed text-slate-600">Your medication guide below explains what it does and how to take it.</p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-slate-600">Confirm the dose, timing, and whether to take it as needed with your prescriber or pharmacist.</p>
                   </div>
                 </div>
               ))}
@@ -204,7 +204,7 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
             <SectionTitle icon={<ListChecks className="h-4 w-4" />} title="Your next steps" />
             <ul className="space-y-2">
               {[
-                'Take each medication every day as prescribed, even when you feel fine.',
+                'Follow the exact medication instructions from your prescriber or pharmacist; confirm any missing dose or schedule.',
                 state.procedures.length ? 'Complete the ordered labs or tests so your team can confirm the plan is working.' : 'Keep your follow up appointment so your team can track your progress.',
                 'Small daily habits help: balanced meals, regular movement, and good sleep.',
               ].map((s, i) => (
@@ -250,7 +250,7 @@ export default function PatientPortal({ report }: { report?: StakeholderReport }
           <motion.div {...fade(9)} className="rounded-xl border border-teal-200 bg-teal-50/60 p-4">
             <div className="mb-2.5 flex items-center gap-2 text-teal-700">
               <Sparkles className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-wider">What Synthure did for you</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Suggested next actions</span>
             </div>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {report.actions.map((a, i) => (

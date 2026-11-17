@@ -1,181 +1,44 @@
 import Link from 'next/link'
-import Nav from '@/components/Nav'
-import { Gauge } from '@/components/Charts'
-import {
-  evals, formatMetric, findMetric,
-  KIND_LABEL, KIND_COLOR, TRUST_COLOR,
-  type EvalMetric, type MetricKind,
-} from '@/lib/evals'
+import { ArrowLeft, ArrowUpRight, FlaskConical } from 'lucide-react'
+import Nav from '@/components/SiteNav'
+import { SiteFooter } from '@/components/Landing'
+import { evals, formatMetric, type EvalMetric } from '@/lib/evals'
+import preferenceModel from '@/lib/insurance-demo-model.json'
 
 export const metadata = {
-  title: 'Evaluations · Synthure',
-  description: 'One source of truth for every measured, deferred, and by construction number in Synthure.',
+  title: 'Research & evidence · Synthure',
+  description: 'Synthetic preference-model measurements, historical clinical benchmarks, and clear limits on what they establish.',
 }
-
-// Headline gauges: measured, fraction valued metrics only.
-const HEADLINE = ['openmed.deid_recall', 'coding.top1_accuracy', 'icd_coder.codiesp_acc1', 'readiness.auroc']
-
-function StatusChip({ kind }: { kind: MetricKind }) {
-  const c = KIND_COLOR[kind]
-  return (
-    <span
-      className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-      style={{ background: `${c}1f`, color: c }}
-    >
-      {KIND_LABEL[kind]}
-    </span>
-  )
-}
-
-function MetricCard({ m }: { m: EvalMetric }) {
-  const ds = evals.datasets[m.dataset]
-  const deferred = m.kind === 'deferred'
-  const color = KIND_COLOR[m.kind]
-  return (
-    <div
-      className="rounded-2xl border p-5"
-      style={{
-        borderColor: deferred ? 'rgba(255,255,255,0.06)' : `${color}26`,
-        background: deferred ? 'rgba(255,255,255,0.012)' : 'rgba(255,255,255,0.02)',
-      }}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="text-sm font-medium text-white">{m.label}</div>
-        <StatusChip kind={m.kind} />
-      </div>
-      <div
-        className="mt-2 text-3xl font-bold tabular-nums"
-        style={{ color: deferred ? '#64748b' : color }}
-      >
-        {formatMetric(m)}
-      </div>
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500">
-        {ds && <span>{ds.name}</span>}
-        {m.n != null && <span className="text-slate-600">N = {m.n.toLocaleString()}</span>}
-      </div>
-      {m.threshold && (m.threshold.min != null || m.threshold.max != null) && (
-        <div className="mt-1 text-[10px] text-slate-600">
-          CI gate {m.threshold.min != null ? `floor ${fmtThreshold(m)}` : `ceiling ${fmtThreshold(m)}`}
-        </div>
-      )}
-      {m.caveat && <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{m.caveat}</p>}
-    </div>
-  )
-}
-
-function fmtThreshold(m: EvalMetric): string {
-  const t = m.threshold
-  if (!t) return ''
-  const v = t.min ?? t.max ?? 0
-  if (m.unit === 'fraction') return `${Math.round(v * 100)}%`
-  if (m.unit === 'ratio') return v.toFixed(2)
-  return `${v}`
-}
+const labels = { measured: 'Measured', deferred: 'Not yet measured', by_construction: 'Structural property' }
+const caveat = (m: EvalMetric) => m.key === 'openmed.deid_recall'
+  ? '90 seeded name spans in synthetic notes, scored by overlap. This is not evidence of complete identifier removal or validated privacy.'
+  : m.caveat
+const percent = (value: number) => `${(value * 100).toFixed(1)}%`
 
 export default function EvalsPage() {
-  const measured = evals.groups.flatMap((g) => g.metrics).filter((m) => m.kind === 'measured').length
-  const deferred = evals.groups.flatMap((g) => g.metrics).filter((m) => m.kind === 'deferred').length
-  const usedDatasets = Object.entries(evals.datasets)
+  const training = preferenceModel.training
+  const evaluation = preferenceModel.evaluation
+  return <div className="synthure-site"><Nav /><main className="site-container evidence-main">
+    <Link className="eyebrow-link" href="/research"><ArrowLeft size={13} />Our approach</Link>
+    <div className="site-eyebrow">RESEARCH & EVIDENCE</div>
+    <h1>Every number<br /><em>needs its context.</em></h1>
+    <p className="evidence-lede">The preference demo has trained weights and a held-out synthetic evaluation. Historical clinical-model results are listed separately. Neither is evidence of improved outcomes for real patients.</p>
 
-  return (
-    <div className="min-h-screen grid-bg text-white">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full opacity-[0.06]" style={{ background: 'radial-gradient(circle, #34d399, transparent 70%)' }} />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full opacity-[0.05]" style={{ background: 'radial-gradient(circle, #818cf8, transparent 70%)' }} />
-      </div>
-      <Nav />
+    <div className="evidence-callout"><FlaskConical size={22} /><div><strong>Trained on synthetic preferences. Not validated on real choices.</strong><p>The model learns a designed simulation policy over fictional plan scenarios. Its test cases are held out from training but use the same generation assumptions. Agreement with that policy is not insurance suitability, coverage accuracy, or a savings estimate.</p></div></div>
+    <section className="evidence-section"><h2>The synthetic preference model.</h2><p>A pairwise linear ranker learns relative preferences between fictional plans. A deterministic budget check precedes ranking; costs and provider matches are calculated separately from authored tables. These values come directly from the shipped model artifact.</p>
+      <table className="metric-table"><thead><tr><th>MEASURE</th><th>RESULT</th><th>CONTEXT</th></tr></thead><tbody>
+        <tr><td>Training scenarios<small>{training.rows.toLocaleString()} fictional plan rows</small></td><td>{training.cases.toLocaleString()}</td><td><span className="metric-status measured">Synthetic</span></td></tr>
+        <tr><td>Held-out scenarios<small>{evaluation.heldoutRows.toLocaleString()} fictional plan rows</small></td><td>{evaluation.heldoutCases.toLocaleString()}</td><td><span className="metric-status measured">Synthetic</span></td></tr>
+        <tr><td>Top-ranked policy agreement<small>How often the ranking pipeline, including its budget check, agrees with the simulation policy.</small></td><td>{percent(evaluation.top1PolicyAgreement)}</td><td><span className="metric-status measured">Synthetic only</span></td></tr>
+        <tr><td>Pairwise policy agreement<small>Learned-score ordering across {evaluation.heldoutPairs.toLocaleString()} held-out pairs; budget ordering is excluded.</small></td><td>{percent(evaluation.pairwisePolicyAgreement)}</td><td><span className="metric-status measured">Synthetic only</span></td></tr>
+      </tbody></table>
+      <div className="evidence-list"><div className="evidence-row"><strong>What it shows</strong><span>The training and browser inference path work, and the model can be checked against its simulated preference labels. Scores rank examples; they are not probabilities of coverage or personal suitability.</span></div><div className="evidence-row"><strong>What it cannot show</strong><span>Real patient preferences, current plan availability, provider quality, coverage determinations, clinical safety, or prospective savings. New synthetic cases do not replace independent real-world evaluation.</span></div><div className="evidence-row"><strong>Verified-data track</strong><span>The separate insurance research trainer remains untrained on verified data. It requires permitted, reviewed preferences and independent evaluation before a real-use claim.</span></div></div>
+      <Link className="text-link" href="/insurance">Explore the synthetic model<ArrowUpRight size={16} /></Link>
+    </section>
 
-      <main className="relative mx-auto max-w-6xl px-6 pt-28 pb-24">
-        {/* Header */}
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ borderColor: '#b6f40055', background: '#b6f40014', color: '#b6f400' }}>
-          // one source of truth
-        </div>
-        <h1 className="font-display text-3xl font-bold sm:text-4xl">Evaluations</h1>
-        <p className="mt-3 max-w-3xl text-slate-400">
-          Every number the product and the paper show lives in one file, <span className="font-mono text-slate-300">data/evals.json</span>,
-          generated by <span className="font-mono text-slate-300">python3 ml/run_evals.py</span>. Each metric carries its dataset, its
-          source, and an honest status. A number is either <span className="text-emerald-300">measured</span> on a stated dataset,
-          <span className="text-cyan-300"> true by construction</span>, or openly <span className="text-amber-300">deferred</span> until the
-          run that produces it. A provenance gate and a regression gate block any build where a headline number lacks a backing record.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-          <span>Built {evals.generated}</span>
-          <span className="text-slate-600">·</span>
-          <span className="text-emerald-300">{measured} measured</span>
-          <span className="text-slate-600">·</span>
-          <span className="text-amber-300">{deferred} deferred</span>
-          <span className="text-slate-600">·</span>
-          <Link href="/research" className="text-slate-400 underline decoration-slate-700 underline-offset-4 hover:text-white">Read the technical report</Link>
-        </div>
-
-        {/* Headline gauges */}
-        <div className="mt-10 grid gap-4 rounded-3xl border border-white/[0.07] bg-white/[0.015] p-6 sm:grid-cols-2 lg:grid-cols-4">
-          {HEADLINE.map((key) => {
-            const m = findMetric(key)
-            if (!m || m.value == null || m.unit !== 'fraction') return null
-            return (
-              <div key={key} className="flex flex-col items-center">
-                <Gauge value={m.value} label={m.label} sub={evals.datasets[m.dataset]?.name} tone="lime" />
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Groups */}
-        <div className="mt-12 space-y-10">
-          {evals.groups.map((group) => (
-            <section key={group.id}>
-              <div className="mb-4 border-b border-white/[0.06] pb-3">
-                <h2 className="font-display text-xl font-bold text-white">{group.title}</h2>
-                <p className="mt-1 max-w-3xl text-sm text-slate-400">{group.blurb}</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {group.metrics.map((m) => (
-                  <MetricCard key={m.key} m={m} />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        {/* Datasets */}
-        <section className="mt-16">
-          <h2 className="font-display text-xl font-bold text-white">Datasets and how far to trust them</h2>
-          <p className="mt-1 max-w-3xl text-sm text-slate-400">
-            Every metric above points at one of these. The synthetic split is a floor test whose labels leak; the honest generalization
-            numbers come from the frozen real note holdout.
-          </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {usedDatasets.map(([id, ds]) => (
-              <div key={id} className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-semibold text-white">{ds.name}</div>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-                    style={{ background: `${TRUST_COLOR[ds.trust]}1f`, color: TRUST_COLOR[ds.trust] }}
-                  >
-                    {ds.trust} trust
-                  </span>
-                </div>
-                <p className="mt-2 text-[12px] leading-relaxed text-slate-400">{ds.provenance}</p>
-                <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{ds.caveat}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* How it is produced */}
-        <section className="mt-16 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
-          <h2 className="font-display text-lg font-semibold text-white">How these numbers stay honest</h2>
-          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-slate-400">
-            <li className="flex gap-2"><span className="text-teal-400">1</span> One command, <span className="font-mono text-slate-300">python3 ml/run_evals.py</span>, folds every eval source into this file. The product never reads the source files directly.</li>
-            <li className="flex gap-2"><span className="text-teal-400">2</span> A provenance gate fails the build if any headline metric lacks a backing record or a deferred label.</li>
-            <li className="flex gap-2"><span className="text-teal-400">3</span> A regression gate fails the build if any measured metric drops below its committed floor.</li>
-            <li className="flex gap-2"><span className="text-teal-400">4</span> Every run appends a row to <span className="font-mono text-slate-300">ml/artifacts/eval_history.jsonl</span> so drift over time is visible.</li>
-            <li className="flex gap-2"><span className="text-teal-400">5</span> CI runs all of the above, plus the guardrail and harness red team graders, on every pull request.</li>
-          </ul>
-        </section>
-      </main>
-    </div>
-  )
+    <section className="evidence-section"><h2>Historical clinical-model benchmarks.</h2><p>The records below predate this redesign and were not remeasured for the new experience. They do not evaluate the preference demo, patient understanding, or referral completion.</p><div className="evidence-list"><div className="evidence-row"><strong>Clinical coding</strong><span>The neural coder benchmark measures mention-to-code ranking on translated CodiEsp cases. It does not establish that an entire encounter is correctly coded.</span></div><div className="evidence-row"><strong>Synthetic evaluation</strong><span>Shared note and label generation limits the value of template-generated results as estimates of real clinical performance.</span></div><div className="evidence-row"><strong>Automated safeguards</strong><span>Deterministic adversarial tests check specific failure modes. Passing those cases does not establish that all clinical errors are prevented.</span></div></div></section>
+    {evals.groups.map(group => <details className="metric-group" key={group.id}><summary>{group.title}<span>{group.metrics.length} records</span></summary><p>{group.blurb}</p><table className="metric-table"><thead><tr><th>MEASURE</th><th>RESULT</th><th>STATUS</th></tr></thead><tbody>{group.metrics.map(m => <tr key={m.key}><td>{m.label}<small>{evals.datasets[m.dataset]?.name}{m.n != null ? ` · N = ${m.n.toLocaleString()}` : ''}</small>{caveat(m) && <small>{caveat(m)}</small>}</td><td>{formatMetric(m)}</td><td><span className={`metric-status ${m.kind}`}>{labels[m.kind]}</span></td></tr>)}</tbody></table></details>)}
+    <section className="evidence-section"><h2>The next useful measurements.</h2><p>Patient teach-back accuracy. Unresolved handoffs. Staff time per completed referral. Confirmed provider availability. Estimate error against actual responsibility. These outcomes should determine whether the experience is useful beyond a simulation.</p></section>
+    <div className="evidence-actions"><Link className="site-button" href="/journey">See the connected flow<ArrowUpRight size={17} /></Link><Link className="text-link" href="/demo">Open the care workspace<ArrowUpRight size={16} /></Link><Link className="text-link" href="/research">How it works<ArrowUpRight size={16} /></Link></div>
+  </main><SiteFooter /></div>
 }

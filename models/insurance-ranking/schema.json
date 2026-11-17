@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verified plan-preference training row",
+  "description": "One eligible plan candidate for one case. At least two candidates per case; preference labels are human-reviewed preferences, not coverage guarantees or medical outcomes. JSONL input.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "group_id", "plan_id", "plan_year", "eligibility_verified", "availability_verified", "synthetic", "training_permission", "source_refs", "reviewer_ref", "preference_grade", "features"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "group_id": {"type": "string", "minLength": 1, "description": "Pseudonymous household grouping: all repeated household cases remain in one split. Never use a name or member ID."},
+    "plan_id": {"type": "string", "minLength": 1},
+    "plan_year": {"type": "integer", "minimum": 2020, "maximum": 2100},
+    "eligibility_verified": {"const": true},
+    "availability_verified": {"const": true},
+    "synthetic": {"const": false},
+    "training_permission": {"const": "verified"},
+    "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "reviewer_ref": {"type": "string", "minLength": 1},
+    "preference_grade": {"type": "integer", "minimum": 0, "maximum": 3},
+    "features": {
+      "type": "object", "additionalProperties": false,
+      "required": ["annual_premium", "estimated_annual_oop", "annual_oop_limit", "preferred_provider_coverage", "required_medication_coverage"],
+      "properties": {
+        "annual_premium": {"type": "number", "minimum": 0},
+        "estimated_annual_oop": {"type": "number", "minimum": 0},
+        "annual_oop_limit": {"type": "number", "minimum": 0},
+        "preferred_provider_coverage": {"type": "number", "minimum": 0, "maximum": 1},
+        "required_medication_coverage": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

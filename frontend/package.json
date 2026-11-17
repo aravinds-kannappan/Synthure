@@ -9,28 +9,35 @@
     "lint": "next lint",
     "grade-guardrails": "tsc lib/guardrails.ts lib/guardrails.harness.ts --rootDir lib --outDir .guardrail-build --module commonjs --target es2020 --skipLibCheck && node -e \"const {runHarness}=require('./.guardrail-build/guardrails.harness');process.exit(runHarness().failures.length?1:0)\"",
     "grade-harness": "tsc lib/guardrails.ts lib/harness.ts lib/audit.ts lib/harness.harness.ts --rootDir lib --outDir .harness-build --module commonjs --target es2020 --skipLibCheck --lib es2020,dom && node -e \"require('./.harness-build/harness.harness').runHarnessSuite().then(r=>process.exit(r.failures.length?1:0))\"",
-    "redteam-agents": "tsc lib/guardrails.ts lib/redteam.agents.ts lib/redteam.agents.harness.ts --rootDir lib --outDir .redteam-build --module commonjs --target es2020 --skipLibCheck --lib es2020,dom && node -e \"process.exit(require('./.redteam-build/redteam.agents.harness').runRedTeamHarness()?0:1)\""
+    "redteam-agents": "tsc lib/guardrails.ts lib/redteam.agents.ts lib/redteam.agents.harness.ts --rootDir lib --outDir .redteam-build --module commonjs --target es2020 --skipLibCheck --lib es2020,dom && node -e \"process.exit(require('./.redteam-build/redteam.agents.harness').runRedTeamHarness()?0:1)\"",
+    "grade-journey": "tsc lib/journey.ts lib/journey.harness.ts --rootDir lib --outDir .journey-build --module commonjs --target es2020 --skipLibCheck && node -e \"process.exit(require('./.journey-build/journey.harness').runJourneyHarness().failures.length?1:0)\"",
+    "grade-insurance": "tsc lib/insurance-demo.ts lib/insurance-demo.harness.ts --rootDir lib --outDir .insurance-build --module commonjs --target es2020 --resolveJsonModule --esModuleInterop --skipLibCheck && node -e \"process.exit(require('./.insurance-build/insurance-demo.harness').runInsuranceDemoHarness().failures.length?1:0)\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "clsx": "^2.1.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.400.0",
-    "next": "14.2.29",
-    "react": "^18",
-    "react-dom": "^18",
+    "next": "15.5.29",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^4.2.0",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "autoprefixer": "^10.4.0",
     "eslint": "^8",
-    "eslint-config-next": "14.2.29",
+    "eslint-config-next": "15.5.29",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5",
-    "@huggingface/transformers": "^4.2.0"
+    "typescript": "^5"
+  },
+  "overrides": {
+    "next": {
+      "sharp": "^0.35.5"
+    }
   }
 }

@@ -1,21 +1,22 @@
 import type { Metadata } from 'next'
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
+import './site.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 const grotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-grotesk', display: 'swap' })
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'Synthure — One clinical note. Four intelligent reports.',
+  title: 'Synthure — One note. A connected care journey.',
   description:
-    'Synthure is a multi-agent clinical AI engine. Drop in a single clinical note and watch specialized agents write tailored, verified reports for the patient, physician, hospital, and employer in real time.',
+    'Turn a clinical note into a connected journey for patients, clinicians, care operations, and benefits teams. Explore a local prototype with source-linked care plans and transparent coverage comparisons.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${grotesk.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-[#08080b] text-zinc-300 antialiased font-sans">
+    <html lang="en" className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+      <body className="min-h-screen antialiased font-sans">
         {children}
       </body>
     </html>

@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "modelType": "pairwise_linear_ranker",
+  "status": "trained_synthetic_only",
+  "productionReady": false,
+  "seed": 20261116,
+  "features": [
+    "balanced:annual_cost_over_10000",
+    "balanced:annual_premium_over_4000",
+    "balanced:annual_exposure_over_12000",
+    "balanced:sample_network_count_over_2",
+    "balanced:accessible_sample_network_count_over_2",
+    "lowest_premium:annual_cost_over_10000",
+    "lowest_premium:annual_premium_over_4000",
+    "lowest_premium:annual_exposure_over_12000",
+    "lowest_premium:sample_network_count_over_2",
+    "lowest_premium:accessible_sample_network_count_over_2",
+    "predictable_cost:annual_cost_over_10000",
+    "predictable_cost:annual_premium_over_4000",
+    "predictable_cost:annual_exposure_over_12000",
+    "predictable_cost:sample_network_count_over_2",
+    "predictable_cost:accessible_sample_network_count_over_2"
+  ],
+  "weights": [
+    -1.41404045266035,
+    -1.866843402620401,
+    1.3957623688599206,
+    3.93516684971678,
+    2.698896729370735,
+    -0.562997645456678,
+    -5.985190036211441,
+    1.4113344394019256,
+    0.9905664501801579,
+    -1.7263419511179983,
+    0.5097483325969103,
+    3.6453949688734437,
+    -1.0495554582757018,
+    -1.324178798836563,
+    4.805351866234369
+  ],
+  "training": {
+    "cases": 1200,
+    "rows": 3600,
+    "pairs": 3600,
+    "epochs": 800,
+    "split": "1200 training / 300 heldout distinct synthetic input configurations; all three plans for a case stay in one split",
+    "learningRate": 0.4,
+    "l2": 0.0001
+  },
+  "evaluation": {
+    "heldoutCases": 300,
+    "heldoutRows": 900,
+    "heldoutPairs": 900,
+    "top1PolicyAgreement": 0.98,
+    "pairwisePolicyAgreement": 0.9655555555555555,
+    "top1Definition": "Learned ranker plus the same deterministic budget-first rule, compared with the authored synthetic policy; distinct heldout input combinations.",
+    "pairwiseDefinition": "Learned pair ordering versus authored synthetic utility, excluding utility ties; no budget constraint in this metric.",
+    "interpretation": "Synthetic-policy fidelity only. Not real insurance accuracy, clinical validity, eligibility verification, savings, or suitability evidence."
+  },
+  "authoredPolicy": {
+    "balanced": [
+      -0.55,
+      -0.1,
+      -0.2,
+      0.1,
+      0.15
+    ],
+    "lowest_premium": [
+      -0.2,
+      -0.65,
+      -0.05,
+      0.05,
+      0.05
+    ],
+    "predictable_cost": [
+      -0.1,
+      -0.05,
+      -0.65,
+      0.05,
+      0.15
+    ]
+  },
+  "costAndNetworkEngine": "Deterministic authored fictional rates and exact sample-plan directory mappings; never predicted by the model.",
+  "limitations": [
+    "All labels were generated from an authored preference policy.",
+    "No real patient, insurance carrier, plan offer, clinical outcome or provider contract was used.",
+    "The synthetic split shares the same policy and plan catalog; it does not test real-world generalization.",
+    "Budget feasibility is enforced separately; a rank is not an eligibility or enrollment decision.",
+    "Controls outside the supported finite demo ranges are clamped."
+  ],
+  "verificationCases": [
+    {
+      "input": {
+        "scenarioId": "diabetes-followup",
+        "priority": "predictable_cost",
+        "expectedVisits": 30,
+        "monthlyBudget": 475,
+        "maxTravelMiles": 1,
+        "preferredLanguage": "English",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-predictable"
+    },
+    {
+      "input": {
+        "scenarioId": "hypertension-followup",
+        "priority": "balanced",
+        "expectedVisits": 9,
+        "monthlyBudget": 575,
+        "maxTravelMiles": 5,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-balanced"
+    },
+    {
+      "input": {
+        "scenarioId": "hypertension-followup",
+        "priority": "balanced",
+        "expectedVisits": 31,
+        "monthlyBudget": 0,
+        "maxTravelMiles": 5,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-balanced"
+    },
+    {
+      "input": {
+        "scenarioId": "knee-osteoarthritis",
+        "priority": "predictable_cost",
+        "expectedVisits": 30,
+        "monthlyBudget": 200,
+        "maxTravelMiles": 8,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-lowpremium"
+    },
+    {
+      "input": {
+        "scenarioId": "hypertension-followup",
+        "priority": "lowest_premium",
+        "expectedVisits": 2,
+        "monthlyBudget": 425,
+        "maxTravelMiles": 15,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-lowpremium"
+    },
+    {
+      "input": {
+        "scenarioId": "knee-osteoarthritis",
+        "priority": "predictable_cost",
+        "expectedVisits": 30,
+        "monthlyBudget": 300,
+        "maxTravelMiles": 3,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-predictable"
+    },
+    {
+      "input": {
+        "scenarioId": "hypertension-followup",
+        "priority": "predictable_cost",
+        "expectedVisits": 22,
+        "monthlyBudget": 425,
+        "maxTravelMiles": 10,
+        "preferredLanguage": "English",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-balanced"
+    },
+    {
+      "input": {
+        "scenarioId": "knee-osteoarthritis",
+        "priority": "lowest_premium",
+        "expectedVisits": 5,
+        "monthlyBudget": 200,
+        "maxTravelMiles": 25,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-lowpremium"
+    },
+    {
+      "input": {
+        "scenarioId": "knee-osteoarthritis",
+        "priority": "lowest_premium",
+        "expectedVisits": 19,
+        "monthlyBudget": 375,
+        "maxTravelMiles": 15,
+        "preferredLanguage": "English",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-lowpremium"
+    },
+    {
+      "input": {
+        "scenarioId": "diabetes-followup",
+        "priority": "balanced",
+        "expectedVisits": 9,
+        "monthlyBudget": 25,
+        "maxTravelMiles": 8,
+        "preferredLanguage": "English",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-balanced"
+    },
+    {
+      "input": {
+        "scenarioId": "knee-osteoarthritis",
+        "priority": "balanced",
+        "expectedVisits": 23,
+        "monthlyBudget": 575,
+        "maxTravelMiles": 5,
+        "preferredLanguage": "English",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-balanced"
+    },
+    {
+      "input": {
+        "scenarioId": "knee-osteoarthritis",
+        "priority": "lowest_premium",
+        "expectedVisits": 33,
+        "monthlyBudget": 150,
+        "maxTravelMiles": 15,
+        "preferredLanguage": "Spanish",
+        "selectedPlanId": null
+      },
+      "modelTopPlanId": "sample-lowpremium"
+    }
+  ],
+  "datasetSha256": "84ebd1e5966626fb421fbbb98021f2fd9e51fd999173f4e022ea7fab02ebc6fe"
+}

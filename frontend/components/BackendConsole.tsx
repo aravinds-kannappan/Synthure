@@ -84,7 +84,7 @@ export default function BackendConsole({
           const inf = stageInfo[a.id]
           const active = st === 'active' || a.id === activeId
           const where = WHERE_BY_STAGE[a.id]
-          const rowColor = st === 'idle' ? '#334155' : a.accent
+          const rowColor = st === 'failed' ? '#f43f5e' : st === 'skipped' || st === 'idle' ? '#64748b' : a.accent
           return (
             <motion.div
               key={a.id}
@@ -94,11 +94,11 @@ export default function BackendConsole({
             >
               {/* status glyph */}
               <span className="w-3 flex-shrink-0 text-center" style={{ color: rowColor }}>
-                {st === 'done' ? '✓' : st === 'active' ? '›' : '·'}
+                {st === 'done' ? '✓' : st === 'failed' ? '×' : st === 'skipped' ? '–' : st === 'active' ? '›' : '·'}
               </span>
               {/* stage name */}
               <span className="w-[150px] flex-shrink-0 truncate" style={{ color: rowColor }}>
-                {a.name.toLowerCase()}
+                {a.name.toLowerCase()}{st === 'failed' || st === 'skipped' ? ` · ${st}` : ''}
               </span>
               {/* where */}
               <span
